@@ -3,12 +3,18 @@
 import { useState } from "react";
 import Navbar from "@components/Navbar";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const Page = () => {
+export default function Page() {
+  const router = useRouter();
+
   // Placeholder state management
   const [prnPlaceholder, setPrnPlaceholder] = useState("Enter your PRN");
   const [passwordPlaceholder, setPasswordPlaceholder] = useState("Enter your Password");
+
+  const handleSignIn = () => {
+    router.push("/dashboard");
+  };
 
   return (
     <div className="flex flex-col items-center w-full min-h-screen overflow-hidden">
@@ -53,7 +59,10 @@ const Page = () => {
               onFocus={() => setPasswordPlaceholder("")}
               onBlur={(e) => e.target.value === "" && setPasswordPlaceholder("Enter your Password")}
             />
-            <button className="w-3/4 p-3 border border-black rounded-lg hover:bg-black hover:text-white transition text-black">
+            <button
+              onClick={handleSignIn}
+              className="w-3/4 p-3 border border-black rounded-lg hover:bg-black hover:text-white transition text-black"
+            >
               Sign In
             </button>
           </div>
@@ -61,16 +70,14 @@ const Page = () => {
           {/* "Don't have an account?" */}
           <div className="w-full flex-1 flex items-center justify-center text-md">
             <p className="text-black">
-              Don&apos;t have an account?
-              <Link href="/signup">
-                <span className="text-orange-500 cursor-pointer hover:underline"> Click here.</span>
-              </Link>
+              Don&apos;t have an account?{" "}
+              <a href="/signup" className="text-orange-500 cursor-pointer hover:underline">
+                Click here.
+              </a>
             </p>
           </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default Page;
+}
