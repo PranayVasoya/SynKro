@@ -28,7 +28,7 @@ const Leaderboard = () => {
     <div className="flex flex-col w-full min-h-screen">
       {/* Navbar */}
       <nav className="w-full bg-gray-100 p-4 flex justify-between items-center border-b border-gray-300">
-        <h1 className="text-xl font-bold text-black">SynKro <span className="text-blue-500 text-xs">BETA</span></h1>
+        <h1 className="text-xl font-bold text-black">SynKro</h1>
         <Link href="/dashboard" className="text-sm text-gray-600 hover:underline">&lt; Back to Dashboard</Link>
       </nav>
       
@@ -36,7 +36,7 @@ const Leaderboard = () => {
       <main className="flex-1 p-6 flex">
         {/* Leaderboard Section */}
         <div className="w-1/2 pr-6">
-          <h2 className="text-2xl font-bold flex items-center">🏆 Leaderboard</h2>
+          <h2 className="text-2xl text-black font-bold flex items-center">🏆 Leaderboard</h2>
           <ul className="mt-4 border-t border-gray-300">
             {leaderboard.map((user, index) => (
               <li key={index} className="flex justify-between items-center py-2 border-b border-gray-300 cursor-pointer hover:bg-gray-100" onClick={() => setSelectedUser(user)}>

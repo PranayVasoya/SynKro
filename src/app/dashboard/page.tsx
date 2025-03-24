@@ -23,7 +23,7 @@ const Dashboard = () => {
       {/* Sidebar */}
       <aside className="w-64 bg-gray-100 border-r border-gray-300 p-4 flex flex-col">
         <h1 className="text-xl font-bold text-black flex items-center justify-between">
-          SynKro <span className="text-blue-500 text-xs">BETA</span>
+          SynKro 
         </h1>
         <div className="mt-4">
           <h2 className="text-gray-700 font-semibold">Projects</h2>
@@ -72,12 +72,12 @@ const Dashboard = () => {
         </div>
 
         {/* Welcome Message */}
-        <h2 className="text-2xl font-semibold mt-6">Welcome to your dashboard, John Doe.</h2>
+        <h2 className="text-2xl text-black font-semibold mt-6">Welcome to your dashboard, John Doe.</h2>
         <button className="mt-2 px-4 py-2 bg-black text-white rounded-lg">+ New</button>
 
         {/* Project Slider */}
         <div className="mt-6 p-4 bg-gray-200 rounded-lg">
-          <h3 className="text-lg font-semibold">Projects</h3>
+          <h3 className="text-black text-lg font-semibold">Projects</h3>
           <div className="flex items-center justify-between">
             <button className="p-2 bg-gray-300 rounded-lg">⬅</button>
             <div className="flex space-x-4">
