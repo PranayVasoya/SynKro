@@ -1,100 +1,152 @@
-"use client"; // Ensure this component runs on the client side
+"use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Bell, MessageCircle, Users } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { User, Settings } from "lucide-react";
+import { Plus } from "lucide-react";
 
-const Dashboard = () => {
+
+export default function Dashboard() {
   const router = useRouter();
-  const [projects] = useState(["Project 1", "Sample Title", "Synchronization", "Long Project Name"]);
-  const [bookmarks] = useState(["Bookmark 1", "Welcome To The", "Internet, Have a", "Look Around"]);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
-  // Simulate checking if user is logged in
-  const isAuthenticated = true; // Change this logic based on real authentication
+  const isAuthenticated = true; // Simulate authentication
 
-  if (!isAuthenticated) {
-    router.push("/signin"); // Redirect to sign-in page if not authenticated
-    return null; // Prevent rendering before redirect
-  }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/signin");
+    }
+  }, [isAuthenticated, router]);
+
+  // Close mobile sidebar if screen becomes large
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setShowSidebar(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  if (!isAuthenticated) return null;
+
+  const menuItems = [
+    { label: "Profile", icon: <User className="w-5 h-5" /> },
+    { label: "Settings", icon: <Settings className="w-5 h-5" /> },
+  ];
+
+  const MenuLinks = () => (
+    <div className="flex flex-col h-full w-full bg-gray-100 overflow-hidden">
+      {/* Spacer to push menu items to the bottom */}
+      <div className="flex-grow"></div>
+      {/* Bottom Menu */}
+      <div className="space-y-2 w-full">
+        {menuItems.map((item, idx) => (
+          <div
+            key={idx}
+            className="flex items-center w-full text-black cursor-pointer px-2 py-2 hover:border-t hover:border-b hover:border-black transition"
+          >
+            {item.icon}
+            <span className="ml-2">{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const MenuIcon = ({ onClick }: { onClick: () => void }) => (
+    <button onClick={onClick}>
+      <svg
+        className="w-6 h-6 text-black"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth="1.5"
+        stroke="currentColor"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+        />
+      </svg>
+    </button>
+  );
 
   return (
-    <div className="flex w-full min-h-screen">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-100 border-r border-gray-300 p-4 flex flex-col">
-        <h1 className="text-xl font-bold text-black flex items-center justify-between">
-          SynKro 
-        </h1>
-        <div className="mt-4">
-          <h2 className="text-gray-700 font-semibold">Projects</h2>
-          <ul className="mt-2 space-y-2">
-            {projects.map((project, index) => (
-              <li key={index} className="flex items-center text-gray-800 hover:underline cursor-pointer">
-                📄 {project}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="mt-6">
-          <h2 className="text-gray-700 font-semibold">Bookmarks</h2>
-          <ul className="mt-2 space-y-2">
-            {bookmarks.map((bookmark, index) => (
-              <li key={index} className="flex items-center text-gray-800 hover:underline cursor-pointer">
-                🔖 {bookmark}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="mt-auto">
-          <Link href="/profile">
-            <p className="text-gray-800 hover:underline cursor-pointer">👤 Profile</p>
-          </Link>
-          <Link href="/settings">
-            <p className="text-gray-800 hover:underline cursor-pointer">⚙️ Settings</p>
-          </Link>
+    <div className="flex min-h-screen w-full relative">
+      {/* Sidebar for Desktop */}
+      <aside className="hidden md:flex flex-col w-64 bg-gray-100 p-6 space-y-8 border-r border-gray-300 h-screen">
+        <h1 className="text-xl font-bold text-black">SynKro</h1>
+        <div className="flex flex-col h-full">
+          <MenuLinks />
         </div>
       </aside>
 
-      {/* Main Dashboard */}
-      <main className="flex-1 p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+      {/* Mobile Menu Toggle */}
+      {!showSidebar && (
+        <div className="md:hidden fixed top-4 left-4 z-50">
+          <MenuIcon onClick={() => setShowSidebar(true)} />
+        </div>
+      )}
+
+      {/* Mobile Sidebar & Backdrop */}
+      {showSidebar && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black opacity-40 z-40"
+            onClick={() => setShowSidebar(false)}
+          />
+
+          {/* Sidebar */}
+          <aside className="fixed top-0 left-0 w-64 h-screen bg-gray-100 p-6 space-y-8 border-r border-gray-300 z-50 transition-transform duration-300 transform translate-x-0 overflow-y-auto">
+            {/* Menu icon inside sidebar, top-right corner */}
+            <div className="flex justify-end">
+              <MenuIcon onClick={() => setShowSidebar(false)} />
+            </div>
+
+            <h1 className="text-xl font-bold text-black">SynKro</h1>
+            <div className="flex flex-col h-full">
+              <MenuLinks />
+            </div>
+          </aside>
+        </>
+      )}
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col items-center justify-start p-8 w-full">
+
+        {/* Search for Projects */}
+        <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-xl xl:max-w-3xl mb-6 sm:mb-8">
           <input
             type="text"
-            placeholder="Search for projects"
-            className="w-full max-w-lg p-2 border border-gray-300 rounded-lg"
+            className="w-full p-2 sm:p-3 bg-gray-200 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black text-sm sm:text-base placeholder-black"
+            placeholder="Search for projects..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
           />
-          <div className="flex space-x-4">
-            <Bell className="text-gray-700 cursor-pointer" />
-            <MessageCircle className="text-gray-700 cursor-pointer" />
-            <Users className="text-gray-700 cursor-pointer" />
-          </div>
         </div>
 
-        {/* Welcome Message */}
-        <h2 className="text-2xl text-black font-semibold mt-6">Welcome to your dashboard, John Doe.</h2>
-        <button className="mt-2 px-4 py-2 bg-black text-white rounded-lg">+ New</button>
-
-        {/* Project Slider */}
-        <div className="mt-6 p-4 bg-gray-200 rounded-lg">
-          <h3 className="text-black text-lg font-semibold">Projects</h3>
-          <div className="flex items-center justify-between">
-            <button className="p-2 bg-gray-300 rounded-lg">⬅</button>
-            <div className="flex space-x-4">
-              <div className="w-48 h-32 bg-gray-400 rounded-lg"></div>
-              <div className="w-48 h-32 bg-gray-400 rounded-lg"></div>
-            </div>
-            <button className="p-2 bg-gray-300 rounded-lg">➡</button>
-          </div>
-          <div className="flex justify-center space-x-2 mt-2">
-            <span className="w-2 h-2 bg-black rounded-full"></span>
-            <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
-            <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
-          </div>
+        {/* Welcome Text with Bottom Border */}
+        <div className="w-full border-b border-gray-300 mb-3 sm:mb-4 pb-3 sm:pb-4 text-center">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-black">
+            Welcome to Your Dashboard, John Doe
+          </h1>
         </div>
+
+        {/* New Button aligned left */}
+        <div className="w-full mb-6 flex justify-start">
+          <button className="flex items-center gap-2 bg-gray-800 text-white py-2 px-4 rounded-full text-sm sm:text-base hover:bg-gray-700 transition">
+            <Plus className="w-4 h-4" />
+            New
+          </button>
+        </div>
+
       </main>
     </div>
   );
-};
-
-export default Dashboard;
+}
