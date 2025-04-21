@@ -9,7 +9,7 @@ export default function Page() {
   const router = useRouter();
 
   // Placeholder state management
-  const [prnPlaceholder, setPrnPlaceholder] = useState("Enter your PRN");
+  const [userPlaceholder, setUserPlaceholder] = useState("Enter your Username");
   const [passwordPlaceholder, setPasswordPlaceholder] = useState("Enter your Password");
 
   const handleSignIn = () => {
@@ -47,10 +47,10 @@ export default function Page() {
           <div className="w-full flex-1 flex flex-col items-center justify-center space-y-4 border-y border-gray-300 py-6">
             <input
               type="text"
-              placeholder={prnPlaceholder}
+              placeholder={userPlaceholder}
               className="w-3/4 p-3 border border-black rounded-lg text-center text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:text-black"
-              onFocus={() => setPrnPlaceholder("")}
-              onBlur={(e) => e.target.value === "" && setPrnPlaceholder("Enter your PRN")}
+              onFocus={() => setUserPlaceholder("")}
+              onBlur={(e) => e.target.value === "" && setUserPlaceholder("Enter your PRN")}
             />
             <input
               type="password"
