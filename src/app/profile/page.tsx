@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import Navbar from "@components/Navbar";
-
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 export default function Page() {
     const router = useRouter();
@@ -37,19 +37,26 @@ export default function Page() {
         setFormData({ ...formData, skills: updatedSkills });
     };
 
-    const handleLogout = () => {
-        router.push("/signin");
-    };
+    const onLogout = async () => {
+        try {
+            const response = await axios.get("/api/users/logout");
+            console.log("Logout success", response.data);
+            router.push("/signin"); 
+        } catch (error: any) {
+            console.log("Loguout Failed", error);
+            toast.error(error.response?.data?.message || error.message || "Logout failed");
+        }
+    }
 
     return (
         <div className="flex flex-col items-center w-full min-h-screen  bg-gray-100">
-            <Navbar />
+            
             {/* Top Bar */}
             <div className="flex justify-between w-full p-3 max-w-4xl mb-4">
                 <Button variant="outline" onClick={() => router.push("/dashboard")}>
                     ← Back
                 </Button>
-                <Button variant="outline" onClick={handleLogout}>
+                <Button variant="outline" onClick={onLogout}>
                     Logout ↩
                 </Button>
             </div>
