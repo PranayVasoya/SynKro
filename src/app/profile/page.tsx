@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { Plus, UserCircle } from "lucide-react";
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 // ProjectPopup Component
 const ProjectPopup = ({ onClose }) => {
@@ -127,6 +132,7 @@ const ProjectPopup = ({ onClose }) => {
 
 export default function Page() {
   const router = useRouter();
+  const userId = 'userIdHere'; // Replace with actual user ID from context or auth
   const [formData, setFormData] = useState({
     name: "",
     prn: "",
@@ -135,23 +141,245 @@ export default function Page() {
     mobile: "",
     github: "",
     linkedin: "",
-    others: "",
-    skills: [] as string[],
+    skills: [],
   });
   const [showProjectPopup, setShowProjectPopup] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [skillsCategories, setSkillsCategories] = useState({
+    programmingLanguages: [
+      { id: 'c', name: 'C', checked: false },
+      { id: 'cpp', name: 'C++', checked: false },
+      { id: 'csharp', name: 'C#', checked: false },
+      { id: 'go', name: 'Go', checked: false },
+      { id: 'java', name: 'Java', checked: false },
+      { id: 'js', name: 'JS', checked: false },
+      { id: 'ts', name: 'TS', checked: false },
+      { id: 'php', name: 'PHP', checked: false },
+      { id: 'python', name: 'Python', checked: false },
+      { id: 'ruby', name: 'Ruby', checked: false },
+      { id: 'rust', name: 'Rust', checked: false },
+      { id: 'scala', name: 'Scala', checked: false },
+      { id: 'kotlin', name: 'Kotlin', checked: false },
+      { id: 'erlang', name: 'Erlang', checked: false },
+      { id: 'coffeescript', name: 'CoffeeScript', checked: false },
+      { id: 'elixir', name: 'Elixir', checked: false },
+      { id: 'dart', name: 'Dart', checked: false },
+      { id: 'r', name: 'R', checked: false },
+      { id: 'swift', name: 'Swift', checked: false },
+      { id: 'objectivec', name: 'Objective-C', checked: false },
+      { id: 'perl', name: 'Perl', checked: false },
+    ],
+    frontendDevelopment: [
+      { id: 'vue', name: 'Vue.js', checked: false },
+      { id: 'react', name: 'React', checked: false },
+      { id: 'svelte', name: 'Svelte', checked: false },
+      { id: 'angular', name: 'Angular', checked: false },
+      { id: 'ember', name: 'Ember', checked: false },
+      { id: 'backbone', name: 'Backbone', checked: false },
+      { id: 'bootstrap', name: 'Bootstrap', checked: false },
+      { id: 'css', name: 'CSS', checked: false },
+      { id: 'html', name: 'HTML', checked: false },
+      { id: 'pug', name: 'Pug', checked: false },
+      { id: 'sass', name: 'Sass', checked: false },
+      { id: 'less', name: 'Less', checked: false },
+      { id: 'webcomponents', name: 'Web Components', checked: false },
+      { id: 'babel', name: 'Babel', checked: false },
+      { id: 'qt', name: 'Qt', checked: false },
+      { id: 'd3', name: 'D3.js', checked: false },
+      { id: 'lit', name: 'Lit', checked: false },
+      { id: 'preact', name: 'Preact', checked: false },
+      { id: 'stencil', name: 'Stencil', checked: false },
+      { id: 'materialui', name: 'Material-UI', checked: false },
+      { id: 'tailwindcss', name: 'Tailwind CSS', checked: false },
+      { id: 'bulma', name: 'Bulma', checked: false },
+      { id: 'foundation', name: 'Foundation', checked: false },
+    ],
+    backendDevelopment: [
+      { id: 'node', name: 'Node.js', checked: false },
+      { id: 'express', name: 'Express', checked: false },
+      { id: 'nestjs', name: 'NestJS', checked: false },
+      { id: 'django', name: 'Django', checked: false },
+      { id: 'flask', name: 'Flask', checked: false },
+      { id: 'laravel', name: 'Laravel', checked: false },
+      { id: 'rails', name: 'Ruby on Rails', checked: false },
+      { id: 'spring', name: 'Spring Boot', checked: false },
+      { id: 'fastapi', name: 'FastAPI', checked: false },
+      { id: 'asp', name: 'ASP.NET', checked: false },
+      { id: 'grails', name: 'Grails', checked: false },
+    ],
+    mobileAppDevelopment: [
+      { id: 'android', name: 'Android', checked: false },
+      { id: 'ios', name: 'iOS', checked: false },
+      { id: 'flutter', name: 'Flutter', checked: false },
+      { id: 'reactnative', name: 'React Native', checked: false },
+      { id: 'xamarin', name: 'Xamarin', checked: false },
+      { id: 'ionic', name: 'Ionic', checked: false },
+      { id: 'kotlinmultiplatform', name: 'Kotlin Multiplatform', checked: false },
+      { id: 'capacitor', name: 'Capacitor', checked: false },
+      { id: 'cordova', name: 'Cordova', checked: false },
+    ],
+    aiml: [
+      { id: 'tensorflow', name: 'TensorFlow', checked: false },
+      { id: 'pytorch', name: 'PyTorch', checked: false },
+      { id: 'scikitlearn', name: 'Scikit-learn', checked: false },
+      { id: 'keras', name: 'Keras', checked: false },
+      { id: 'opencv', name: 'OpenCV', checked: false },
+      { id: 'huggingface', name: 'Hugging Face', checked: false },
+    ],
+    database: [
+      { id: 'mongodb', name: 'MongoDB', checked: false },
+      { id: 'postgresql', name: 'PostgreSQL', checked: false },
+      { id: 'mysql', name: 'MySQL', checked: false },
+      { id: 'sqlite', name: 'SQLite', checked: false },
+      { id: 'redis', name: 'Redis', checked: false },
+      { id: 'cassandra', name: 'Cassandra', checked: false },
+      { id: 'dynamodb', name: 'DynamoDB', checked: false },
+      { id: 'firebase', name: 'Firebase', checked: false },
+      { id: 'elasticsearch', name: 'Elasticsearch', checked: false },
+      { id: 'mariadb', name: 'MariaDB', checked: false },
+      { id: 'couchdb', name: 'CouchDB', checked: false },
+      { id: 'cockroachdb', name: 'CockroachDB', checked: false },
+      { id: 'neo4j', name: 'Neo4j', checked: false },
+      { id: 'oracle', name: 'Oracle', checked: false },
+    ],
+    dataVisualization: [
+      { id: 'chartjs', name: 'Chart.js', checked: false },
+      { id: 'd3viz', name: 'D3.js', checked: false },
+      { id: 'tableau', name: 'Tableau', checked: false },
+      { id: 'powerbi', name: 'Power BI', checked: false },
+      { id: 'apacheairflow', name: 'Apache Airflow', checked: false },
+    ],
+    devops: [
+      { id: 'kubernetes', name: 'Kubernetes', checked: false },
+      { id: 'docker', name: 'Docker', checked: false },
+      { id: 'jenkins', name: 'Jenkins', checked: false },
+      { id: 'ansible', name: 'Ansible', checked: false },
+      { id: 'terraform', name: 'Terraform', checked: false },
+      { id: 'aws', name: 'AWS', checked: false },
+      { id: 'gcp', name: 'Google Cloud', checked: false },
+      { id: 'azure', name: 'Azure', checked: false },
+      { id: 'heroku', name: 'Heroku', checked: false },
+      { id: 'netlify', name: 'Netlify', checked: false },
+    ],
+    baas: [
+      { id: 'firebasebaas', name: 'Firebase', checked: false },
+      { id: 'supabase', name: 'Supabase', checked: false },
+      { id: 'hasura', name: 'Hasura', checked: false },
+      { id: 'parse', name: 'Parse', checked: false },
+    ],
+    framework: [
+      { id: 'adonisjs', name: 'AdonisJS', checked: false },
+      { id: 'codeigniter', name: 'CodeIgniter', checked: false },
+      { id: 'cakephp', name: 'CakePHP', checked: false },
+      { id: 'phalcon', name: 'Phalcon', checked: false },
+      { id: 'dotnet', name: '.NET', checked: false },
+      { id: 'spring', name: 'Spring', checked: false },
+      { id: 'play', name: 'Play Framework', checked: false },
+      { id: 'sails', name: 'Sails.js', checked: false },
+      { id: 'hapi', name: 'Hapi.js', checked: false },
+    ],
+    testing: [
+      { id: 'cypress', name: 'Cypress', checked: false },
+      { id: 'selenium', name: 'Selenium', checked: false },
+      { id: 'jest', name: 'Jest', checked: false },
+      { id: 'mocha', name: 'Mocha', checked: false },
+      { id: 'jasmine', name: 'Jasmine', checked: false },
+      { id: 'playwright', name: 'Playwright', checked: false },
+    ],
+    software: [
+      { id: 'photoshop', name: 'Photoshop', checked: false },
+      { id: 'illustrator', name: 'Illustrator', checked: false },
+      { id: 'xd', name: 'Adobe XD', checked: false },
+      { id: 'figma', name: 'Figma', checked: false },
+      { id: 'blender', name: 'Blender', checked: false },
+      { id: 'unity', name: 'Unity', checked: false },
+      { id: 'unreal', name: 'Unreal Engine', checked: false },
+      { id: 'maya', name: 'Maya', checked: false },
+      { id: '3dsmax', name: '3ds Max', checked: false },
+      { id: 'aftereffects', name: 'After Effects', checked: false },
+    ],
+    staticSiteGenerators: [
+      { id: 'gatsby', name: 'Gatsby', checked: false },
+      { id: 'gridsome', name: 'Gridsome', checked: false },
+      { id: 'hugo', name: 'Hugo', checked: false },
+      { id: 'nextjs', name: 'Next.js', checked: false },
+      { id: 'nuxtjs', name: 'Nuxt.js', checked: false },
+      { id: 'eleventy', name: 'Eleventy', checked: false },
+      { id: 'jekyll', name: 'Jekyll', checked: false },
+      { id: 'hexo', name: 'Hexo', checked: false },
+      { id: 'middleman', name: 'Middleman', checked: false },
+      { id: 'scully', name: 'Scully', checked: false },
+      { id: 'vuepress', name: 'VuePress', checked: false },
+      { id: 'docusaurus', name: 'Docusaurus', checked: false },
+      { id: 'zola', name: 'Zola', checked: false },
+    ],
+    gameEngines: [
+      { id: 'unity', name: 'Unity', checked: false },
+      { id: 'unreal', name: 'Unreal Engine', checked: false },
+    ],
+    automation: [
+      { id: 'ifttt', name: 'IFTTT', checked: false },
+      { id: 'zapier', name: 'Zapier', checked: false },
+    ],
+    other: [
+      { id: 'linux', name: 'Linux', checked: false },
+      { id: 'git', name: 'Git', checked: false },
+      { id: 'npm', name: 'NPM', checked: false },
+    ],
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    fetchUserSkills();
+  }, []);
+
+  const fetchUserSkills = async () => {
+    try {
+      const response = await axios.get(`/api/skills?userId=${userId}`);
+      const savedSkills = response.data.skills || [];
+      setFormData((prev) => ({ ...prev, skills: savedSkills }));
+      updateSkillChecks(savedSkills);
+    } catch (error) {
+      console.error('Error fetching skills:', error);
+      toast.error("Failed to fetch skills.");
+    }
+  };
+
+  const updateSkillChecks = (savedSkills) => {
+    const updatedSkills = { ...skillsCategories };
+    Object.keys(updatedSkills).forEach(category => {
+      updatedSkills[category].forEach(skill => {
+        skill.checked = savedSkills.includes(skill.name);
+      });
+    });
+    setSkillsCategories(updatedSkills);
+  };
+
+  const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAddSkill = () => {
-    setFormData({ ...formData, skills: [...formData.skills, ""] });
+  const handleSkillToggle = (category, skillId) => {
+    const updatedSkills = { ...skillsCategories };
+    updatedSkills[category] = updatedSkills[category].map(skill =>
+      skill.id === skillId ? { ...skill, checked: !skill.checked } : skill
+    );
+    setSkillsCategories(updatedSkills);
   };
 
-  const handleSkillChange = (index: number, value: string) => {
-    const updatedSkills = [...formData.skills];
-    updatedSkills[index] = value;
-    setFormData({ ...formData, skills: updatedSkills });
+  const handleSaveSkills = async () => {
+    const selectedSkills = [];
+    Object.values(skillsCategories).forEach(categorySkills =>
+      categorySkills.forEach(skill => skill.checked && skill.name && selectedSkills.push(skill.name))
+    );
+    try {
+      await axios.post('/api/skills', { userId, skills: selectedSkills });
+      setFormData({ ...formData, skills: selectedSkills });
+      setEditMode(false);
+      toast.success("Skills saved successfully!");
+    } catch (error) {
+      console.error('Error saving skills:', error);
+      toast.error("Failed to save skills.");
+    }
   };
 
   const onLogout = async () => {
@@ -159,7 +387,7 @@ export default function Page() {
       const response = await axios.get("/api/users/logout");
       console.log("Logout success", response.data);
       router.push("/signin");
-    } catch (error: any) {
+    } catch (error) {
       console.log("Logout Failed", error);
       toast.error(error.response?.data?.message || error.message || "Logout failed");
     }
@@ -172,7 +400,7 @@ export default function Page() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
       {/* Navbar */}
-      <nav className="w-full bg-gray-200 shadow-md p-4">
+      <nav className="w-full bg-gray-200 shadow-md p-4 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-bold text-black">SynKro</h1>
           <div className="flex space-x-4">
@@ -187,8 +415,8 @@ export default function Page() {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-6">
-        <Card className="w-full max-w-4xl p-8 bg-white rounded-2xl shadow-2xl border border-gray-200 transform transition-all hover:scale-105">
+      <main className="flex-1 flex items-center justify-center p-6 pt-20">
+        <Card className="w-full max-w-4xl p-8 bg-white rounded-2xl shadow-2xl border border-gray-200 transform transition-all hover:scale-105 hover:-translate-y-1">
           <CardContent className="flex flex-col items-center space-y-8">
             {/* Profile Picture */}
             <div className="relative w-40 h-40 border-4 border-gray-300 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center animate-pulse-slow">
@@ -203,13 +431,13 @@ export default function Page() {
 
             {/* Form Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-6">
-              {["name", "prn", "batch", "email", "mobile", "github", "linkedin", "others"].map((field) => (
+              {["name", "prn", "batch", "email", "mobile", "github", "linkedin"].map((field) => (
                 <div key={field} className="space-y-2">
                   <label className="text-gray-600 text-sm font-medium">{field.toUpperCase()}</label>
                   <Input
                     type="text"
                     name={field}
-                    value={formData[field as keyof typeof formData]}
+                    value={formData[field]}
                     onChange={handleChange}
                     placeholder={`Enter ${field}`}
                     className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 placeholder-gray-400 transition-all hover:border-blue-300"
@@ -218,36 +446,81 @@ export default function Page() {
               ))}
             </div>
 
-            {/* Skills Section */}
+            {/* Skills Section with Accordion */}
             <div className="w-full mt-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-semibold text-gray-800">Skills</h3>
-                <Button
-                  size="sm"
-                  onClick={handleAddSkill}
-                  className="bg-gray-800 text-white hover:bg-gray-700 transition-colors rounded-full p-2 shadow-md"
-                >
-                  + Add Skill
-                </Button>
+                <div>
+                  {editMode ? (
+                    <Button
+                      size="sm"
+                      onClick={handleSaveSkills}
+                      className="bg-gray-800 text-white hover:bg-gray-700 transition-colors rounded-full p-2 shadow-md mr-2"
+                    >
+                      Save Skills
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => setEditMode(true)}
+                      className="bg-gray-800 text-white hover:bg-gray-700 transition-colors rounded-full p-2 shadow-md mr-2"
+                    >
+                      Edit Skills
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="mt-4 space-y-3">
-                {formData.skills.map((skill, index) => (
-                  <Input
-                    key={index}
-                    type="text"
-                    value={skill}
-                    onChange={(e) => handleSkillChange(index, e.target.value)}
-                    placeholder="Enter skill"
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 placeholder-gray-400 transition-all hover:border-blue-300"
-                  />
-                ))}
+              {editMode && (
+                <div className="mt-4 space-y-3">
+                  {Object.keys(skillsCategories).map((category, index) => (
+                    <Accordion key={index}>
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls={`panel${index}-content`}
+                        id={`panel${index}-header`}
+                      >
+                        <Typography component="span">
+                          {category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <div className="grid grid-cols-4 gap-4">
+                          {skillsCategories[category].map((skill) => (
+                            <label key={skill.id} className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={skill.checked}
+                                onChange={() => handleSkillToggle(category, skill.id)}
+                                className="form-checkbox"
+                              />
+                              <span className="text-gray-700">{skill.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </AccordionDetails>
+                    </Accordion>
+                  ))}
+                </div>
+              )}
+              <div className="mt-4">
+                <h4 className="text-lg font-medium text-gray-700">Selected Skills:</h4>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.skills.map((skill, index) => (
+                    <span
+                      key={index}
+                      className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* New Project Button */}
             <div className="w-full mt-8 flex justify-center">
               <Button
-                className="flex items-center gap-2 bg-gradient-to-r from-gray-800 to-gray-600 text-white py-3 px-8 rounded-xl text-lg hover:from-gray-700 hover:to-gray-500 transition-all shadow-lg transform hover:scale-105"
+                className="flex items-center gap-2 bg-gradient-to-r from-gray-800 to-gray-600 text-white py-3 px-8 rounded-xl text-lg hover:from-gray-700 hover:to-gray-500 transition-all shadow-lg transform hover:scale-101 hover:-translate-y-1"
                 onClick={handleNewProject}
               >
                 <Plus className="w-6 h-6" />
@@ -256,9 +529,9 @@ export default function Page() {
             </div>
           </CardContent>
         </Card>
-
-        {showProjectPopup && <ProjectPopup onClose={() => setShowProjectPopup(false)} />}
       </main>
+
+      {showProjectPopup && <ProjectPopup onClose={() => setShowProjectPopup(false)} />}
     </div>
   );
 }
