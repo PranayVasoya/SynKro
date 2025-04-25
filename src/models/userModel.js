@@ -24,6 +24,12 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false, 
     },
+    role: {
+        type: String,
+        enum: ["Student", "Mentor", "Admin"],
+        default: "Student",
+        required: true,
+    },
     prn: {
         type: String,
         required:[true, "Please provide a PRN"],
