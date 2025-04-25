@@ -20,9 +20,9 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    isAdmin: {
+    profileComplete: {
         type: Boolean,
-        default: false, 
+        default: false,
     },
     role: {
         type: String,
