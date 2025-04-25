@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { assign } from "nodemailer/lib/shared";
 
 const projectSchema = new mongoose.Schema({
     title: {
@@ -19,13 +20,12 @@ const projectSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "users"
         },
-        role: String, // 'student', 'faculty', 'mentor', etc.
-        joinedAt: {
-            type: Date,
-            default: Date.now
-        }
     }],
-    lookingForMembers: {
+    mentors: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users",
+    }],
+    islookingForMembers: {
         type: Boolean,
         default: false
     },
@@ -36,7 +36,29 @@ const projectSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    chatRoomId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ChatRoom",
+    },
+    tokenBoard: [{
+        tokenTitle: String, 
+        status: {
+            type: String,
+            enum: ["Completed", "In-progress", "closed"],
+            default: "open"
+        },
+        assignedTo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "users",
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        },
+    }]
+}, {
+    timestamps: true,
 });
 
 const Project = mongoose.models.projects || mongoose.model("projects", projectSchema);
