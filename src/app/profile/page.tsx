@@ -8,15 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { Plus, UserCircle } from "lucide-react";
+import { Plus, UserCircle, X } from "lucide-react";
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { motion } from "framer-motion";
 
 // ProjectPopup Component
-const ProjectPopup = ({ onClose }: { onClose: () => void }) => {
+const ProjectPopup = ({ onClose, onAddProject }: { onClose: () => void; onAddProject: (project: any) => void }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [techStack, setTechStack] = useState("");
@@ -35,98 +36,119 @@ const ProjectPopup = ({ onClose }: { onClose: () => void }) => {
       createdBy: "userIdHere",
       lookingForMembers,
     };
-    console.log("Project Data:", projectData);
+    onAddProject(projectData);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-4 rounded-lg shadow-2xl w-96 transform transition-all duration-300 hover:shadow-3xl border border-blue-200">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-xl font-bold text-gray-800">Create New Project</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </button>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.5 }}
+      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
+    >
+      <motion.div
+        className="bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-900 p-4 rounded-2xl shadow-2xl w-full max-w-sm border border-blue-200 dark:border-gray-700 transform transition-all duration-300"
+        whileHover={{ scale: 1.02 }}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-indigo-900 dark:text-white tracking-tight">Create a New Project</h2>
+          <motion.button
+            onClick={onClose}
+            whileHover={{ rotate: 90, scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100"
+          >
+            <X className="w-5 h-5" />
+          </motion.button>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Title</label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Project Title</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm transition-all duration-300"
+              placeholder="Enter project title"
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50 h-16"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm h-20 resize-none transition-all duration-300"
+              placeholder="Describe your project"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Tech Stack (comma separated)</label>
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Tech Stack (comma separated)</label>
             <input
               type="text"
               value={techStack}
               onChange={(e) => setTechStack(e.target.value)}
-              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50"
+              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm transition-all duration-300"
+              placeholder="e.g., React, Node.js, MongoDB"
             />
           </div>
-          <div className="flex space-x-4">
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700">Repo Link</label>
+          <div className="flex space-x-3">
+            <div className="w-1/2 space-y-1">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Repo Link</label>
               <input
                 type="url"
                 value={repoLink}
                 onChange={(e) => setRepoLink(e.target.value)}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm transition-all duration-300"
+                placeholder="GitHub link"
               />
             </div>
-            <div className="w-1/2">
-              <label className="block text-sm font-medium text-gray-700">Live Link</label>
+            <div className="w-1/2 space-y-1">
+              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Live Link</label>
               <input
                 type="url"
                 value={liveLink}
                 onChange={(e) => setLiveLink(e.target.value)}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-sm transition-all duration-300"
+                placeholder="Live demo link"
               />
             </div>
           </div>
-          <div>
-            <label className="flex items-center text-sm text-gray-700">
+          <div className="space-y-1">
+            <label className="flex items-center text-xs text-gray-700 dark:text-gray-200">
               <input
                 type="checkbox"
                 checked={lookingForMembers}
                 onChange={(e) => setLookingForMembers(e.target.checked)}
-                className="mr-2 accent-blue-500"
+                className="mr-2 accent-blue-500 dark:accent-blue-400 rounded"
               />
               Looking for Members
             </label>
           </div>
           <div className="flex justify-end gap-2">
-            <button
+            <motion.button
               type="button"
               onClick={onClose}
-              className="px-4 py-1 bg-gray-200 rounded-md hover:bg-gray-300 text-gray-800 font-semibold"
+              whileHover={{ scale: 1.05, backgroundColor: "#e5e7eb" }}
+              whileTap={{ scale: 0.95 }}
+              className="px-4 py-1.5 bg-gray-200 dark:bg-gray-600 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 font-semibold transition-all duration-300"
             >
               Cancel
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               type="submit"
-              className="px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold"
+              whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(34, 211, 238, 0.5)" }}
+              whileTap={{ scale: 0.95 }}
+              className="px-4 py-1.5 bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white rounded-xl hover:bg-cyan-600 dark:hover:bg-cyan-700 font-semibold transition-all duration-300"
             >
-              Create
-            </button>
+              Create Project
+            </motion.button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -151,6 +173,22 @@ interface FormData {
   skills: string[];
 }
 
+interface Badge {
+  name: string;
+  description: string;
+  icon: string;
+}
+
+interface Project {
+  title: string;
+  description: string;
+  techStack: string[];
+  repoLink: string;
+  liveLink: string;
+  createdBy: string;
+  lookingForMembers: boolean;
+}
+
 export default function Page() {
   const router = useRouter();
   const userId = 'userIdHere'; // Replace with actual user ID from context or auth
@@ -164,6 +202,17 @@ export default function Page() {
     linkedin: "",
     skills: [],
   });
+  const [projects, setProjects] = useState<Project[]>([
+    {
+      title: "SynKro Dashboard",
+      description: "A dynamic dashboard built with React and Tailwind CSS to manage user profiles and projects.",
+      techStack: ["React", "Tailwind CSS", "Node.js", "MongoDB"],
+      repoLink: "https://github.com/user/synkro-dashboard",
+      liveLink: "https://synkro-dashboard.com",
+      createdBy: "userIdHere",
+      lookingForMembers: false,
+    },
+  ]);
   const [showProjectPopup, setShowProjectPopup] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [skillsCategories, setSkillsCategories] = useState<SkillsCategories>({
@@ -349,6 +398,35 @@ export default function Page() {
     ],
   });
 
+  // Example badges data
+  const badges: Badge[] = [
+    {
+      name: "Top Contributor",
+      description: "Awarded for being in the top 10 on the leaderboard.",
+      icon: "🏆",
+    },
+    {
+      name: "Leaderboard Champion",
+      description: "Reached #1 on the leaderboard.",
+      icon: "🥇",
+    },
+    {
+      name: "Skill Master",
+      description: "Mastered 10+ skills in the skills section.",
+      icon: "📚",
+    },
+    {
+      name: "Tech Enthusiast",
+      description: "Added 5+ tech skills to your profile.",
+      icon: "💻",
+    },
+    {
+      name: "Project Pioneer",
+      description: "Completed your first project successfully.",
+      icon: "🚀",
+    },
+  ];
+
   useEffect(() => {
     fetchUserSkills();
   }, []);
@@ -386,16 +464,18 @@ export default function Page() {
       skill.id === skillId ? { ...skill, checked: !skill.checked } : skill
     );
     setSkillsCategories(updatedSkills);
+
+    // Update formData.skills in real-time
+    const selectedSkills: string[] = [];
+    Object.values(updatedSkills).forEach(categorySkills =>
+      categorySkills.forEach(skill => skill.checked && skill.name && selectedSkills.push(skill.name))
+    );
+    setFormData((prev) => ({ ...prev, skills: selectedSkills }));
   };
 
   const handleSaveSkills = async () => {
-    const selectedSkills: string[] = [];
-    Object.values(skillsCategories).forEach(categorySkills =>
-      categorySkills.forEach(skill => skill.checked && skill.name && selectedSkills.push(skill.name))
-    );
     try {
-      await axios.post('/api/skills', { userId, skills: selectedSkills });
-      setFormData({ ...formData, skills: selectedSkills });
+      await axios.post('/api/skills', { userId, skills: formData.skills });
       setEditMode(false);
       toast.success("Skills saved successfully!");
     } catch (error) {
@@ -419,141 +499,325 @@ export default function Page() {
     setShowProjectPopup(true);
   };
 
+  const addProject = (projectData: Project) => {
+    setProjects((prevProjects) => [...prevProjects, projectData]);
+    toast.success("Project added successfully!");
+  };
+
+  // ProjectCard Component
+  const ProjectCard = ({ project }: { project: Project }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7 }}
+      whileHover={{ scale: 1.03, boxShadow: "0 0 15px rgba(34, 211, 238, 0.5)" }}
+      className="p-6 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-700 dark:to-blue-900 rounded-lg shadow-md border border-blue-200 dark:border-blue-800"
+    >
+      <h4 className="text-xl font-semibold text-indigo-900 dark:text-white mb-2">{project.title}</h4>
+      <p className="text-gray-600 dark:text-gray-300 mb-4">{project.description}</p>
+      <div className="mb-4">
+        <h5 className="text-md font-medium text-indigo-800 dark:text-blue-200 mb-2">Tech Stack:</h5>
+        <div className="flex flex-wrap gap-2">
+          {project.techStack.map((skill, index) => (
+            <span
+              key={index}
+              className="inline-block bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200"
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="mb-4">
+        <h5 className="text-md font-medium text-indigo-800 dark:text-blue-200 mb-2">Links:</h5>
+        <a href={project.repoLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 dark:text-blue-400 hover:underline mr-4">Repo</a>
+        <a href={project.liveLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 dark:text-blue-400 hover:underline">Live</a>
+      </div>
+    </motion.div>
+  );
+
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-card dark:to-muted">
       {/* Navbar */}
-      <nav className="w-full bg-gray-200 shadow-md p-4 z-50">
+      <motion.nav
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0, backgroundPosition: "200% 0" }}
+        transition={{ 
+          opacity: { duration: 0.7 },
+          y: { duration: 0.7 },
+          backgroundPosition: { duration: 4, repeat: Infinity, repeatType: "reverse", ease: "linear" }
+        }}
+        className="w-full bg-gradient-to-r from-blue-50 via-blue-200 to-blue-50 dark:from-card dark:via-muted dark:to-card shadow-lg p-4 z-50"
+        style={{
+          backgroundSize: "200% 100%",
+          border: "1px solid rgba(59, 130, 246, 0.3)",
+          boxShadow: "0 0 15px rgba(59, 130, 246, 0.5)",
+        }}
+      >
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-black">SynKro</h1>
+          <h1 className="text-xl font-bold text-indigo-900 dark:text-white">SynKro</h1>
           <div className="flex space-x-4">
-            <Button variant="outline" onClick={() => router.push("/dashboard")}>
-              ← Back
-            </Button>
-            <Button variant="outline" onClick={onLogout}>
-              Logout ↩
-            </Button>
+            <motion.div
+              whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(34, 211, 238, 0.5)" }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                variant="outline"
+                onClick={() => router.push("/dashboard")}
+                className="border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-gray-700 transition-all"
+              >
+                ← Back
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(34, 211, 238, 0.5)" }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                variant="outline"
+                onClick={onLogout}
+                className="border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-gray-700 transition-all"
+              >
+                Logout ↩
+              </Button>
+            </motion.div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-6 pt-20">
-        <Card className="w-full max-w-4xl p-8 bg-white rounded-2xl shadow-2xl border border-gray-200 transform transition-all hover:scale-105 hover:-translate-y-1">
-          <CardContent className="flex flex-col items-center space-y-8">
-            {/* Profile Picture */}
-            <div className="relative w-40 h-40 border-4 border-gray-300 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center animate-pulse-slow">
-              <Image src="/profile-placeholder.png" alt="Profile" width={160} height={160} className="rounded-full" />
-              <Button
-                size="sm"
-                className="mt-2 bg-gray-800 text-white hover:bg-gray-700 transition-colors absolute bottom-0 right-0 transform translate-y-1/2 translate-x-1/2 rounded-full p-2 shadow-md"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          whileHover={{ scale: 1.01 }}
+        >
+          <Card className="w-full max-w-4xl p-8 bg-white/90 dark:bg-gray-800/90 rounded-2xl shadow-2xl border border-blue-200 dark:border-gray-700 transform transition-all hover:scale-105 hover:-translate-y-1">
+            <CardContent className="flex flex-col items-center space-y-8">
+              {/* Profile Picture */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="relative w-40 h-40 border-4 border-gradient-to-r from-cyan-400 to-blue-500 dark:from-cyan-500 dark:to-blue-700 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center"
+                style={{ boxShadow: "0 0 15px rgba(34, 211, 238, 0.5)" }}
               >
-                <UserCircle className="w-5 h-5" />
-              </Button>
-            </div>
+                <Image src="/profile-placeholder.png" alt="Profile" width={160} height={160} className="rounded-full" />
+                <motion.div
+                  whileHover={{ scale: 1.1, boxShadow: "0 0 10px rgba(34, 211, 238, 0.7)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="absolute bottom-0 right-0 transform translate-y-1/2 translate-x-1/2"
+                >
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white hover:bg-cyan-600 dark:hover:bg-cyan-700 transition-colors rounded-full p-2 shadow-md"
+                  >
+                    <UserCircle className="w-5 h-5" />
+                  </Button>
+                </motion.div>
+              </motion.div>
 
-            {/* Form Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-6">
-              {["name", "prn", "batch", "email", "mobile", "github", "linkedin"].map((field) => (
-                <div key={field} className="space-y-2">
-                  <label className="text-gray-600 text-sm font-medium">{field.toUpperCase()}</label>
-                  <Input
-                    type="text"
-                    name={field}
-                    value={formData[field as keyof FormData]}
-                    onChange={handleChange}
-                    placeholder={`Enter ${field}`}
-                    className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 placeholder-gray-400 transition-all hover:border-blue-300"
-                  />
-                </div>
-              ))}
-            </div>
+              {/* Form Fields */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.4 }}
+                className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-6"
+              >
+                {["name", "prn", "batch", "email", "mobile", "github", "linkedin"].map((field, index) => (
+                  <motion.div
+                    key={field}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                    className="space-y-2"
+                  >
+                    <label className="text-gray-600 dark:text-gray-300 text-sm font-medium">{field.toUpperCase()}</label>
+                    <Input
+                      type="text"
+                      name={field}
+                      value={formData[field as keyof FormData]}
+                      onChange={handleChange}
+                      placeholder={`Enter ${field}`}
+                      className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-all hover:border-blue-300 dark:hover:border-blue-500"
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
 
-            {/* Skills Section with Accordion */}
-            <div className="w-full mt-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-gray-800">Skills</h3>
-                <div>
-                  {editMode ? (
-                    <Button
-                      size="sm"
-                      onClick={handleSaveSkills}
-                      className="bg-gray-800 text-white hover:bg-gray-700 transition-colors rounded-full p-2 shadow-md mr-2"
-                    >
-                      Save Skills
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      onClick={() => setEditMode(true)}
-                      className="bg-gray-800 text-white hover:bg-gray-700 transition-colors rounded-full p-2 shadow-md mr-2"
-                    >
-                      Edit Skills
-                    </Button>
-                  )}
-                </div>
-              </div>
-              {editMode && (
-                <div className="mt-4 space-y-3">
-                  {Object.keys(skillsCategories).map((category, index) => (
-                    <Accordion key={index}>
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        aria-controls={`panel${index}-content`}
-                        id={`panel${index}-header`}
+              {/* Skills Section with Accordion */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.6 }}
+                className="w-full mt-6"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold text-indigo-900 dark:text-white">Skills</h3>
+                  <div>
+                    {editMode ? (
+                      <motion.div
+                        whileHover={{ scale: 1.1, boxShadow: "0 0 10px rgba(34, 211, 238, 0.7)" }}
+                        whileTap={{ scale: 0.95 }}
                       >
-                        <Typography component="span">
-                          {category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                        </Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <div className="grid grid-cols-4 gap-4">
-                          {skillsCategories[category].map((skill) => (
-                            <label key={skill.id} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={skill.checked}
-                                onChange={() => handleSkillToggle(category, skill.id)}
-                                className="form-checkbox"
-                              />
-                              <span className="text-gray-700">{skill.name}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
+                        <Button
+                          size="sm"
+                          onClick={handleSaveSkills}
+                          className="bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white hover:bg-cyan-600 dark:hover:bg-cyan-700 transition-colors rounded-full p-2 shadow-md mr-2"
+                        >
+                          Save Skills
+                        </Button>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        whileHover={{ scale: 1.1, boxShadow: "0 0 10px rgba(34, 211, 238, 0.7)" }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button
+                          size="sm"
+                          onClick={() => setEditMode(true)}
+                          className="bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white hover:bg-cyan-600 dark:hover:bg-cyan-700 transition-colors rounded-full p-2 shadow-md mr-2"
+                        >
+                          Edit Skills
+                        </Button>
+                      </motion.div>
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className="mt-4">
-                <h4 className="text-lg font-medium text-gray-700">Selected Skills:</h4>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.skills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
+                {editMode && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    transition={{ duration: 0.5 }}
+                    className="mt-4 space-y-3"
+                  >
+                    {Object.keys(skillsCategories).map((category, index) => (
+                      <Accordion
+                        key={index}
+                        className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+                      >
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon className="text-gray-600 dark:text-gray-300" />}
+                          aria-controls={`panel${index}-content`}
+                          id={`panel${index}-header`}
+                          className="hover:bg-blue-100 dark:hover:bg-gray-600 transition-colors"
+                        >
+                          <Typography component="span" className="text-gray-800 dark:text-gray-200">
+                            {category.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails className="bg-white dark:bg-gray-800">
+                          <div className="grid grid-cols-4 gap-4">
+                            {skillsCategories[category].map((skill) => (
+                              <label key={skill.id} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={skill.checked}
+                                  onChange={() => handleSkillToggle(category, skill.id)}
+                                  className="form-checkbox accent-blue-500 dark:accent-blue-400"
+                                />
+                                <span className="text-gray-700 dark:text-gray-300">{skill.name}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </AccordionDetails>
+                      </Accordion>
+                    ))}
+                  </motion.div>
+                )}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.7 }}
+                  className="mt-4"
+                >
+                  <h4 className="text-lg font-medium text-indigo-900 dark:text-white">Selected Skills:</h4>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.skills.map((skill, index) => (
+                      <motion.span
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 0.8 + index * 0.05 }}
+                        className="inline-block bg-gradient-to-r from-blue-200 to-blue-300 dark:from-blue-600 dark:to-blue-800 rounded-full px-3 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        {skill}
+                      </motion.span>
+                    ))}
+                  </div>
+                </motion.div>
+              </motion.div>
 
-            {/* New Project Button */}
-            <div className="w-full mt-8 flex justify-center">
-              <Button
-                className="flex items-center gap-2 bg-gradient-to-r from-gray-800 to-gray-600 text-white py-3 px-8 rounded-xl text-lg hover:from-gray-700 hover:to-gray-500 transition-all shadow-lg transform hover:scale-101 hover:-translate-y-1"
-                onClick={handleNewProject}
+              {/* Badges Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.9 }}
+                className="w-full mt-6"
               >
-                <Plus className="w-6 h-6" />
-                New
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                <h3 className="text-xl font-semibold text-indigo-900 dark:text-white mb-4">Badges</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {badges.map((badge, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 1.0 + index * 0.1 }}
+                      whileHover={{ scale: 1.05, boxShadow: "0 0 15px rgba(34, 211, 238, 0.5)" }}
+                      className="flex items-center p-4 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-700 dark:to-blue-900 rounded-lg shadow-md border border-blue-200 dark:border-blue-800"
+                    >
+                      <span className="text-3xl mr-3">{badge.icon}</span>
+                      <div>
+                        <h4 className="text-md font-semibold text-indigo-900 dark:text-white">{badge.name}</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{badge.description}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Project Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 1.1 }}
+                className="w-full mt-6"
+              >
+                <h3 className="text-xl font-semibold text-indigo-900 dark:text-white mb-4">Projects</h3>
+                <div className="space-y-6">
+                  {projects.map((project, index) => (
+                    <ProjectCard key={index} project={project} />
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* New Project Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 1.3 }}
+                className="w-full mt-8 flex justify-center"
+              >
+                <motion.div
+                  whileHover={{ scale: 1.1, boxShadow: "0 0 15px rgba(34, 211, 238, 0.7)" }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    className="flex items-center gap-2 bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white py-3 px-8 rounded-xl text-lg hover:bg-cyan-600 dark:hover:bg-cyan-700 transition-all shadow-lg transform hover:scale-101 hover:-translate-y-1"
+                    onClick={handleNewProject}
+                  >
+                    <Plus className="w-6 h-6" />
+                    New
+                  </Button>
+                </motion.div>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </main>
 
-      {showProjectPopup && <ProjectPopup onClose={() => setShowProjectPopup(false)} />}
+      {showProjectPopup && <ProjectPopup onClose={() => setShowProjectPopup(false)} onAddProject={addProject} />}
     </div>
   );
 }
