@@ -2,6 +2,7 @@ import { connectToDatabase } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import bcrypt from "bcryptjs";
 
 connectToDatabase();
 
@@ -14,7 +15,7 @@ export async function PUT(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-
+    
     // ✨ Step 1: Only update fields that changed
     let hasChanges = false;
     for (const key in body) {
@@ -38,6 +39,13 @@ export async function PUT(request: NextRequest) {
 
     if (isProfileComplete && !user.profileComplete) {
       user.profileComplete = true;
+      hasChanges = true;
+    }
+
+    // encrypt password if it has changed
+    if (body.password && !(await bcrypt.compare(body.password, user.password))) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(body.password, salt);
       hasChanges = true;
     }
 
