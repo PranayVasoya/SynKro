@@ -20,14 +20,24 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    isAdmin: {
+    profileComplete: {
         type: Boolean,
-        default: false, 
+        default: false,
+    },
+    role: {
+        type: String,
+        enum: ["Student", "Mentor", "Admin"],
+        default: "Student",
+        required: true,
     },
     prn: {
         type: String,
         required:[true, "Please provide a PRN"],
         unique: true,
+    },
+    batch: {
+        type: String,
+        required: [true, "Please provide a batch"],
     },
     mobile: {
         type: String,

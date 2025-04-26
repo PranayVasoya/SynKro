@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "../theme-context"; // Import the useTheme hook
 
 // ProjectPopup Component
-const ProjectPopup = ({ onClose }) => {
+const ProjectPopup = ({ onClose }: { onClose: () => void }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [techStack, setTechStack] = useState("");
@@ -18,9 +18,19 @@ const ProjectPopup = ({ onClose }) => {
   const [liveLink, setLiveLink] = useState("");
   const [lookingForMembers, setLookingForMembers] = useState(false);
 
-  const handleSubmit = async (e) => {
+  interface ProjectData {
+    title: string;
+    description: string;
+    techStack: string[];
+    repoLink: string;
+    liveLink: string;
+    createdBy: string;
+    lookingForMembers: boolean;
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const projectData = {
+    const projectData: ProjectData = {
       title,
       description,
       techStack: techStack.split(",").map(item => item.trim()),
@@ -172,13 +182,27 @@ export default function Dashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("/api/users/me");
+        setUser(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch user", err);
+      }
+    };
+    fetchUser();
+  }, []);
+
   if (!isAuthenticated) return null;
 
   const menuItems = [
     { label: "Chat", icon: <MessageCircle className="w-5 h-5" />, action: () => router.push("/chat") },
     { label: "Community", icon: <Users className="w-5 h-5" />, action: () => router.push("/community") },
     { label: "Profile", icon: <UserCircle className="w-5 h-5" />, action: () => router.push("/profile") },
-    { label: "Settings", icon: <Cog className="w-5 h-5" />, action: () => setShowSettingsDropdown(!showSettingsDropdown) },
+    {
+      label: "Settings", icon: <Cog className="w-5 h-5" />, action: () => setShowSettingsDropdown(!showSettingsDropdown)
+    },
   ];
 
   const MenuLinks = () => (

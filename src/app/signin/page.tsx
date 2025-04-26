@@ -30,7 +30,12 @@ export default function Page() {
       });
 
       toast.success("Sign-in successful!");
-      router.push("/profile");
+      const isProfileComplete = response.data.profileComplete; // Assuming API response contains this
+      if (!isProfileComplete) {
+        router.push("/profile");
+      }else{
+        router.push("/dashboard");
+      }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Sign-in failed.";
       console.error("Signin error:", err);

@@ -16,7 +16,7 @@ import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 // ProjectPopup Component
-const ProjectPopup = ({ onClose }) => {
+const ProjectPopup = ({ onClose }: { onClose: () => void }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [techStack, setTechStack] = useState("");
@@ -24,7 +24,7 @@ const ProjectPopup = ({ onClose }) => {
   const [liveLink, setLiveLink] = useState("");
   const [lookingForMembers, setLookingForMembers] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const projectData = {
       title,
@@ -130,10 +130,31 @@ const ProjectPopup = ({ onClose }) => {
   );
 };
 
+interface Skill {
+  id: string;
+  name: string;
+  checked: boolean;
+}
+
+interface SkillsCategories {
+  [key: string]: Skill[];
+}
+
+interface FormData {
+  name: string;
+  prn: string;
+  batch: string;
+  email: string;
+  mobile: string;
+  github: string;
+  linkedin: string;
+  skills: string[];
+}
+
 export default function Page() {
   const router = useRouter();
   const userId = 'userIdHere'; // Replace with actual user ID from context or auth
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     prn: "",
     batch: "",
@@ -145,7 +166,7 @@ export default function Page() {
   });
   const [showProjectPopup, setShowProjectPopup] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [skillsCategories, setSkillsCategories] = useState({
+  const [skillsCategories, setSkillsCategories] = useState<SkillsCategories>({
     programmingLanguages: [
       { id: 'c', name: 'C', checked: false },
       { id: 'cpp', name: 'C++', checked: false },
@@ -344,21 +365,22 @@ export default function Page() {
     }
   };
 
-  const updateSkillChecks = (savedSkills) => {
-    const updatedSkills = { ...skillsCategories };
+  const updateSkillChecks = (savedSkills: string[]) => {
+    const updatedSkills: SkillsCategories = { ...skillsCategories };
     Object.keys(updatedSkills).forEach(category => {
-      updatedSkills[category].forEach(skill => {
-        skill.checked = savedSkills.includes(skill.name);
-      });
+      updatedSkills[category] = updatedSkills[category].map(skill => ({
+        ...skill,
+        checked: savedSkills.includes(skill.name)
+      }));
     });
     setSkillsCategories(updatedSkills);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSkillToggle = (category, skillId) => {
+  const handleSkillToggle = (category: string, skillId: string) => {
     const updatedSkills = { ...skillsCategories };
     updatedSkills[category] = updatedSkills[category].map(skill =>
       skill.id === skillId ? { ...skill, checked: !skill.checked } : skill
@@ -367,7 +389,7 @@ export default function Page() {
   };
 
   const handleSaveSkills = async () => {
-    const selectedSkills = [];
+    const selectedSkills: string[] = [];
     Object.values(skillsCategories).forEach(categorySkills =>
       categorySkills.forEach(skill => skill.checked && skill.name && selectedSkills.push(skill.name))
     );
@@ -387,7 +409,7 @@ export default function Page() {
       const response = await axios.get("/api/users/logout");
       console.log("Logout success", response.data);
       router.push("/signin");
-    } catch (error) {
+    } catch (error: any) {
       console.log("Logout Failed", error);
       toast.error(error.response?.data?.message || error.message || "Logout failed");
     }
@@ -437,7 +459,7 @@ export default function Page() {
                   <Input
                     type="text"
                     name={field}
-                    value={formData[field]}
+                    value={formData[field as keyof FormData]}
                     onChange={handleChange}
                     placeholder={`Enter ${field}`}
                     className="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 placeholder-gray-400 transition-all hover:border-blue-300"
