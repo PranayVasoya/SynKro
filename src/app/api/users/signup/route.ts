@@ -11,11 +11,11 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const reqBody = await request.json();
-    const { username, email, password } = reqBody;
+    const { username, email, password, prn, batch, mobile } = reqBody;
 
-    if (!username || !email || !password) {
+    if (!username || !email || !password || !prn || !batch || !mobile) {
       return NextResponse.json(
-        { error: "Username, email, and password are required" },
+        { error: "Username, email, password, prn, batch and mobile number are required" },
         { status: 400 }
       );
     }
@@ -50,6 +50,9 @@ export async function POST(request: NextRequest) {
       email,
       password: hashedPassword,
       isVerified: false,
+      prn,
+      batch,
+      mobile,
     });
 
     const savedUser = await newUser.save();

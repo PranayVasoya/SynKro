@@ -13,13 +13,19 @@ const SignupPage = () => {
   const [namePlaceholder, setNamePlaceholder] = useState("Enter your Name");
   const [emailPlaceholder, setEmailPlaceholder] = useState("Enter your Email-ID");
   const [passPlaceholder, setPassPlaceholder] = useState("Enter your Password");
+  const [prnPlaceholder, setPrnPlaceholder] = useState("Enter your PRN");
+  const [batchPlaceholder, setBatchPlaceholder] = useState("Enter your Batch");
+  const [mobilePlaceholder, setMobilePlaceholder] = useState("Enter your Mobile Number");
 
   const router = useRouter();
 
   const [user, setUser] = useState({
     username: "",
     email: "",
-    password: ""
+    password: "",
+    prn: "",
+    batch: "",
+    mobile: "",
   });
 
   const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -110,6 +116,45 @@ const SignupPage = () => {
               className="w-3/4 p-3 border border-border rounded-lg text-center text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:text-foreground bg-background dark:bg-card transition-all duration-200"
               onFocus={() => setPassPlaceholder("")}
               onBlur={(e) => e.target.value === "" && setPassPlaceholder("Enter your Password")}
+            />
+
+            <motion.input
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              type="text"
+              placeholder={prnPlaceholder}
+              value={user.prn}
+              onChange={(e) => setUser({ ...user, prn: e.target.value })}
+              className="w-3/4 p-3 border border-border rounded-lg text-center text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:text-foreground bg-background dark:bg-card transition-all duration-200"
+              onFocus={() => setPrnPlaceholder("")}
+              onBlur={(e) => e.target.value === "" && setPrnPlaceholder("Enter your PRN")}
+            />
+
+            <motion.input
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              type="text"
+              placeholder={batchPlaceholder}
+              value={user.batch}
+              onChange={(e) => setUser({ ...user, batch: e.target.value })}
+              className="w-3/4 p-3 border border-border rounded-lg text-center text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:text-foreground bg-background dark:bg-card transition-all duration-200"
+              onFocus={() => setBatchPlaceholder("")}
+              onBlur={(e) => e.target.value === "" && setBatchPlaceholder("Enter your Batch")}
+            />
+
+            <motion.input
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              type="text"
+              placeholder={mobilePlaceholder}
+              value={user.mobile}
+              onChange={(e) => setUser({ ...user, mobile: e.target.value })}
+              className="w-3/4 p-3 border border-border rounded-lg text-center text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:text-foreground bg-background dark:bg-card transition-all duration-200"
+              onFocus={() => setMobilePlaceholder("")}
+              onBlur={(e) => e.target.value === "" && setMobilePlaceholder("Enter your Mobile Number")}
             />
 
             <motion.button
