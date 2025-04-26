@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
+import { ThemeProvider } from "./theme-context"; // Import the ThemeProvider
 
 // Import and configure the Poppins font
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"], display: "swap" });
@@ -13,8 +14,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      {/* Apply Poppins font to the entire body */}
-      <body className={`${poppins.className} bg-white`}>{children}</body>
+      {/* Apply Poppins font and theme background to the entire body */}
+      <body className={`${poppins.className} bg-white dark:bg-gray-900`}>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

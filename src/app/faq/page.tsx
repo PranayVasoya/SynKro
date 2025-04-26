@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { HelpCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function FAQ() {
   const router = useRouter();
@@ -25,33 +26,46 @@ export default function FAQ() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
-      <nav className="w-full bg-gray-200 shadow-md p-4">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-muted">
+      <nav className="w-full bg-gradient-to-b from-blue-50 to-blue-100 dark:from-card dark:to-muted shadow-md p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-black">SynKro</h1>
-          <button
+          <h1 className="text-xl font-bold text-foreground">SynKro</h1>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => router.push("/dashboard")}
-            className="border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+            className="border border-border px-4 py-2 rounded-lg hover:bg-muted text-foreground transition-colors"
           >
             ← Back
-          </button>
+          </motion.button>
         </div>
       </nav>
 
       <main className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-4xl p-6 bg-white rounded-2xl shadow-2xl border border-gray-200">
-          <h2 className="text-3xl font-bold text-gray-800 text-center mb-8 flex items-center justify-center">
-            <HelpCircle className="w-8 h-8 mr-2 text-blue-600" /> FAQ
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-4xl p-6 bg-background dark:bg-card rounded-2xl shadow-2xl border border-border transform transition-all hover:scale-101 hover:shadow-3xl"
+        >
+          <h2 className="text-3xl font-bold text-foreground text-center mb-8 flex items-center justify-center">
+            <HelpCircle className="w-8 h-8 mr-2 text-primary" /> FAQ
           </h2>
           <div className="space-y-6">
             {faqs.map((faq, index) => (
-              <div key={index} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                <h3 className="text-lg font-semibold text-gray-700">{faq.question}</h3>
-                <p className="text-gray-600 mt-2">{faq.answer}</p>
-              </div>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                className="p-6 bg-muted dark:bg-muted/50 rounded-xl hover:bg-muted/80 transition-colors border border-border"
+              >
+                <h3 className="text-lg font-semibold text-foreground">{faq.question}</h3>
+                <p className="text-muted-foreground mt-2">{faq.answer}</p>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </main>
     </div>
   );
