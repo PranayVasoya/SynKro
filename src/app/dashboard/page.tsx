@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { UserCircle, Cog, Bell, Trophy, MessageCircle, Sun, Moon, HelpCircle, Users, LogOut } from "lucide-react";
+import { UserCircle, Cog, Bell, Trophy, MessageCircle, Sun, Moon, HelpCircle, Users, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "../theme-context"; // Import the useTheme hook
+
+
 
 // ProjectPopup Component
 const ProjectPopup = ({ onClose }: { onClose: () => void }) => {
@@ -182,17 +184,18 @@ export default function Dashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const [user, setUser] = useState<{username?: string}>({});
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await axios.get("/api/users/me");
-        setUser(res.data.data);
+        setUser(res.data.data); // Assuming the response has data property with user info
       } catch (err) {
         console.error("Failed to fetch user", err);
       }
     };
     fetchUser();
-  }, []);
+  }, []);
 
   if (!isAuthenticated) return null;
 
@@ -425,7 +428,7 @@ export default function Dashboard() {
           className="w-full border-b border-border mb-4 sm:mb-6 pb-3 sm:pb-4 text-center"
         >
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-            Welcome to your dashboard, John Doe.
+            Welcome to your dashboard, {user.username || "Loading..."}.
           </h1>
         </motion.div>
 
@@ -465,4 +468,8 @@ export default function Dashboard() {
       </AnimatePresence>
     </div>
   );
+}
+
+function setUser(data: any) {
+  throw new Error("Function not implemented.");
 }
