@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema({
         required:[true, "Please provide a PRN"],
         unique: true,
     },
+    batch: {
+        type: String,
+        required: [true, "Please provide a batch"],
+    },
     mobile: {
         type: String,
         required: [true, "Please provide a mobile number"],
