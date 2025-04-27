@@ -84,7 +84,7 @@ const Leaderboard = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="mb-10 grid grid-cols-3 gap-6"
+            className="mb-10 grid grid-rows-3 gap-6"
           >
             {topThree.map((user, index) => (
               <motion.div
