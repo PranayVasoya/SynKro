@@ -23,6 +23,50 @@ export default function FAQ() {
       question: "Where can I find help?",
       answer: "Check the FAQ section or visit the 'Project Help' forum in the community section for assistance.",
     },
+    {
+      question: "How do I edit my skill profile?",
+      answer: "Go to your profile, expand the skills section, select categories like programming or design, and save your changes.",
+    },
+    {
+      question: "What are badges, and how do I earn them?",
+      answer: "Badges (e.g., Top Contributor, Leaderboard Champion) are achievements earned based on project contributions and skill mastery, visible on your profile.",
+    },
+    {
+      question: "How do I update a project with my team?",
+      answer: "Open your project, use the real-time update feature to add tech stack details or recruit members, and share with your team.",
+    },
+    {
+      question: "Can I connect with others based on skills?",
+      answer: "Yes, use the Community Skill Matching feature to find and connect with users who share your skills or interests.",
+    },
+    {
+      question: "How do I add social links to my profile?",
+      answer: "Edit your profile settings and input your social media or portfolio links under the networking section.",
+    },
+    {
+      question: "What should I do if a project fails to save?",
+      answer: "Ensure you’re connected to the internet, check your input details, and retry. Contact support if the issue persists.",
+    },
+    {
+      question: "How do I leave feedback for the community?",
+      answer: "Post your feedback in the 'Project Help' or general forums under the Community section.",
+    },
+    {
+      question: "Can I delete a project I created?",
+      answer: "Yes, go to your project, click the settings icon, and select 'Delete' to remove it permanently.",
+    },
+    {
+      question: "How do I track my achievements?",
+      answer: "View your badges and achievement history in the profile section under the 'Achievements' tab.",
+    },
+    {
+      question: "What types of projects can I create?",
+      answer: "You can create any project type (e.g., web apps, design portfolios) by specifying details in the 'New' project popup.",
+    },
+    {
+      question: "How do I report a bug or issue?",
+      answer: "Submit a bug report through the 'Project Help' forum or email support@synkro.com with details of the issue.",
+    },
   ];
 
   return (
