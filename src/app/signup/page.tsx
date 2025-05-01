@@ -23,14 +23,10 @@ const SignupPage = () => {
     "Enter your Email-ID"
   );
   const [passPlaceholder, setPassPlaceholder] = useState("Enter your Password");
-  const [prnPlaceholder, setPrnPlaceholder] = useState(
-    "Enter your PRN (Optional)"
-  );
-  const [batchPlaceholder, setBatchPlaceholder] = useState(
-    "Enter your Batch (Optional)"
-  );
+  const [prnPlaceholder, setPrnPlaceholder] = useState("Enter your PRN");
+  const [batchPlaceholder, setBatchPlaceholder] = useState("Enter your Batch");
   const [mobilePlaceholder, setMobilePlaceholder] = useState(
-    "Enter your Mobile Number (Optional)"
+    "Enter your Mobile Number"
   );
 
   // 2. Add state for password visibility

@@ -38,13 +38,13 @@
 
   .dark {
     /* Define DARK mode variables */
-    --background: 222.2 84% 4.9%; /* Your customDarkGray? '#2d2d2d' is ~ hsl(0 0% 18%) */
+    --background: 0 0% 18%; /* customDarkGray */
     --foreground: 210 40% 98%; /* White / Light Gray */
-    --card: 0 0% 22%; /* Your customMediumGray? '#4d4d4d' is ~ hsl(0 0% 30%) */
+    --card: 0 0% 30%; /* customMediumGray */
     --card-foreground: 210 40% 98%; /* White / Light Gray */
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 245 80% 80%; /* Your customPurple '#8c8bf1' is ~ hsl(240 79% 75%) - Adjust HSL if needed */
+    --primary: 240 79% 75%; /* customPurple */
     --primary-foreground: 255 100% 100%; /* White text */
     --secondary: 217.2 32.6% 17.5%; /* Darker Gray/Blue */
     --secondary-foreground: 210 40% 98%;
