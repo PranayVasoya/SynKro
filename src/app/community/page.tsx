@@ -2,23 +2,53 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Users, ChevronRight, MessageCircle } from "lucide-react";
+import { Users, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
-// Sidebar Component for Discussion
-const DiscussionSidebar = ({ forum, onClose }) => {
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Welcome to the discussion!", sender: "admin", time: "09:00 AM" },
-    { id: 2, text: "Any updates on the project?", sender: "user1", time: "09:15 AM" },
-    { id: 3, text: "Working on it!", sender: "user2", time: "09:20 AM" },
-  ]);
-  const [newMessage, setNewMessage] = useState("");
+interface Forum {
+  id: string;
+  title: string;
+  description: string;
+  posts: number;
+}
 
-  const handleSendMessage = (e) => {
+interface Post {
+  _id: string;
+  title: string;
+  content: string;
+  createdBy: { username: string };
+  createdAt: string;
+}
+
+const DiscussionSidebar = ({ forum, onClose }: { forum: Forum; onClose: () => void }) => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [newPost, setNewPost] = useState("");
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get(`/api/forums/${forum.id}/posts`);
+        setPosts(response.data.data);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+        toast.error("Failed to load posts");
+      }
+    };
+    fetchPosts();
+  }, [forum.id]);
+
+  const handleSendPost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim()) {
-      setMessages([...messages, { id: messages.length + 1, text: newMessage, sender: "me", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
-      setNewMessage("");
+    if (!newPost.trim()) return;
+    try {
+      const response = await axios.post(`/api/forums/${forum.id}/posts`, { content: newPost });
+      setPosts([...posts, response.data.data]);
+      setNewPost("");
+    } catch (error) {
+      console.error("Error sending post:", error);
+      toast.error("Failed to send post");
     }
   };
 
@@ -28,7 +58,6 @@ const DiscussionSidebar = ({ forum, onClose }) => {
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="fixed top-0 right-0 h-full w-1/3 bg-background dark:bg-card shadow-2xl border-l border-border z-50"
       >
         <div className="flex items-center p-4 border-b border-border">
@@ -36,7 +65,7 @@ const DiscussionSidebar = ({ forum, onClose }) => {
             whileHover={{ scale: 1.2, rotate: 90 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="mr-4 text-muted-foreground hover:text-foreground transition-colors"
+            className="mr-4 text-muted-foreground hover:text-foreground"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
@@ -45,35 +74,37 @@ const DiscussionSidebar = ({ forum, onClose }) => {
           <h2 className="text-xl font-semibold text-foreground">{forum.title} Discussion</h2>
         </div>
         <div className="p-4 overflow-y-auto h-[calc(100%-100px)] bg-muted dark:bg-muted/50">
-          {messages.map((msg) => (
+          {posts.map((post) => (
             <motion.div
-              key={msg.id}
+              key={post._id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className={`mb-2 ${msg.sender === "me" ? "text-right" : "text-left"}`}
+              className="mb-4"
             >
-              <div className={`inline-block p-2 rounded-lg ${msg.sender === "me" ? "bg-primary text-primary-foreground" : "bg-gray-200 dark:bg-gray-600 text-foreground"}`}>
-                {msg.text}
+              <div className="p-2 rounded-lg bg-gray-200 dark:bg-gray-600 text-foreground">
+                <h4 className="font-semibold">{post.title}</h4>
+                <p>{post.content}</p>
+                <div className="text-xs text-muted-foreground">
+                  Posted by {post.createdBy.username} at {new Date(post.createdAt).toLocaleString()}
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">{msg.time}</div>
             </motion.div>
           ))}
         </div>
-        <form onSubmit={handleSendMessage} className="p-4 border-t border-border">
+        <form onSubmit={handleSendPost} className="p-4 border-t border-border">
           <div className="flex space-x-2">
             <input
               type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-primary bg-muted text-foreground border-border transition-all duration-200 hover:border-primary"
+              className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-primary bg-muted text-foreground border-border"
             />
             <motion.button
-              whileHover={{ scale: 1.05, backgroundColor: "hsl(var(--primary))" }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="submit"
-              className="bg-primary text-primary-foreground rounded-lg p-2 hover:bg-primary/90 transition-colors"
+              className="bg-primary text-primary-foreground rounded-lg p-2 hover:bg-primary/90"
             >
               Send
             </motion.button>
@@ -86,25 +117,25 @@ const DiscussionSidebar = ({ forum, onClose }) => {
 
 export default function Community() {
   const router = useRouter();
-  const [forums, setForums] = useState([
-    { id: 1, title: "General Discussion", description: "Talk about anything related to SynKro.", posts: 45 },
-    { id: 2, title: "Project Help", description: "Get help with your projects.", posts: 23 },
-    { id: 3, title: "Ideas & Feedback", description: "Share your ideas and feedback.", posts: 15 },
+  const [forums, setForums] = useState<Forum[]>([
+    { id: "1", title: "General Discussion", description: "Talk about anything related to SynKro.", posts: 45 },
+    { id: "2", title: "Project Help", description: "Get help with your projects.", posts: 23 },
+    { id: "3", title: "Ideas & Feedback", description: "Share your ideas and feedback.", posts: 15 },
   ]);
-  const [selectedForum, setSelectedForum] = useState(null);
+  const [selectedForum, setSelectedForum] = useState<Forum | null>(null);
   const [showSidebar, setShowSidebar] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768 && !showSidebar) {
-        // No specific action needed for now
+        // No specific action needed
       }
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [showSidebar]);
 
-  const handleForumSelect = (forum) => {
+  const handleForumSelect = (forum: Forum) => {
     setSelectedForum(forum);
     setShowSidebar(true);
   };
@@ -118,7 +149,7 @@ export default function Community() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push("/dashboard")}
-            className="border border-border px-4 py-2 rounded-lg hover:bg-muted text-foreground transition-colors"
+            className="border border-border px-4 py-2 rounded-lg hover:bg-muted text-foreground"
           >
             ← Back
           </motion.button>
@@ -129,8 +160,7 @@ export default function Community() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-4xl p-6 bg-background dark:bg-card rounded-2xl shadow-2xl border border-border transform transition-all hover:scale-101 hover:shadow-3xl"
+          className="w-full max-w-4xl p-6 bg-background dark:bg-card rounded-2xl shadow-2xl border border-border"
         >
           <h2 className="text-3xl font-bold text-foreground text-center mb-8 flex items-center justify-center">
             <Users className="w-8 h-8 mr-2 text-primary" /> Community Forums
@@ -141,9 +171,8 @@ export default function Community() {
                 key={forum.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                whileHover={{ scale: 1.02, backgroundColor: "hsl(var(--muted))" }}
-                className="flex items-center justify-between p-6 bg-muted dark:bg-muted/50 rounded-xl cursor-pointer transition-colors border border-border"
+                whileHover={{ scale: 1.02 }}
+                className="flex items-center justify-between p-6 bg-muted dark:bg-muted/50 rounded-xl cursor-pointer border border-border"
                 onClick={() => handleForumSelect(forum)}
               >
                 <div>

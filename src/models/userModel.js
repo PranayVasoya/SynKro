@@ -55,6 +55,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "Student",
   },
+  points: {
+    type: Number,
+    default: 0,
+  },
   forgotPasswordToken: String,
   forgotPasswordTokenExpiry: Date,
 });
