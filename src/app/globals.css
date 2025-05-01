@@ -1,64 +1,78 @@
+/* globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-.btn{
-  @apply rounded-full py-2 px-3 uppercase text-xs font-bold cursor-pointer tracking-wider
-}
-
-.box{
-  @apply w-80 border-2 border-gray-600 rounded-full px-6 py-4 text-lg text-center text-black font-semibold cursor-pointer 
-}
-
-.image-container img {
-  mix-blend-mode: multiply;
-}
-
-
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    /* Define LIGHT mode variables */
+    --background: 0 0% 100%; /* White */
+    --foreground: 222.2 84% 4.9%; /* Dark Gray */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 222.2 84% 4.9%; /* Dark Gray */
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;}
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 245 80% 80%; /* Example: Map to your customPurple conceptually? Or define a separate primary */
+    --primary-foreground: 255 100% 100%; /* White text on primary */
+    --secondary: 210 40% 96.1%; /* Light Gray */
+    --secondary-foreground: 222.2 47.4% 11.2%; /* Dark Gray */
+    --muted: 210 40% 96.1%; /* Light Gray */
+    --muted-foreground: 215.4 16.3% 46.9%; /* Medium Gray */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%; /* Red */
+    --destructive-foreground: 0 0% 98%; /* Light text on red */
+    --border: 214.3 31.8% 91.4%; /* Light Gray Border */
+    --input: 214.3 31.8% 91.4%; /* Light Gray Input Border */
+    --ring: 245 80% 80%; /* Ring color - often matches primary */
+
+    --radius: 0.75rem; /* Example border radius */
+
+    /* Chart colors (examples) */
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 70% 50%;
+    --chart-3: 40 70% 50%;
+    --chart-4: 280 70% 50%;
+    --chart-5: 0 70% 50%;
+  }
+
   .dark {
-    --background: 217 20% 10%;        /* New dark mode background: deep blue-gray */
-    --foreground: 210 20% 98%;        /* New dark mode text: light gray */
-    --muted: 217 20% 20%;             /* New dark mode muted: darker blue-gray */
-    --muted-foreground: 215 20% 65%;  /* New dark mode muted text */
-    --card: 217 20% 15%;              /* New dark mode card: slightly lighter blue-gray */
-    --border: 217 20% 25%;            /* New dark mode border */
-    --primary: 196 100% 50%;          /* New dark mode primary: vibrant cyan */
-    --primary-foreground: 210 20% 10%; /* New dark mode primary text: dark */
-    --destructive: 0 84.2% 60.2%;     /* Keep destructive as red */
-    --destructive-foreground: 210 40% 98%; /* Keep destructive text */}}
+    /* Define DARK mode variables */
+    --background: 222.2 84% 4.9%; /* Your customDarkGray? '#2d2d2d' is ~ hsl(0 0% 18%) */
+    --foreground: 210 40% 98%; /* White / Light Gray */
+    --card: 0 0% 22%; /* Your customMediumGray? '#4d4d4d' is ~ hsl(0 0% 30%) */
+    --card-foreground: 210 40% 98%; /* White / Light Gray */
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 245 80% 80%; /* Your customPurple '#8c8bf1' is ~ hsl(240 79% 75%) - Adjust HSL if needed */
+    --primary-foreground: 255 100% 100%; /* White text */
+    --secondary: 217.2 32.6% 17.5%; /* Darker Gray/Blue */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%; /* Lighter Gray for muted text */
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50.6%; /* Darker Red */
+    --destructive-foreground: 0 0% 98%;
+    --border: 217.2 32.6% 17.5%; /* Dark Border */
+    --input: 217.2 32.6% 17.5%; /* Dark Input Border */
+    --ring: 245 80% 80%; /* Ring color - can be same as light or different */
 
-
+    /* Keep --radius the same usually */
+    /* Adjust chart colors for dark mode if needed */
+    --chart-1: 220 70% 60%;
+    --chart-2: 160 70% 60%;
+    --chart-3: 40 70% 60%;
+    --chart-4: 280 70% 60%;
+    --chart-5: 0 70% 60%;
+  }
+}
 
 @layer base {
   * {
-    @apply border-border;}
+    @apply border-border; /* Apply default border color */
+  }
   body {
-    @apply bg-background text-foreground;}}
+    @apply bg-background text-foreground; /* Apply default bg/text colors */
+  }
+}

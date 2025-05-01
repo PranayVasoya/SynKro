@@ -15,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       {/* Apply Poppins font and theme background to the entire body */}
-      <body className={`${poppins.className} bg-white dark:bg-gray-900`}>
+      <body className={`${poppins.className} bg-white dark:bg-customDarkGray`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

@@ -28,7 +28,7 @@ export default function Home() {
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0 }}
                   whileHover={{ backgroundColor: "#8c8bf1" }}
                   whileTap={{ scale: 0.95 }}
                   className="px-8 lg:px-12 py-2 text-lg lg:text-xl font-semibold border-4 border-gray-900 dark:border-white bg-white dark:bg-customDarkGray rounded-full w-full lg:w-auto transition-all"
@@ -41,7 +41,7 @@ export default function Home() {
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
+                  transition={{ duration: 0 }}
                   whileHover={{ backgroundColor: "#8c8bf1" }}
                   whileTap={{ scale: 0.95 }}
                   className="px-8 lg:px-12 py-2 text-lg lg:text-xl font-semibold border-4 border-gray-900 dark:border-white bg-white dark:bg-customDarkGray rounded-full w-full lg:w-auto transition-all"
@@ -214,28 +214,28 @@ export default function Home() {
             
             <a
               href="mailto:krish.panchal.btech2022@sitpune.edu.in"
-              className="text-customPurple hover:underline text-lg"
+              className="text-customPurple hover:underline lg:text-lg"
             >
               krish.panchal.btech2022@sitpune.edu.in
             </a>
             <br/>
             <a
               href="mailto:krish.panchal.btech2022@sitpune.edu.in"
-              className="text-customPurple hover:underline text-lg"
+              className="text-customPurple hover:underline lg:text-lg"
             >
               mehra.dhairya.btech2022@sitpune.edu.in
             </a>
             <br/>
             <a
               href="mailto:krish.panchal.btech2022@sitpune.edu.in"
-              className="text-customPurple hover:underline text-lg"
+              className="text-customPurple hover:underline lg:text-lg"
             >
               pranay.vasoya.btech2022@sitpune.edu.in
             </a>
             <br/>
             <a
               href="mailto:krish.panchal.btech2022@sitpune.edu.in"
-              className="text-customPurple hover:underline text-lg"
+              className="text-customPurple hover:underline lg:text-lg"
             >
               devvrat.saini.btech2022@sitpune.edu.in
             </a>
