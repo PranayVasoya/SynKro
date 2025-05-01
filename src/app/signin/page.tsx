@@ -14,7 +14,6 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Placeholder state management
   const [emailPlaceholder, setEmailPlaceholder] = useState("Enter your Email");
   const [passwordPlaceholder, setPasswordPlaceholder] = useState("Enter your Password");
 
@@ -28,12 +27,11 @@ export default function Page() {
         email: formData.email,
         password: formData.password,
       });
-
       toast.success("Sign-in successful!");
-      const isProfileComplete = response.data.profileComplete; // Assuming API response contains this
+      const isProfileComplete = response.data.data.profileComplete;
       if (!isProfileComplete) {
         router.push("/profile");
-      }else{
+      } else {
         router.push("/dashboard");
       }
     } catch (err: unknown) {
@@ -58,7 +56,6 @@ export default function Page() {
       </motion.div>
 
       <div className="flex flex-col md:flex-row w-full flex-1 min-h-[90vh] p-6 md:p-0 relative">
-        {/* Left Section - Image */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -76,9 +73,7 @@ export default function Page() {
           </div>
         </motion.div>
 
-        {/* Right Section - Login Form */}
         <div className="w-full md:w-1/2 flex flex-col items-center justify-center text-center p-6 md:p-4 relative">
-          {/* Heading */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -90,7 +85,6 @@ export default function Page() {
             </p>
           </motion.div>
 
-          {/* Input Fields with Borders */}
           <form
             onSubmit={handleSignIn}
             className="w-full flex-1 flex flex-col items-center justify-center space-y-4 bg-gradient-to-b from-blue-50 to-blue-100 dark:from-card dark:to-muted py-6 rounded-xl shadow-md border border-border"
@@ -145,7 +139,6 @@ export default function Page() {
             )}
           </form>
 
-          {/* "Don't have an account?" */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

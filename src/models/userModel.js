@@ -1,89 +1,62 @@
-import mongoose from "mongoose"
-import { PassThrough } from "stream"
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: [true, "Please provide a username"],
-        unique: false,
-    },
-    email: {
-        type: String,
-        required: [true, "Please provide an email"],
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: [true, "Please provide a password"],
-    },
-    isVerified: {
-        type: Boolean,
-        default: false,
-    },
-    profileComplete: {
-        type: Boolean,
-        default: false,
-    },
-    role: {
-        type: String,
-        enum: ["Student", "Mentor", "Admin"],
-        default: "Student",
-        required: true,
-    },
-    prn: {
-        type: String,
-        required:[true, "Please provide a PRN"],
-        unique: true,
-    },
-    batch: {
-        type: String,
-        required: [true, "Please provide a batch"],
-    },
-    mobile: {
-        type: String,
-        required: [true, "Please provide a mobile number"],
-        unique: true,   
-    },
-    github: {
-        type: String,
-        required: false,
-    },
-    linkedin: {
-        type: String,
-        required: false,    
-    },
-    skills: {
-        programmingLanguages: [String],
-        frontendDevelopment: [String],
-        backendDevelopment: [String],
-        mobileAppDevelopment: [String],
-        aiml: [String],
-        database: [String],
-        dataVisualization: [String],
-        devops: [String],
-        baas: [String],
-        frameworks: [String],
-        testing: [String],
-        software: [String],
-        staticSiteGenerators: [String],
-        gameEngines: [String],
-        automation: [String],
-        cloudComputing: [String],
-        other: [String],
-    },
-    points: {
-        type: Number,
-        default: 0
-    },
-    projects: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Projects"
-    }],
-    forgotPasswordToken: String,
-    forgotPasswordTokenExpiry: Date,
-    verifyToken: String,
-    verifyTokenExpiry: Date
-}, { timestamps: true })
+  username: {
+    type: String,
+    required: [true, "Please provide a username"],
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: [true, "Please provide an email"],
+    unique: true,
+    trim: true,
+  },
+  password: {
+    type: String,
+    required: [true, "Please provide a password"],
+  },
+  prn: {
+    type: String,
+    required: [true, "Please provide a PRN"],
+    unique: true,
+    trim: true,
+  },
+  batch: {
+    type: String,
+    required: [true, "Please provide a batch"],
+    trim: true,
+  },
+  mobile: {
+    type: String,
+    required: [true, "Please provide a mobile number"],
+    unique: true,
+    trim: true,
+  },
+  github: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  linkedin: {
+    type: String,
+    default: "",
+    trim: true,
+  },
+  skills: {
+    type: [String],
+    default: [],
+  },
+  profileComplete: {
+    type: Boolean,
+    default: false,
+  },
+  role: {
+    type: String,
+    default: "Student",
+  },
+  forgotPasswordToken: String,
+  forgotPasswordTokenExpiry: Date,
+});
 
-const User = mongoose.models.users || mongoose.model("users", userSchema)
-export default User
+module.exports = mongoose.models.User || mongoose.model("User", userSchema);
