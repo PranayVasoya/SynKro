@@ -3,7 +3,7 @@ import { connectToDatabase } from "@/dbConfig/dbConfig";
 import Notification from "@/models/notificationModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
     let userId: string;
@@ -12,18 +12,28 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     } catch (error) {
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
-    const notification = await Notification.findOneAndUpdate(
-      { _id: params.id, recipient: userId },
-      { read: true },
-      { new: true }
-    );
+
+    const { id } = await params; // Await params to access id
+    const notification = await Notification.findById(id);
     if (!notification) {
       return NextResponse.json({ error: "Notification not found" }, { status: 404 });
     }
+
+    // Verify the user is the recipient
+    if (notification.recipient.toString() !== userId) {
+      return NextResponse.json({ error: "You are not authorized to mark this notification as read" }, { status: 403 });
+    }
+
+    notification.read = true;
+    await notification.save();
+
     return NextResponse.json({
-      message: "Notification marked as read",
+      message: "Notification marked as read successfully",
       success: true,
-      data: notification,
+      data: {
+        _id: notification._id.toString(),
+        read: notification.read,
+      },
     });
   } catch (error: unknown) {
     console.error("Mark Notification Read: Error:", error);

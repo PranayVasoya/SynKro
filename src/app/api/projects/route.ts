@@ -12,13 +12,34 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
-    const projects = await Project.find({
-      $or: [{ createdBy: userId }, { teamMembers: userId }],
-    });
+
+    const projects = await Project.find()
+      .populate("createdBy", "username")
+      .populate("teamMembers", "username");
+
+    const formattedProjects = projects.map((project) => ({
+      _id: project._id.toString(),
+      title: project.title,
+      description: project.description,
+      techStack: project.techStack,
+      repoLink: project.repoLink,
+      liveLink: project.liveLink,
+      createdBy: {
+        username: project.createdBy.username,
+      },
+      teamMembers: project.teamMembers.map((member: any) => ({
+        _id: member._id.toString(),
+        username: member.username,
+      })),
+      lookingForMembers: project.lookingForMembers,
+      status: project.status,
+      createdAt: project.createdAt,
+    }));
+
     return NextResponse.json({
       message: "Projects fetched successfully",
       success: true,
-      data: projects,
+      data: formattedProjects,
     });
   } catch (error: unknown) {
     console.error("Fetch Projects: Error:", error);

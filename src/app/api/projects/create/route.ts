@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/dbConfig/dbConfig";
 import Project from "@/models/projectModel";
-import Chatroom from "@/models/chatroomModel";
-import Notification from "@/models/notificationModel";
 import Post from "@/models/postModel";
-import User from "@/models/userModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import mongoose from "mongoose";
 
-interface CreateProjectRequestBody {
+interface Project {
+  _id: mongoose.Types.ObjectId;
   title: string;
   description: string;
   techStack: string[];
-  repoLink?: string;
-  liveLink?: string;
-  teamMembers: string[];
+  repoLink: string;
+  liveLink: string;
+  createdBy: mongoose.Types.ObjectId;
+  teamMembers: mongoose.Types.ObjectId[];
   lookingForMembers: boolean;
   status: "active" | "completed";
 }
@@ -21,111 +21,91 @@ interface CreateProjectRequestBody {
 export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
-    const reqBody = await request.json() as CreateProjectRequestBody;
-    console.log("Create Project: Request body:", reqBody);
-
-    const { title, description, techStack, repoLink, liveLink, teamMembers, lookingForMembers, status } = reqBody;
-
-    // Validate required fields
-    if (!title?.trim()) {
-      console.log("Create Project: Missing title");
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
-    }
-    if (!description?.trim()) {
-      console.log("Create Project: Missing description");
-      return NextResponse.json({ error: "Description is required" }, { status: 400 });
-    }
-    if (!Array.isArray(techStack)) {
-      console.log("Create Project: Invalid techStack");
-      return NextResponse.json({ error: "Tech stack must be an array" }, { status: 400 });
-    }
-    if (!Array.isArray(teamMembers)) {
-      console.log("Create Project: Invalid teamMembers");
-      return NextResponse.json({ error: "Team members must be an array" }, { status: 400 });
-    }
-    if (!["active", "completed"].includes(status)) {
-      console.log("Create Project: Invalid status");
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
-    }
-
-    // Authenticate user
     let userId: string;
     try {
       userId = await getDataFromToken(request);
-      console.log("Create Project: Authenticated userId:", userId);
     } catch (error) {
-      console.error("Create Project: Token error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 
-    // Verify team members exist
-    const validTeamMembers = await User.find({ _id: { $in: teamMembers } }).select("_id");
-    if (validTeamMembers.length !== teamMembers.length) {
-      console.log("Create Project: Some team members not found");
-      return NextResponse.json({ error: "One or more team members not found" }, { status: 400 });
+    const {
+      title,
+      description,
+      techStack,
+      repoLink,
+      liveLink,
+      lookingForMembers,
+      teamMembers,
+      status,
+    } = await request.json();
+
+    if (!title?.trim() || !description?.trim()) {
+      return NextResponse.json({ error: "Title and description are required" }, { status: 400 });
     }
 
-    // Create project
-    const project = new Project({
+    const projectData: Partial<Project> = {
       title: title.trim(),
       description: description.trim(),
-      techStack,
+      techStack: techStack ? techStack.map((item: string) => item.trim()).filter(Boolean) : [],
       repoLink: repoLink?.trim() || "",
       liveLink: liveLink?.trim() || "",
-      createdBy: userId,
-      teamMembers: [...new Set([userId, ...teamMembers])], // Include creator
-      lookingForMembers,
-      status,
-    });
+      createdBy: new mongoose.Types.ObjectId(userId),
+      teamMembers: teamMembers
+        ? teamMembers.map((id: string) => new mongoose.Types.ObjectId(id))
+        : [],
+      lookingForMembers: !!lookingForMembers,
+      status: status === "completed" ? "completed" : "active",
+    };
+
+    const project = new Project(projectData);
     await project.save();
-    console.log("Create Project: Project created:", project._id);
 
-    // Create chatroom
-    const chatroomTitle = `${title} Chatroom`;
-    const chatroom = new Chatroom({
-      title: chatroomTitle,
-      project: project._id,
-      members: [...new Set([userId, ...teamMembers])],
-      messages: [],
-    });
-    await chatroom.save();
-    console.log("Create Project: Chatroom created:", chatroom._id);
+    if (lookingForMembers && status !== "completed") {
+      try {
+        const post = new Post({
+          forumId: "1", // General Discussion forum ID
+          title: `Looking for Members: ${title}`,
+          content: `We are looking for team members for our project "${title}".\n\n**Description**: ${description}\n**Tech Stack**: ${techStack.join(
+            ", "
+          )}\n**Status**: ${status}\nJoin us!`,
+          createdBy: userId,
+          project: project._id,
+        });
+        await post.save();
+        console.log("Create Project: Posted to General Discussion:", post._id);
+      } catch (postError: unknown) {
+        console.error("Create Project: Failed to create community post:", postError);
+        // Continue with project creation even if post creation fails
+      }
+    }
 
-    // Create notifications for team members (except creator)
-    const notificationPromises = teamMembers
-      .filter((memberId) => memberId !== userId)
-      .map((memberId) =>
-        new Notification({
-          recipient: memberId,
-          message: `You have been added to the "${chatroomTitle}" for the project "${title}"`,
-          link: "/chats",
-          read: false,
-        }).save()
-      );
-    await Promise.all(notificationPromises);
-    console.log("Create Project: Notifications created for team members");
-
-    // Award 10 points to the creator
-    await User.findByIdAndUpdate(userId, { $inc: { points: 10 } });
-    console.log("Create Project: Awarded 10 points to user:", userId);
-
-    // Post to General Discussion if lookingForMembers and status is active
-    if (lookingForMembers && status === "active") {
-      const post = new Post({
-        forumId: "1", // General Discussion forum ID
-        title: `Looking for Members: ${title}`,
-        content: `We are looking for team members for our project "${title}".\n\n**Description**: ${description}\n**Tech Stack**: ${techStack.join(", ")}\n**Status**: ${status}\nJoin us!`,
-        createdBy: userId,
-        project: project._id,
-      });
-      await post.save();
-      console.log("Create Project: Posted to General Discussion:", post._id);
+    const populatedProject = await Project.findById(project._id)
+      .populate("createdBy", "username")
+      .populate("teamMembers", "username");
+    if (!populatedProject) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     return NextResponse.json({
       message: "Project created successfully",
       success: true,
-      data: project,
+      data: {
+        _id: populatedProject._id.toString(),
+        title: populatedProject.title,
+        description: populatedProject.description,
+        techStack: project.techStack,
+        repoLink: populatedProject.repoLink,
+        liveLink: populatedProject.liveLink,
+        createdBy: {
+          username: populatedProject.createdBy.username,
+        },
+        teamMembers: populatedProject.teamMembers.map((member: any) => ({
+          _id: member._id.toString(),
+          username: member.username,
+        })),
+        lookingForMembers: populatedProject.lookingForMembers,
+        status: populatedProject.status,
+      },
     });
   } catch (error: unknown) {
     console.error("Create Project: Error:", error);

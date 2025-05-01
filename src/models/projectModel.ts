@@ -1,6 +1,19 @@
-const mongoose = require("mongoose");
+import mongoose, { Schema, Document } from "mongoose";
 
-const projectSchema = new mongoose.Schema({
+export interface IProject extends Document {
+  title: string;
+  description: string;
+  techStack: string[];
+  repoLink: string;
+  liveLink: string;
+  createdBy: mongoose.Types.ObjectId;
+  teamMembers: mongoose.Types.ObjectId[];
+  lookingForMembers: boolean;
+  status: "active" | "completed";
+  createdAt: Date;
+}
+
+const projectSchema: Schema = new mongoose.Schema({
   title: {
     type: String,
     required: [true, "Please provide a project title"],
@@ -49,4 +62,7 @@ const projectSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.models.Project || mongoose.model("Project", projectSchema);
+// Ensure teamMembers contains unique entries
+projectSchema.index({ teamMembers: 1 }, { unique: false }); // Optional: Allows duplicates; set to true for strict uniqueness
+
+export default mongoose.models.Project || mongoose.model<IProject>("Project", projectSchema);

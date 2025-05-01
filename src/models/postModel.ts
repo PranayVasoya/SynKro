@@ -1,6 +1,15 @@
-const mongoose = require("mongoose");
+import mongoose, { Schema, Document } from "mongoose";
 
-const postSchema = new mongoose.Schema({
+interface IPost extends Document {
+  forumId: string;
+  title: string;
+  content: string;
+  createdBy: mongoose.Types.ObjectId;
+  project?: mongoose.Types.ObjectId | null;
+  createdAt: Date;
+}
+
+const postSchema: Schema = new mongoose.Schema({
   forumId: {
     type: String,
     required: [true, "Please provide a forum ID"],
@@ -23,6 +32,7 @@ const postSchema = new mongoose.Schema({
   project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Project",
+    default: null,
   },
   createdAt: {
     type: Date,
@@ -30,4 +40,4 @@ const postSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.models.Post || mongoose.model("Post", postSchema);
+export default mongoose.models.Post || mongoose.model<IPost>("Post", postSchema);

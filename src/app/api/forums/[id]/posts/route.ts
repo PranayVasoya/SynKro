@@ -2,17 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/dbConfig/dbConfig";
 import Post from "@/models/postModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
-import mongoose from "mongoose";
 
-interface Post {
-  _id: mongoose.Types.ObjectId;
-  title: string;
-  content: string;
-  createdBy: { username: string };
-  createdAt: Date;
-}
-
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
     let userId: string;
@@ -22,17 +13,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 
-    const posts = await Post.find({ forumId: params.id })
+    const { id } = await params; // Await params to access id
+    const posts = await Post.find({ forumId: id })
       .populate("createdBy", "username")
       .sort({ createdAt: -1 });
 
-    const formattedPosts = posts.map((post: Post) => ({
+    const formattedPosts = posts.map((post) => ({
       _id: post._id.toString(),
+      forumId: post.forumId,
       title: post.title,
       content: post.content,
       createdBy: {
         username: post.createdBy.username,
       },
+      project: post.project ? post.project.toString() : null,
       createdAt: post.createdAt,
     }));
 
@@ -50,7 +44,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     await connectToDatabase();
     let userId: string;
@@ -60,14 +54,16 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 
-    const { content } = await request.json();
-    if (!content?.trim()) {
-      return NextResponse.json({ error: "Post content is required" }, { status: 400 });
+    const { id } = await params; // Await params to access id
+    const { title, content } = await request.json();
+
+    if (!title?.trim() || !content?.trim()) {
+      return NextResponse.json({ error: "Title and content are required" }, { status: 400 });
     }
 
     const post = new Post({
-      forumId: params.id,
-      title: content.trim().substring(0, 50) + (content.length > 50 ? "..." : ""),
+      forumId: id,
+      title: title.trim(),
       content: content.trim(),
       createdBy: userId,
     });
@@ -76,7 +72,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const populatedPost = await Post.findById(post._id).populate("createdBy", "username");
     if (!populatedPost) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+      return NextResponse.json({ error: "Post not found after creation" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -84,11 +80,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       success: true,
       data: {
         _id: populatedPost._id.toString(),
+        forumId: populatedPost.forumId,
         title: populatedPost.title,
         content: populatedPost.content,
         createdBy: {
           username: populatedPost.createdBy.username,
         },
+        project: populatedPost.project ? populatedPost.project.toString() : null,
         createdAt: populatedPost.createdAt,
       },
     });

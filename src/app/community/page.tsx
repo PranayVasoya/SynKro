@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Users, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { motion } from "framer-motion";
 
 interface Forum {
   id: string;
@@ -19,178 +20,251 @@ interface Post {
   title: string;
   content: string;
   createdBy: { username: string };
-  createdAt: string;
+  createdAt: Date;
+  project?: string | null;
 }
 
-const DiscussionSidebar = ({ forum, onClose }: { forum: Forum; onClose: () => void }) => {
+interface JoinRequest {
+  _id: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
+const DiscussionSidebar = ({
+  forumId,
+  onPostCreated,
+}: {
+  forumId: string;
+  onPostCreated: () => void;
+}) => {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [newPost, setNewPost] = useState("");
+  const [newPostContent, setNewPostContent] = useState("");
+  const [joinRequestStatus, setJoinRequestStatus] = useState<{ [projectId: string]: JoinRequest | null }>({});
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.get(`/api/forums/${forum.id}/posts`);
-        setPosts(response.data.data);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-        toast.error("Failed to load posts");
-      }
-    };
     fetchPosts();
-  }, [forum.id]);
+    if (posts.length > 0) {
+      checkJoinRequestStatus();
+    }
+  }, [forumId, posts.length]);
 
-  const handleSendPost = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPost.trim()) return;
+  const fetchPosts = async () => {
     try {
-      const response = await axios.post(`/api/forums/${forum.id}/posts`, { content: newPost });
-      setPosts([...posts, response.data.data]);
-      setNewPost("");
+      const response = await axios.get(`/api/forums/${forumId}/posts`);
+      setPosts(response.data.data);
     } catch (error) {
-      console.error("Error sending post:", error);
-      toast.error("Failed to send post");
+      console.error("Error fetching posts:", error);
+      toast.error("Failed to fetch posts");
+    }
+  };
+
+  const checkJoinRequestStatus = async () => {
+    try {
+      const projectIds = posts.filter((post) => post.project).map((post) => post.project!);
+      const responses = await Promise.all(
+        projectIds.map((projectId) =>
+          axios.get(`/api/projects/${projectId}/join/status`).catch(() => ({ data: { data: null } }))
+        )
+      );
+      const statusMap: { [projectId: string]: JoinRequest | null } = {};
+      responses.forEach((response, index) => {
+        statusMap[projectIds[index]] = response.data.data;
+      });
+      setJoinRequestStatus(statusMap);
+    } catch (error) {
+      console.error("Error checking join request status:", error);
+    }
+  };
+
+  const handlePostSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPostContent.trim()) {
+      toast.error("Post content is required");
+      return;
+    }
+    try {
+      await axios.post(`/api/forums/${forumId}/posts`, { content: newPostContent });
+      setNewPostContent("");
+      onPostCreated();
+      fetchPosts();
+      toast.success("Post created successfully!");
+    } catch (error) {
+      console.error("Error creating post:", error);
+      toast.error("Failed to create post");
+    }
+  };
+
+  const handleJoinProject = async (projectId: string) => {
+    try {
+      const response = await axios.post(`/api/projects/${projectId}/join`);
+      toast.success("Join request sent successfully!");
+      setJoinRequestStatus((prev) => ({
+        ...prev,
+        [projectId]: { _id: response.data.data.joinRequestId, status: "pending" },
+      }));
+    } catch (error: any) {
+      console.error("Error sending join request:", error);
+      toast.error(error.response?.data?.error || "Failed to send join request");
     }
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        className="fixed top-0 right-0 h-full w-1/3 bg-background dark:bg-card shadow-2xl border-l border-border z-50"
-      >
-        <div className="flex items-center p-4 border-b border-border">
-          <motion.button
-            whileHover={{ scale: 1.2, rotate: 90 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={onClose}
-            className="mr-4 text-muted-foreground hover:text-foreground"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-          </motion.button>
-          <h2 className="text-xl font-semibold text-foreground">{forum.title} Discussion</h2>
-        </div>
-        <div className="p-4 overflow-y-auto h-[calc(100%-100px)] bg-muted dark:bg-muted/50">
-          {posts.map((post) => (
+    <motion.div
+      className="w-full md:w-3/4 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <h3 className="text-xl font-semibold text-indigo-900 dark:text-white mb-4">
+        Discussion
+      </h3>
+      <form onSubmit={handlePostSubmit} className="mb-6">
+        <textarea
+          value={newPostContent}
+          onChange={(e) => setNewPostContent(e.target.value)}
+          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+          placeholder="Write a new post..."
+          rows={4}
+        />
+        <Button
+          type="submit"
+          className="mt-2 bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white rounded-xl"
+        >
+          Post
+        </Button>
+      </form>
+      <div className="space-y-4">
+        {posts.length > 0 ? (
+          posts.map((post) => (
             <motion.div
               key={post._id}
+              className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl shadow-sm"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4"
+              transition={{ duration: 0.2 }}
             >
-              <div className="p-2 rounded-lg bg-gray-200 dark:bg-gray-600 text-foreground">
-                <h4 className="font-semibold">{post.title}</h4>
-                <p>{post.content}</p>
-                <div className="text-xs text-muted-foreground">
-                  Posted by {post.createdBy.username} at {new Date(post.createdAt).toLocaleString()}
-                </div>
+              <h4 className="text-lg font-medium text-indigo-900 dark:text-white">
+                {post.title}
+              </h4>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">{post.content}</p>
+              <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                Posted by {post.createdBy.username} on{" "}
+                {new Date(post.createdAt).toLocaleString()}
               </div>
+              {post.project && (
+                <Button
+                  onClick={() => handleJoinProject(post.project!)}
+                  disabled={joinRequestStatus[post.project!]?.status === "pending"}
+                  className={`mt-3 bg-gradient-to-r from-blue-500 to-blue-700 dark:from-blue-600 dark:to-blue-800 text-white rounded-xl ${
+                    joinRequestStatus[post.project!]?.status === "pending" ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  {joinRequestStatus[post.project!]?.status === "pending" ? "Request Pending" : "Join Group"}
+                </Button>
+              )}
             </motion.div>
-          ))}
-        </div>
-        <form onSubmit={handleSendPost} className="p-4 border-t border-border">
-          <div className="flex space-x-2">
-            <input
-              type="text"
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              placeholder="Type a message..."
-              className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-primary bg-muted text-foreground border-border"
-            />
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              type="submit"
-              className="bg-primary text-primary-foreground rounded-lg p-2 hover:bg-primary/90"
-            >
-              Send
-            </motion.button>
-          </div>
-        </form>
-      </motion.div>
-    </AnimatePresence>
+          ))
+        ) : (
+          <p className="text-gray-600 dark:text-gray-400">No posts yet.</p>
+        )}
+      </div>
+    </motion.div>
   );
 };
 
-export default function Community() {
+export default function CommunityPage() {
   const router = useRouter();
+  const [selectedForum, setSelectedForum] = useState<string>("1");
   const [forums, setForums] = useState<Forum[]>([
-    { id: "1", title: "General Discussion", description: "Talk about anything related to SynKro.", posts: 45 },
-    { id: "2", title: "Project Help", description: "Get help with your projects.", posts: 23 },
-    { id: "3", title: "Ideas & Feedback", description: "Share your ideas and feedback.", posts: 15 },
+    {
+      id: "1",
+      title: "General Discussion",
+      description: "Talk about anything related to SynKro.",
+      posts: 45,
+    },
+    {
+      id: "2",
+      title: "Project Help",
+      description: "Get help with your projects.",
+      posts: 23,
+    },
+    {
+      id: "3",
+      title: "Ideas & Feedback",
+      description: "Share your ideas and feedback.",
+      posts: 15,
+    },
   ]);
-  const [selectedForum, setSelectedForum] = useState<Forum | null>(null);
-  const [showSidebar, setShowSidebar] = useState(false);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768 && !showSidebar) {
-        // No specific action needed
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [showSidebar]);
+  const handleForumSelect = (forumId: string) => {
+    setSelectedForum(forumId);
+  };
 
-  const handleForumSelect = (forum: Forum) => {
-    setSelectedForum(forum);
-    setShowSidebar(true);
+  const handlePostCreated = () => {
+    setForums((prevForums) =>
+      prevForums.map((forum) =>
+        forum.id === selectedForum
+          ? { ...forum, posts: forum.posts + 1 }
+          : forum
+      )
+    );
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-background dark:to-muted">
-      <nav className="w-full bg-gradient-to-b from-blue-50 to-blue-100 dark:from-card dark:to-muted shadow-md p-4">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-card dark:to-muted">
+      <nav className="w-full bg-gradient-to-r from-blue-50 via-blue-200 to-blue-50 dark:from-card dark:via-muted dark:to-card shadow-lg p-4 z-50">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-foreground">SynKro</h1>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <h1 className="text-xl font-bold text-indigo-900 dark:text-white">
+            SynKro Community
+          </h1>
+          <Button
+            variant="outline"
             onClick={() => router.push("/dashboard")}
-            className="border border-border px-4 py-2 rounded-lg hover:bg-muted text-foreground"
+            className="border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-gray-700"
           >
-            ← Back
-          </motion.button>
+            ← Back to Dashboard
+          </Button>
         </div>
       </nav>
 
-      <main className="flex-1 flex items-center justify-center p-6 relative">
+      <main className="flex-1 flex flex-col md:flex-row p-6 pt-20 max-w-6xl mx-auto space-x-0 md:space-x-6 space-y-6 md:space-y-0">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-4xl p-6 bg-background dark:bg-card rounded-2xl shadow-2xl border border-border"
+          className="w-full md:w-1/4 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <h2 className="text-3xl font-bold text-foreground text-center mb-8 flex items-center justify-center">
-            <Users className="w-8 h-8 mr-2 text-primary" /> Community Forums
-          </h2>
-          <div className="space-y-6">
-            {forums.map((forum, idx) => (
+          <h3 className="text-xl font-semibold text-indigo-900 dark:text-white mb-4">
+            Forums
+          </h3>
+          <div className="space-y-2">
+            {forums.map((forum) => (
               <motion.div
                 key={forum.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                onClick={() => handleForumSelect(forum.id)}
+                className={`p-3 rounded-xl cursor-pointer ${
+                  selectedForum === forum.id
+                    ? "bg-gradient-to-r from-blue-200 to-blue-300 dark:from-blue-600 dark:to-blue-800 text-indigo-900 dark:text-white"
+                    : "bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                }`}
                 whileHover={{ scale: 1.02 }}
-                className="flex items-center justify-between p-6 bg-muted dark:bg-muted/50 rounded-xl cursor-pointer border border-border"
-                onClick={() => handleForumSelect(forum)}
+                whileTap={{ scale: 0.98 }}
               >
-                <div>
-                  <h3 className="text-xl font-semibold text-foreground">{forum.title}</h3>
-                  <p className="text-muted-foreground">{forum.description}</p>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-muted-foreground">{forum.posts} Posts</span>
-                  <ChevronRight className="w-6 h-6 text-muted-foreground" />
-                </div>
+                <h4 className="text-lg font-medium">{forum.title}</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {forum.description}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-500">
+                  {forum.posts} posts
+                </p>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {showSidebar && selectedForum && (
-          <DiscussionSidebar forum={selectedForum} onClose={() => setShowSidebar(false)} />
-        )}
+        <DiscussionSidebar
+          forumId={selectedForum}
+          onPostCreated={handlePostCreated}
+        />
       </main>
     </div>
   );
