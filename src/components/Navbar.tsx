@@ -8,9 +8,10 @@ const Navbar = () => {
   const { toggleTheme } = useTheme();
 
   return (
-    <div className="bg-white dark:bg-customDarkGray w-screen px-6 lg:px-44 py-3 flex flex-row justify-between items-center border-b-4 border-gray-300 dark:border-customMediumGray">
+    <div className="bg-white dark:bg-customDarkGray w-full px-6 lg:px-44 py-3 flex flex-row justify-between items-center border-b-4 border-gray-300 dark:border-customMediumGray">
       <Link
         href="/"
+        tabIndex={-1}
         className="font-semibold text-4xl text-black dark:text-white"
       >
         SynKro
@@ -18,6 +19,7 @@ const Navbar = () => {
       <div className="flex flex-row items-center">
         <Link
           href="/signin"
+          tabIndex={-1}
           className="font-semibold text-xl border-4 rounded-full border-black dark:border-white px-4 py-2 text-black dark:text-white"
         >
           Sign In

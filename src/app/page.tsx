@@ -12,8 +12,8 @@ export default function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <div className="relative bg-white dark:bg-customDarkGray w-screen overflow-hidden">
-        <div className="relative z-10 w-screen flex flex-col lg:flex-row justify-between items-center px-8 py-12 lg:px-44 lg:py-16">
+      <div className="relative bg-white dark:bg-customDarkGray w-full overflow-hidden py-32">
+        <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center px-8 py-12 lg:px-44 lg:py-16">
           <div className="flex flex-col items-center lg:items-start gap-y-4 lg:gap-y-6">
             <p className="text-3xl text-center lg:text-start lg:text-4xl font-semibold text-gray-900 dark:text-white">
               Welcome to your
@@ -23,12 +23,12 @@ export default function Home() {
             <p className="text-lg font-semibold text-gray-500 dark:text-gray-400">
               Sync karo yaar!
             </p>
-            <div className="flex flex-col gap-3 w-full lg:w-auto">
-              <Link href="/signin">
+            <div className="flex flex-col gap-3 w-full lg:w-auto lg:items-center">
+              <Link href="/signin" tabIndex={-1}>
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.25 }}
                   whileHover={{ backgroundColor: "#8c8bf1" }}
                   whileTap={{ scale: 0.95 }}
                   className="px-8 lg:px-12 py-2 text-lg lg:text-xl font-semibold border-4 border-gray-900 dark:border-white bg-white dark:bg-customDarkGray rounded-full w-full lg:w-auto transition-all"
@@ -37,7 +37,7 @@ export default function Home() {
                   Sign in to your account
                 </motion.button>
               </Link>
-              <Link href="/signup">
+              <Link href="/signup" tabIndex={-1}>
                 <motion.button
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -60,9 +60,9 @@ export default function Home() {
             <Image
               src="/people.png"
               alt="group"
-              width={400}
-              height={400}
-              className="max-w-full h-auto lg:max-w-[300px]"
+              width={600}
+              height={600}
+              className="max-w-full h-auto lg:max-w-[600px]"
             />
           </motion.div>
         </div>
@@ -86,7 +86,7 @@ export default function Home() {
       </div>
 
       {/* About Section */}
-      <section className="py-12 bg-gray-100 dark:bg-gray-800">
+      <section className="py-32 bg-gray-100 dark:bg-customMediumGray">
         <div className="max-w-7xl mx-auto px-8 lg:px-44 text-center">
           <motion.h2
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
@@ -124,7 +124,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md"
+              className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Project Creation and Management</h3>
               <p className="text-gray-600 dark:text-gray-400">
@@ -136,7 +136,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md"
+              className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Skill Profile Customization</h3>
               <p className="text-gray-600 dark:text-gray-400">
@@ -148,7 +148,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md"
+              className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Collaborative Project Updates</h3>
               <p className="text-gray-600 dark:text-gray-400">
@@ -160,7 +160,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md"
+              className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Badge and Achievement Tracking</h3>
               <p className="text-gray-600 dark:text-gray-400">
@@ -172,7 +172,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
               transition={{ duration: 0.5, delay: 0.6 }}
-              className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md"
+              className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Community Skill Matching</h3>
               <p className="text-gray-600 dark:text-gray-400">
@@ -184,7 +184,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
               transition={{ duration: 0.5, delay: 0.7 }}
-              className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md"
+              className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Profile-Based Networking</h3>
               <p className="text-gray-600 dark:text-gray-400">
@@ -196,7 +196,7 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section className="py-8 bg-gray-100 dark:bg-gray-800">
+      <section className="py-8 bg-gray-100 dark:bg-customMediumGray">
         <div className="max-w-7xl mx-auto px-8 lg:px-44 text-center">
           <motion.h2
             initial={{ opacity: 0, x: -50 }}
@@ -211,11 +211,33 @@ export default function Home() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
+            
             <a
               href="mailto:krish.panchal.btech2022@sitpune.edu.in"
-              className="text-blue-500 hover:underline text-lg"
+              className="text-customPurple hover:underline text-lg"
             >
               krish.panchal.btech2022@sitpune.edu.in
+            </a>
+            <br/>
+            <a
+              href="mailto:krish.panchal.btech2022@sitpune.edu.in"
+              className="text-customPurple hover:underline text-lg"
+            >
+              mehra.dhairya.btech2022@sitpune.edu.in
+            </a>
+            <br/>
+            <a
+              href="mailto:krish.panchal.btech2022@sitpune.edu.in"
+              className="text-customPurple hover:underline text-lg"
+            >
+              pranay.vasoya.btech2022@sitpune.edu.in
+            </a>
+            <br/>
+            <a
+              href="mailto:krish.panchal.btech2022@sitpune.edu.in"
+              className="text-customPurple hover:underline text-lg"
+            >
+              devvrat.saini.btech2022@sitpune.edu.in
             </a>
           </motion.div>
         </div>
@@ -246,10 +268,10 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mt-2 flex justify-center gap-4"
           >
-            <a href="/terms" className="text-[#8c8bf1] hover:underline text-sm">
+            <a href="/terms" className="text-customPurple hover:underline text-sm">
               Terms
             </a>
-            <a href="/privacy" className="text-[#8c8bf1] hover:underline text-sm">
+            <a href="/privacy" className="text-customPurple hover:underline text-sm">
               Privacy
             </a>
           </motion.div>
