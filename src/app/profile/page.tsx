@@ -721,7 +721,7 @@ export default function Page() {
           <CardContent className="flex flex-col items-center space-y-8">
             <div className="relative w-40 h-40 border-4 border-gradient-to-r from-cyan-400 to-blue-500 dark:from-cyan-500 dark:to-blue-700 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center">
               <Image
-                src="/"
+                src="/user.png"
                 alt="Profile"
                 width={160}
                 height={160}
