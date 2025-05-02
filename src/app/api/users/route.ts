@@ -5,7 +5,16 @@ import User from "@/models/userModel";
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
-    const users = await User.find().select("_id username");
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search")?.trim();
+
+    const query: any = {};
+    if (search) {
+      query.username = { $regex: search, $options: "i" };
+    }
+
+    const users = await User.find(query).select("_id username").limit(5);
+
     return NextResponse.json({
       message: "Users fetched successfully",
       success: true,

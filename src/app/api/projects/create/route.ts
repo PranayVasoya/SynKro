@@ -91,6 +91,16 @@ export async function POST(request: NextRequest) {
     await chatroom.save();
     console.log("Create Project: Chatroom created:", chatroom._id);
 
+    // Create notification for creator
+    const creatorNotification = new Notification({
+      recipient: userId,
+      message: `You created the project "${title}"`,
+      link: `/projects/${project._id}`,
+      read: false,
+      type: "project_created",
+    });
+    await creatorNotification.save();
+
     // Create notifications for team members (except creator)
     const notificationPromises = teamMembers
       .filter((memberId) => memberId !== userId)
@@ -100,10 +110,11 @@ export async function POST(request: NextRequest) {
           message: `You have been added to the "${chatroomTitle}" for the project "${title}"`,
           link: "/chats",
           read: false,
+          type: "team_member_added",
         }).save()
       );
     await Promise.all(notificationPromises);
-    console.log("Create Project: Notifications created for team members");
+    console.log("Create Project: Notifications created");
 
     // Award 200 points to the creator
     await User.findByIdAndUpdate(userId, { $inc: { points: 200 } });

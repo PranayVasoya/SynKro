@@ -12,9 +12,25 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
-    const projects = await Project.find({
-      $or: [{ createdBy: userId }, { teamMembers: userId }],
-    });
+
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search")?.trim();
+
+    const query: any = {};
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+        { techStack: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const projects = await Project.find(query)
+      .populate("createdBy", "username")
+      .populate("comments.userId", "username")
+      .sort({ createdAt: -1 })
+      .limit(50);
+
     return NextResponse.json({
       message: "Projects fetched successfully",
       success: true,

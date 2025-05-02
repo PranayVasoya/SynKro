@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/dbConfig/dbConfig";
 import Chatroom from "@/models/chatroomModel";
+import Notification from "@/models/notificationModel";
+import User from "@/models/userModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import mongoose from "mongoose";
 
@@ -58,31 +60,48 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     if (!text?.trim()) {
       return NextResponse.json({ error: "Message text is required" }, { status: 400 });
     }
-    const chatroom = await Chatroom.findOneAndUpdate(
-      { _id: params.id, members: userId },
-      {
-        $push: {
-          messages: {
-            sender: userId,
-            text: text.trim(),
-            time: new Date(),
-          },
-        },
-      },
-      { new: true }
-    ).populate("messages.sender", "username");
+    const chatroom = await Chatroom.findOne({ _id: params.id, members: userId });
     if (!chatroom) {
       return NextResponse.json({ error: "Chatroom not found or access denied" }, { status: 404 });
     }
-    const newMessage = chatroom.messages[chatroom.messages.length - 1];
+    
+    const newMessage = {
+      sender: userId,
+      text: text.trim(),
+      time: new Date(),
+    };
+    
+    chatroom.messages.push(newMessage);
+    await chatroom.save();
+    
+    // Populate sender for notification
+    const populatedChatroom = await Chatroom.findById(params.id)
+      .populate("messages.sender", "username");
+    const savedMessage = populatedChatroom.messages[populatedChatroom.messages.length - 1];
+    
+    // Create notifications for other chatroom members
+    const sender = await User.findById(userId).select("username");
+    const notificationPromises = chatroom.members
+      .filter((memberId: mongoose.Types.ObjectId) => memberId.toString() !== userId)
+      .map((memberId: mongoose.Types.ObjectId) =>
+        new Notification({
+          recipient: memberId,
+          message: `${sender.username} sent a message in "${chatroom.title}"`,
+          link: "/chat",
+          read: false,
+          type: "message",
+        }).save()
+      );
+    await Promise.all(notificationPromises);
+
     return NextResponse.json({
       message: "Message sent successfully",
       success: true,
       data: {
-        id: newMessage._id.toString(),
-        text: newMessage.text,
+        id: savedMessage._id.toString(),
+        text: savedMessage.text,
         sender: "me",
-        time: newMessage.time,
+        time: savedMessage.time,
       },
     });
   } catch (error: unknown) {

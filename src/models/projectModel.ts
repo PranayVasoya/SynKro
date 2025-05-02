@@ -11,6 +11,8 @@ export interface IProject extends Document {
   lookingForMembers: boolean;
   status: "active" | "completed";
   createdAt: Date;
+  likes: mongoose.Types.ObjectId[];
+  comments: { userId: mongoose.Types.ObjectId; text: string; createdAt: Date }[];
 }
 
 const projectSchema: Schema = new mongoose.Schema({
@@ -62,6 +64,31 @@ const projectSchema: Schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  likes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: [],
+    },
+  ],
+  comments: [
+    {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      text: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 export default mongoose.models.Project || mongoose.model<IProject>("Project", projectSchema);
