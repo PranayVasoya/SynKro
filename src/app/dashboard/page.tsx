@@ -646,7 +646,7 @@ export default function Dashboard() {
     {
       label: "Profile",
       icon: <User className="w-5 h-5" />,
-      action: () => { router.push(`/profile/${user._id}`); setShowSidebar(false); }, // Navigate to own profile
+      action: () => { router.push(`/profile`); setShowSidebar(false); }, // Navigate to own profile
     },
     {
       label: "Settings",
