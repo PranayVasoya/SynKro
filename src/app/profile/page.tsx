@@ -841,7 +841,7 @@ export default function Page() {
                         <Typography>{category.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}</Typography>
                       </AccordionSummary>
                       <AccordionDetails>
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                           {skillsCategories[category].map((skill) => (
                             <label key={skill.id} className="flex items-center space-x-2">
                               <input
