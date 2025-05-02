@@ -1,6 +1,19 @@
-const mongoose = require("mongoose");
+import mongoose, { Schema, Document } from "mongoose";
 
-const projectSchema = new mongoose.Schema({
+export interface IProject extends Document {
+  title: string;
+  description: string;
+  techStack: string[];
+  repoLink: string;
+  liveLink: string;
+  createdBy: mongoose.Types.ObjectId;
+  teamMembers: mongoose.Types.ObjectId[];
+  lookingForMembers: boolean;
+  status: "active" | "completed";
+  createdAt: Date;
+}
+
+const projectSchema: Schema = new mongoose.Schema({
   title: {
     type: String,
     required: [true, "Please provide a project title"],
@@ -30,10 +43,12 @@ const projectSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  teamMembers: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  }],
+  teamMembers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
   lookingForMembers: {
     type: Boolean,
     default: false,
@@ -49,4 +64,4 @@ const projectSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.models.Project || mongoose.model("Project", projectSchema);
+export default mongoose.models.Project || mongoose.model<IProject>("Project", projectSchema);

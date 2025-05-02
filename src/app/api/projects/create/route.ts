@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       repoLink: repoLink?.trim() || "",
       liveLink: liveLink?.trim() || "",
       createdBy: userId,
-      teamMembers: [...new Set([userId, ...teamMembers])], // Include creator
+      teamMembers: [...new Set([userId, ...teamMembers])],
       lookingForMembers,
       status,
     });
@@ -105,14 +105,14 @@ export async function POST(request: NextRequest) {
     await Promise.all(notificationPromises);
     console.log("Create Project: Notifications created for team members");
 
-    // Award 10 points to the creator
-    await User.findByIdAndUpdate(userId, { $inc: { points: 10 } });
-    console.log("Create Project: Awarded 10 points to user:", userId);
+    // Award 200 points to the creator
+    await User.findByIdAndUpdate(userId, { $inc: { points: 200 } });
+    console.log("Create Project: Awarded 200 points to user:", userId);
 
     // Post to General Discussion if lookingForMembers and status is active
     if (lookingForMembers && status === "active") {
       const post = new Post({
-        forumId: "1", // General Discussion forum ID
+        forumId: "1",
         title: `Looking for Members: ${title}`,
         content: `We are looking for team members for our project "${title}".\n\n**Description**: ${description}\n**Tech Stack**: ${techStack.join(", ")}\n**Status**: ${status}\nJoin us!`,
         createdBy: userId,
