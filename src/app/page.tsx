@@ -123,7 +123,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.1,delay: 0 }}
               className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Project Creation and Management</h3>
@@ -135,7 +135,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              transition={{ duration: 0.1,delay: 0 }}
               className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Skill Profile Customization</h3>
@@ -147,7 +147,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
+              transition={{ duration: 0.1,delay: 0 }}
               className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Collaborative Project Updates</h3>
@@ -159,7 +159,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
+              transition={{ duration: 0.1,delay: 0 }}
               className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Badge and Achievement Tracking</h3>
@@ -171,7 +171,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
+              transition={{ duration: 0.1,delay: 0 }}
               className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Community Skill Matching</h3>
@@ -183,7 +183,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ rotate: 2, scale: 1.02 }}
-              transition={{ duration: 0.5, delay: 0.7 }}
+              transition={{ duration: 0.1,delay: 0 }}
               className="p-6 bg-gray-50 dark:bg-customMediumGray rounded-lg shadow-md"
             >
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Profile-Based Networking</h3>

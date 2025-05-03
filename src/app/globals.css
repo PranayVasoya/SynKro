@@ -7,6 +7,7 @@
   :root {
     /* Define LIGHT mode variables */
     --background: 0 0% 100%; /* White */
+    --secondary-background: 214.3 31.8% 91.4%; /* Light Gray */
     --foreground: 222.2 84% 4.9%; /* Dark Gray */
     --card: 0 0% 100%; /* White */
     --card-foreground: 222.2 84% 4.9%; /* Dark Gray */
@@ -42,20 +43,20 @@
     --foreground: 210 40% 98%; /* White / Light Gray */
     --card: 0 0% 30%; /* customMediumGray */
     --card-foreground: 210 40% 98%; /* White / Light Gray */
-    --popover: 222.2 84% 4.9%;
+    --popover: 0 0% 25%; /* customMediumGray */
     --popover-foreground: 210 40% 98%;
     --primary: 240 79% 75%; /* customPurple */
     --primary-foreground: 255 100% 100%; /* White text */
     --secondary: 217.2 32.6% 17.5%; /* Darker Gray/Blue */
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 0 0% 18%;
     --muted-foreground: 215 20.2% 65.1%; /* Lighter Gray for muted text */
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 50.6%; /* Darker Red */
     --destructive-foreground: 0 0% 98%;
     --border: 217.2 32.6% 17.5%; /* Dark Border */
-    --input: 217.2 32.6% 17.5%; /* Dark Input Border */
+    --input: 0 0% 18%; /* Dark Input Border */
     --ring: 245 80% 80%; /* Ring color - can be same as light or different */
 
     /* Keep --radius the same usually */
