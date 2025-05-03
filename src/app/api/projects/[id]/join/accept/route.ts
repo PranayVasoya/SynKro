@@ -19,6 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     try {
       userId = await getDataFromToken(request);
     } catch (error) {
+      console.error("Accept Join Request: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 

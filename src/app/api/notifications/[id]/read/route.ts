@@ -13,6 +13,7 @@ export async function PUT(
     try {
       userId = await getDataFromToken(request);
     } catch (error) {
+      console.error("Mark Notification Read: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 

@@ -1,25 +1,31 @@
 import { connectToDatabase } from "@/dbConfig/dbConfig";
-import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 
- 
-connectToDatabase()
+connectToDatabase();
 
 export async function GET(request: NextRequest) {
     try {
          const response = NextResponse.json({
             message: "Logout Successfully",
-            success: true
-         })
+            success: true,
+         });
 
          response.cookies.set("token", "", {
             httpOnly: true,
-            expires: new Date(0)
-         })
+            expires: new Date(0),
+            path: '/',
+         });
 
-         return response
-    } catch (error: any){
-        return NextResponse.json({error: error.message}, {status: 500})
-        console.log(error.message);
+         return response;
+
+    } catch (error: unknown) {
+        console.error("Logout API Error:", error);
+
+        let errorMessage = "An unexpected error occurred during logout.";
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

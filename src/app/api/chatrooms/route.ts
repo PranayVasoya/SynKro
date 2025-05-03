@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
     try {
       userId = await getDataFromToken(request);
     } catch (error) {
+      console.error("Fetch Chatrooms: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
     const chatrooms = await Chatroom.find({ members: userId })

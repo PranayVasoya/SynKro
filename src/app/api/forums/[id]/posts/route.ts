@@ -19,6 +19,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     try {
       userId = await getDataFromToken(request);
     } catch (error) {
+      console.error("Fetch Posts: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     try {
       userId = await getDataFromToken(request);
     } catch (error) {
+      console.error("Create Post: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 
