@@ -24,6 +24,11 @@ import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
 // --- Interfaces ---
+interface ApiErrorResponse {
+  message?: string;
+  error?: string;
+}
+
 interface Project {
   _id?: string;
   title: string;
@@ -778,11 +783,25 @@ export default function ProfilePage() {
       await axios.get("/api/users/logout");
       toast.success("Logout successful!");
       router.push("/signin");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Logout Failed:", error);
-      toast.error(
-        error.response?.data?.message || error.message || "Logout failed."
-      );
+
+      let errorMessage = "Logout failed. Please try again.";
+
+      if (axios.isAxiosError(error)) {
+        const serverError = error.response?.data as
+          | ApiErrorResponse
+          | undefined;
+        errorMessage =
+          serverError?.message ||
+          serverError?.error ||
+          error.message ||
+          errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      toast.error(errorMessage);
     }
   };
 
@@ -1000,7 +1019,7 @@ export default function ProfilePage() {
     <div className="flex flex-col min-h-screen bg-muted dark:bg-background">
       <nav className="w-full bg-card shadow-sm border-b border-border p-3 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-foreground">SynKro Profile</h1>
+          <h1 className="text-xl font-bold text-foreground">SynKro</h1>
           <div className="flex space-x-2">
             <Button
               variant="outline"
