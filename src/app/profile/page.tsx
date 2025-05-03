@@ -1,29 +1,36 @@
 "use client";
 
-import { useState, useEffect } from "react";
+// React & Next.js Imports
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+// UI Component Imports
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import axios from "axios";
-import { toast } from "react-hot-toast";
-import { Plus, UserCircle, X, Bell } from "lucide-react";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { motion } from "framer-motion";
-import userImage from "@/public/user.png";
 
+// Icon Imports
+import { Plus, X, Edit3, Check, Link as LinkIcon } from "lucide-react";
+
+// Utility Imports
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
+
+// --- Interfaces ---
 interface Project {
   _id?: string;
   title: string;
   description: string;
   techStack: string[];
-  repoLink: string;
-  liveLink: string;
+  repoLink?: string;
+  liveLink?: string;
   createdBy: string;
   teamMembers: string[];
   lookingForMembers: boolean;
@@ -51,30 +58,30 @@ interface FormData {
   skills: string[];
 }
 
+interface UserData extends FormData {
+  _id: string;
+}
+
 interface Badge {
   name: string;
   description: string;
   icon: string;
 }
 
-interface User {
+interface UserLookup {
   _id: string;
   username: string;
 }
 
-interface Notification {
-  _id: string;
-  message: string;
-  link: string;
-  read: boolean;
-}
-
+// --- Project Popup Component ---
 const ProjectPopup = ({
+  userId,
   onClose,
   onAddProject,
 }: {
+  userId: string | undefined;
   onClose: () => void;
-  onAddProject: (project: Project) => void;
+  onAddProject: (project: Omit<Project, "_id" | "createdBy">) => Promise<void>;
 }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -83,24 +90,34 @@ const ProjectPopup = ({
   const [liveLink, setLiveLink] = useState("");
   const [lookingForMembers, setLookingForMembers] = useState(false);
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
-  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<UserLookup[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("/api/users");
+        const response = await axios.get<{ data: UserLookup[] }>("/api/users", {
+          signal,
+        });
         setAvailableUsers(response.data.data);
       } catch (error) {
-        console.error("Error fetching users:", error);
-        toast.error("Failed to load users");
+        if (!axios.isCancel(error)) {
+          console.error("Error fetching users for popup:", error);
+          toast.error("Failed to load users for team selection");
+        }
       }
     };
     fetchUsers();
+    return () => controller.abort();
   }, []);
 
-  const filteredUsers = availableUsers.filter((user) =>
-    user.username.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = availableUsers.filter(
+    (user) =>
+      user._id !== userId &&
+      user.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,13 +126,16 @@ const ProjectPopup = ({
       toast.error("Title and description are required");
       return;
     }
-    const projectData: Project = {
+    setIsSubmitting(true);
+    const projectData: Omit<Project, "_id" | "createdBy"> = {
       title,
       description,
-      techStack: techStack.split(",").map((item) => item.trim()).filter(Boolean),
-      repoLink,
-      liveLink,
-      createdBy: "authenticatedUser", // Replaced by API
+      techStack: techStack
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+      repoLink: repoLink || undefined,
+      liveLink: liveLink || undefined,
       lookingForMembers,
       teamMembers,
       status: "active",
@@ -124,157 +144,207 @@ const ProjectPopup = ({
       await onAddProject(projectData);
       onClose();
     } catch (error) {
-      console.error("Error creating project:", error);
-      toast.error("Failed to create project");
+      console.error("Error submitting project from popup:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const toggleTeamMember = (userId: string) => {
     setTeamMembers((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
     );
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.5 }}
-      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
     >
       <motion.div
-        className="bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-900 p-4 rounded-2xl shadow-2xl w-full max-w-md border border-blue-200 dark:border-gray-700"
+        initial={{ scale: 0.95, opacity: 0, y: 10 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 10 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className="bg-card p-6 rounded-lg shadow-xl w-full max-w-lg border border-border"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-indigo-900 dark:text-white">Create a New Project</h2>
-          <motion.button
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-border">
+          <h2 className="text-lg font-semibold text-foreground">
+            Create New Project
+          </h2>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            whileHover={{ rotate: 90, scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100"
+            className="text-muted-foreground h-7 w-7"
           >
-            <X className="w-5 h-5" />
-          </motion.button>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Project Title</label>
-            <input
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-3 max-h-[70vh] overflow-y-auto pr-2"
+        >
+          <div>
+            <label
+              htmlFor="popup-proj-title"
+              className="block text-sm font-medium text-muted-foreground mb-1"
+            >
+              Project Title
+            </label>
+            <Input
+              id="popup-proj-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"
               placeholder="Enter project title"
               required
             />
           </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Description</label>
+          <div>
+            <label
+              htmlFor="popup-proj-desc"
+              className="block text-sm font-medium text-muted-foreground mb-1"
+            >
+              Description
+            </label>
             <textarea
+              id="popup-proj-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white h-20 resize-none"
               placeholder="Describe your project"
               required
+              className="w-full min-h-[80px] p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
             />
           </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Tech Stack (comma separated)</label>
-            <input
+          <div>
+            <label
+              htmlFor="popup-proj-stack"
+              className="block text-sm font-medium text-muted-foreground mb-1"
+            >
+              Tech Stack (comma separated)
+            </label>
+            <Input
+              id="popup-proj-stack"
               type="text"
               value={techStack}
               onChange={(e) => setTechStack(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"
               placeholder="e.g., React, Node.js, MongoDB"
             />
           </div>
-          <div className="flex space-x-3">
-            <div className="w-1/2 space-y-1">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Repo Link</label>
-              <input
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1">
+              <label
+                htmlFor="popup-proj-repo"
+                className="block text-sm font-medium text-muted-foreground mb-1"
+              >
+                Repo Link
+              </label>
+              <Input
+                id="popup-proj-repo"
                 type="url"
                 value={repoLink}
                 onChange={(e) => setRepoLink(e.target.value)}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"
-                placeholder="GitHub link"
+                placeholder="https://github.com/..."
               />
             </div>
-            <div className="w-1/2 space-y-1">
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Live Link</label>
-              <input
+            <div className="flex-1">
+              <label
+                htmlFor="popup-proj-live"
+                className="block text-sm font-medium text-muted-foreground mb-1"
+              >
+                Live Link
+              </label>
+              <Input
+                id="popup-proj-live"
                 type="url"
                 value={liveLink}
                 onChange={(e) => setLiveLink(e.target.value)}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"
-                placeholder="Live demo link"
+                placeholder="https://your-project.com"
               />
             </div>
           </div>
-          <div className="space-y-1">
-            <label className="flex items-center text-xs text-gray-700 dark:text-gray-200">
+          <div className="space-y-2 pt-2">
+            <label className="flex items-center text-sm font-medium text-muted-foreground gap-2 cursor-pointer">
               <input
+                id="popup-proj-members-check"
                 type="checkbox"
                 checked={lookingForMembers}
                 onChange={(e) => setLookingForMembers(e.target.checked)}
-                className="mr-2 accent-blue-500 dark:accent-blue-400 rounded"
+                className="accent-primary w-4 h-4 rounded"
               />
               Looking for Members
             </label>
-          </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-700 dark:text-gray-200">Add Team Members</label>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"
-              placeholder="Search users by username"
-            />
-            <div className="max-h-40 overflow-y-auto mt-2 bg-gray-50 dark:bg-gray-700 rounded-xl p-2">
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <label key={user._id} className="flex items-center space-x-2 p-1">
-                    <input
-                      type="checkbox"
-                      checked={teamMembers.includes(user._id)}
-                      onChange={() => toggleTeamMember(user._id)}
-                      className="accent-blue-500 dark:accent-blue-400"
-                    />
-                    <span className="text-gray-700 dark:text-gray-200">{user.username}</span>
-                  </label>
-                ))
-              ) : (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">No users found</p>
-              )}
+            <div>
+              <label
+                htmlFor="popup-proj-team-search"
+                className="block text-sm font-medium text-muted-foreground mb-1"
+              >
+                Add Team Members (Optional)
+              </label>
+              <Input
+                id="popup-proj-team-search"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search users by username..."
+              />
+              <div className="max-h-32 overflow-y-auto mt-2 border border-border rounded-md p-2 space-y-1 bg-background">
+                {searchQuery && filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <label
+                      key={user._id}
+                      className="flex items-center space-x-2 p-1 cursor-pointer hover:bg-muted rounded"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={teamMembers.includes(user._id)}
+                        onChange={() => toggleTeamMember(user._id)}
+                        className="accent-primary rounded w-4 h-4"
+                      />
+                      <span className="text-sm text-foreground">
+                        {user.username}
+                      </span>
+                    </label>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-xs text-center py-2">
+                    {searchQuery
+                      ? "No matching users found"
+                      : "Start typing to search users"}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
-            <motion.button
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button
               type="button"
+              variant="outline"
               onClick={onClose}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-4 py-1.5 bg-gray-200 dark:bg-gray-600 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200"
+              disabled={isSubmitting}
             >
               Cancel
-            </motion.button>
-            <motion.button
-              type="submit"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-4 py-1.5 bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white rounded-xl hover:bg-cyan-600 dark:hover:bg-cyan-700"
-            >
-              Create Project
-            </motion.button>
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Project"}
+            </Button>
           </div>
         </form>
       </motion.div>
     </motion.div>
   );
 };
+// --- End ProjectPopup Component ---
 
-export default function Page() {
+// --- Profile Page Component ---
+export default function ProfilePage() {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     username: "",
@@ -286,12 +356,13 @@ export default function Page() {
     linkedin: "",
     skills: [],
   });
+  const [originalData, setOriginalData] = useState<UserData | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [showProjectPopup, setShowProjectPopup] = useState(false);
   const [editProfileMode, setEditProfileMode] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<UserLookup[]>([]);
   const [skillsCategories, setSkillsCategories] = useState<SkillsCategories>({
+    // This list should ideally be fetched or defined in a separate constants file
     programmingLanguages: [
       { id: "c", name: "C", checked: false },
       { id: "cpp", name: "C++", checked: false },
@@ -474,136 +545,232 @@ export default function Page() {
     other: [
       { id: "linux", name: "Linux", checked: false },
       { id: "git", name: "Git", checked: false },
-      { id: "npm", name: "NPM", checked: false },
-    ],
+      { id: "npm", name: "NPM", checked: false },
+    ],
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | undefined>(undefined);
 
   const badges: Badge[] = [
-    { name: "Top Contributor", description: "Awarded for being in the top 10 on the leaderboard.", icon: "🏆" },
-    // ... other badges ...
+    {
+      name: "Top Contributor",
+      description: "Top 10 on leaderboard.",
+      icon: "🏆",
+    },
   ];
 
+  // --- Data Fetching Function ---
+  const fetchProfileData = useCallback(
+    async (signal: AbortSignal) => {
+      setIsLoading(true);
+      try {
+        const [userRes, projectsRes, allUsersRes] = await Promise.all([
+          axios.get<{ data: UserData }>("/api/users/me", { signal }),
+          axios.get<{ data: Project[] }>("/api/projects", { signal }),
+          axios.get<{ data: UserLookup[] }>("/api/users", { signal }),
+        ]);
+
+        const user = userRes.data.data;
+        if (!user || !user._id) {
+          throw new Error("User data or ID missing.");
+        }
+
+        setUserId(user._id);
+        const currentFormData = {
+          username: user.username || "",
+          prn: user.prn || "",
+          batch: user.batch || "",
+          email: user.email || "",
+          mobile: user.mobile || "",
+          github: user.github || "",
+          linkedin: user.linkedin || "",
+          skills: user.skills || [],
+        };
+        setFormData(currentFormData);
+        setOriginalData({ ...user, ...currentFormData });
+        updateSkillChecks(user.skills || []);
+
+        // Assuming /api/projects returns *all* projects, filter for user's projects here
+        // If /api/projects is meant to *only* return user's projects, this filter isn't needed
+        const userProjects = (projectsRes.data.data || []).filter(
+          (p) => p.createdBy === user._id || p.teamMembers.includes(user._id)
+        );
+        setProjects(userProjects);
+        setAvailableUsers(allUsersRes.data.data || []);
+      } catch (error: unknown) {
+        if (axios.isCancel(error)) {
+          console.log("Data fetching cancelled.");
+        } else {
+          console.error("Error fetching profile data:", error);
+          toast.error("Failed to load profile data. Please refresh.");
+          if (
+            axios.isAxiosError(error) &&
+            (error.response?.status === 401 || error.response?.status === 403)
+          ) {
+            router.push("/signin");
+          }
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [router]
+  ); // Dependency: router
+
+  // --- Initial Data Fetch UseEffect ---
   useEffect(() => {
-    fetchUserData();
-    fetchProjects();
-    fetchNotifications();
-    fetchUsers();
-  }, []);
+    const controller = new AbortController();
+    fetchProfileData(controller.signal);
+    return () => {
+      controller.abort();
+    };
+  }, [fetchProfileData]);
 
-  const fetchUserData = async () => {
-    try {
-      const response = await axios.get("/api/users/me");
-      const user = response.data.data;
-      setFormData({
-        username: user.username || "",
-        prn: user.prn || "",
-        batch: user.batch || "",
-        email: user.email || "",
-        mobile: user.mobile || "",
-        github: user.github || "",
-        linkedin: user.linkedin || "",
-        skills: user.skills || [],
-      });
-      updateSkillChecks(user.skills || []);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      toast.error("Failed to fetch user data.");
-    }
-  };
-
-  const fetchProjects = async () => {
-    try {
-      const response = await axios.get("/api/projects");
-      setProjects(response.data.data);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-      toast.error("Failed to fetch projects.");
-    }
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const response = await axios.get("/api/notifications");
-      setNotifications(response.data.data);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      toast.error("Failed to fetch notifications.");
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get("/api/users");
-      setAvailableUsers(response.data.data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      toast.error("Failed to load users");
-    }
-  };
-
-  const markNotificationAsRead = async (notificationId: string) => {
-    try {
-      await axios.put(`/api/notifications/${notificationId}/read`);
-      setNotifications((prev) =>
-        prev.map((notif) => (notif._id === notificationId ? { ...notif, read: true } : notif))
-      );
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-      toast.error("Failed to update notification.");
-    }
-  };
+  // --- Helper & Handler Functions ---
 
   const updateSkillChecks = (savedSkills: string[]) => {
-    const updatedSkills: SkillsCategories = { ...skillsCategories };
-    Object.keys(updatedSkills).forEach((category) => {
-      updatedSkills[category] = updatedSkills[category].map((skill) => ({
-        ...skill,
-        checked: savedSkills.includes(skill.name),
-      }));
+    setSkillsCategories((prevCategories) => {
+      const updated: SkillsCategories = {};
+      Object.keys(prevCategories).forEach((category) => {
+        updated[category] = prevCategories[category].map((skill) => ({
+          ...skill,
+          checked: savedSkills.includes(skill.name),
+        }));
+      });
+      return updated;
     });
-    setSkillsCategories(updatedSkills);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSkillToggle = (category: string, skillId: string) => {
-    const updatedSkills = { ...skillsCategories };
-    updatedSkills[category] = updatedSkills[category].map((skill) =>
-      skill.id === skillId ? { ...skill, checked: !skill.checked } : skill
-    );
-    setSkillsCategories(updatedSkills);
+    if (!editProfileMode) return;
 
-    const selectedSkills: string[] = [];
-    Object.values(updatedSkills).forEach((categorySkills) =>
-      categorySkills.forEach((skill) => skill.checked && skill.name && selectedSkills.push(skill.name))
-    );
-    setFormData((prev) => ({ ...prev, skills: selectedSkills }));
+    let toggledSkillName: string | undefined;
+    setSkillsCategories((prevCategories) => {
+      const updatedCategory = prevCategories[category]?.map((skill) => {
+        if (skill.id === skillId) {
+          toggledSkillName = skill.name;
+          return { ...skill, checked: !skill.checked };
+        }
+        return skill;
+      });
+      return updatedCategory
+        ? { ...prevCategories, [category]: updatedCategory }
+        : prevCategories;
+    });
+
+    if (toggledSkillName) {
+      // Read the *intended next* state directly after setting it for accurate update
+      const isChecked = !skillsCategories[category]?.find(
+        (s) => s.id === skillId
+      )?.checked;
+      setFormData((prevFormData) => {
+        const skillsSet = new Set(prevFormData.skills);
+        if (isChecked) {
+          skillsSet.add(toggledSkillName!);
+        } else {
+          skillsSet.delete(toggledSkillName!);
+        }
+        return { ...prevFormData, skills: Array.from(skillsSet) };
+      });
+    }
   };
 
   const handleSaveProfile = async () => {
     try {
-      if (!formData.username || !formData.prn || !formData.batch || !formData.mobile) {
-        toast.error("Please fill all required fields");
+      if (
+        !formData.username ||
+        !formData.prn ||
+        !formData.batch ||
+        !formData.mobile
+      ) {
+        toast.error("Username, PRN, Batch, and Mobile are required fields.");
         return;
       }
-      const response = await axios.put("/api/users/update", {
+      const currentSelectedSkills: string[] = [];
+      Object.values(skillsCategories).forEach((cat) =>
+        cat.forEach((skill) => {
+          if (skill.checked && skill.name) {
+            currentSelectedSkills.push(skill.name);
+          }
+        })
+      );
+
+      const updatePayload = {
         username: formData.username,
         prn: formData.prn,
         batch: formData.batch,
         mobile: formData.mobile,
-        github: formData.github,
-        linkedin: formData.linkedin,
-        skills: formData.skills,
+        github: formData.github || "",
+        linkedin: formData.linkedin || "",
+        skills: currentSelectedSkills,
         profileComplete: true,
-      });
+      };
+
+      await axios.put("/api/users/update", updatePayload);
+
+      if (userId && originalData) {
+        const newOriginalData: UserData = {
+          username: updatePayload.username,
+          prn: updatePayload.prn,
+          batch: updatePayload.batch,
+          mobile: updatePayload.mobile,
+          github: updatePayload.github,
+          linkedin: updatePayload.linkedin,
+          skills: updatePayload.skills,
+          _id: userId,
+          email: originalData.email,
+        };
+        setOriginalData(newOriginalData);
+      } else {
+        console.warn("Could not update originalData state after save.");
+      }
+
+      setFormData((prev) => ({ ...prev, skills: currentSelectedSkills }));
       setEditProfileMode(false);
-      toast.success("Profile and skills updated successfully!");
-    } catch (error: any) {
-      console.error("Error saving profile:", error.response?.data);
-      toast.error(error.response?.data?.error || "Failed to save profile and skills");
+      toast.success("Profile updated successfully!");
+    } catch (error: unknown) {
+      let errorMessage = "Failed to save profile.";
+      if (axios.isAxiosError(error)) {
+        const serverError = error.response?.data as {
+          message?: string;
+          error?: string;
+        };
+        errorMessage =
+          serverError?.message ||
+          serverError?.error ||
+          error.message ||
+          errorMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      console.error("Error saving profile:", error);
+      toast.error(errorMessage);
     }
+  };
+
+  const handleCancelEdit = () => {
+    if (originalData) {
+      setFormData({
+        username: originalData.username,
+        prn: originalData.prn,
+        batch: originalData.batch,
+        email: originalData.email,
+        mobile: originalData.mobile,
+        github: originalData.github,
+        linkedin: originalData.linkedin,
+        skills: originalData.skills,
+      });
+      updateSkillChecks(originalData.skills);
+    } else {
+      console.warn("Cannot cancel edit: Original data not available.");
+    }
+    setEditProfileMode(false);
   };
 
   const onLogout = async () => {
@@ -611,9 +778,11 @@ export default function Page() {
       await axios.get("/api/users/logout");
       toast.success("Logout successful!");
       router.push("/signin");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Logout Failed:", error);
-      toast.error("Logout failed.");
+      toast.error(
+        error.response?.data?.message || error.message || "Logout failed."
+      );
     }
   };
 
@@ -621,203 +790,408 @@ export default function Page() {
     setShowProjectPopup(true);
   };
 
-  const addProject = async (projectData: Project) => {
+  const addProject = async (
+    projectData: Omit<Project, "_id" | "createdBy">
+  ) => {
     try {
-      const response = await axios.post("/api/projects/create", projectData);
-      setProjects((prevProjects) => [...prevProjects, response.data.data]);
+      const response = await axios.post<{ data: Project }>(
+        "/api/projects/create",
+        projectData
+      );
+      setProjects((prevProjects) => [response.data.data, ...prevProjects]);
       toast.success("Project created successfully!");
     } catch (error) {
       console.error("Error adding project:", error);
-      throw error;
+      toast.error("Failed to create project.");
+      throw error; // Re-throw for popup
     }
   };
 
-  const ProjectCard = ({ project, availableUsers }: { project: Project; availableUsers: User[] }) => (
+  {
+    /* --- Project Card Sub-component --- */
+  }
+  const ProjectCard = ({
+    project,
+    availableUsers,
+  }: {
+    project: Project;
+    availableUsers: UserLookup[];
+  }) => (
     <motion.div
-      className="p-6 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-700 dark:to-blue-900 rounded-lg shadow-md border border-blue-200 dark:border-blue-800"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="p-4 bg-card rounded-lg shadow-sm border border-border"
     >
-      <h4 className="text-xl font-semibold text-indigo-900 dark:text-white mb-2">{project.title}</h4>
-      <p className="text-gray-600 dark:text-gray-300 mb-4">{project.description}</p>
-      <div className="mb-4">
-        <h5 className="text-md font-medium text-indigo-800 dark:text-blue-200 mb-2">Tech Stack:</h5>
-        <div className="flex flex-wrap gap-2">
-          {project.techStack.map((skill, index) => (
-            <span
-              key={index}
-              className="inline-block bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200"
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      </div>
-      <div className="mb-4">
-        <h5 className="text-md font-medium text-indigo-800 dark:text-blue-200 mb-2">Team Members:</h5>
-        <div className="flex flex-wrap gap-2">
-          {project.teamMembers.map((memberId, index) => {
-            const member = availableUsers.find((user: User) => user._id === memberId);
-            return (
+      <h4 className="text-lg font-semibold text-foreground mb-2">
+        {project.title}
+      </h4>
+      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+        {project.description}
+      </p>
+      {/* Tech Stack */}
+      <div className="mb-3">
+        <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
+          Tech Stack
+        </h5>
+        <div className="flex flex-wrap gap-1.5">
+          {project.techStack?.length > 0 ? (
+            project.techStack.map((skill, index) => (
               <span
                 key={index}
-                className="inline-block bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200"
+                className="inline-block bg-muted rounded-full px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
               >
-                {member ? member.username : "Unknown"}
+                {skill}
               </span>
-            );
-          })}
+            ))
+          ) : (
+            <span className="text-xs text-muted-foreground italic">
+              Not specified
+            </span>
+          )}
         </div>
       </div>
-      <div className="mb-4">
-        <h5 className="text-md font-medium text-indigo-800 dark:text-blue-200 mb-2">Links:</h5>
-        <a
-          href={project.repoLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 dark:text-blue-400 hover:underline mr-4"
-        >
-          Repo
-        </a>
-        <a
-          href={project.liveLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 dark:text-blue-400 hover:underline"
-        >
-          Live
-        </a>
+      {/* Team Members */}
+      <div className="mb-3">
+        <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
+          Team Members
+        </h5>
+        <div className="flex flex-wrap gap-1.5">
+          {project.teamMembers?.length > 0 ? (
+            project.teamMembers.map((memberId, index) => {
+              const member = availableUsers.find(
+                (user) => user._id === memberId
+              );
+              return (
+                <span
+                  key={index}
+                  className="inline-block bg-muted rounded-full px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                >
+                  {member ? member.username : "..."}
+                </span>
+              );
+            })
+          ) : formData.username ? (
+            <span className="inline-block bg-muted rounded-full px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {formData.username} (Creator)
+            </span>
+          ) : (
+            <span className="text-xs text-muted-foreground italic">
+              Just you
+            </span>
+          )}
+        </div>
       </div>
-      <div className="text-sm text-gray-600 dark:text-gray-300">
-        Status: {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+
+      {/* Links Section */}
+      <div className="mb-3">
+        {" "}
+        <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">
+          Links
+        </h5>{" "}
+        <div className="flex items-center space-x-4">
+          {" "}
+          {project.repoLink ? (
+            <a
+              href={
+                project.repoLink.startsWith("http")
+                  ? project.repoLink
+                  : `https://${project.repoLink}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-muted-foreground hover:text-primary transition-colors"
+              title="Repository"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-1 opacity-50"
+              >
+                <polyline points="10 8 4 12 10 16"></polyline>
+                <polyline points="14 8 20 12 14 16"></polyline>
+              </svg>
+              <span className="text-xs">Repo</span>
+            </a>
+          ) : (
+            <span className="text-xs text-muted-foreground italic flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-1 opacity-50"
+              >
+                <polyline points="10 8 4 12 10 16"></polyline>
+                <polyline points="14 8 20 12 14 16"></polyline>
+              </svg>{" "}
+              No Repo
+            </span>
+          )}
+          {project.liveLink ? (
+            <a
+              href={
+                project.liveLink.startsWith("http")
+                  ? project.liveLink
+                  : `https://${project.liveLink}`
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-muted-foreground hover:text-primary transition-colors"
+              title="Live Demo"
+            >
+              <LinkIcon size={16} className="mr-1 flex-shrink-0" />
+              <span className="text-xs">Live</span>
+            </a>
+          ) : (
+            <span className="text-xs text-muted-foreground italic flex items-center">
+              <LinkIcon size={16} className="mr-1 opacity-50" /> No Live Demo
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="text-xs text-muted-foreground border-t border-border pt-2 mt-2 flex justify-between items-center">
+        <span>
+          Status:{" "}
+          <span
+            className={`font-medium ${
+              project.status === "active"
+                ? "text-green-600 dark:text-green-400"
+                : "text-gray-500"
+            }`}
+          >
+            {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+          </span>
+        </span>
+        {project.lookingForMembers && (
+          <span className="text-blue-600 dark:text-blue-400 font-medium">
+            Recruiting
+          </span>
+        )}
       </div>
     </motion.div>
   );
+  // --- End Project Card ---
+
+  // --- Main Render ---
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
+        Loading Profile...
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 dark:from-card dark:to-muted">
-      <nav className="w-full bg-gradient-to-r from-blue-50 via-blue-200 to-blue-50 dark:from-card dark:via-muted dark:to-card shadow-lg p-4 z-50">
+    <div className="flex flex-col min-h-screen bg-muted dark:bg-background">
+      <nav className="w-full bg-card shadow-sm border-b border-border p-3 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-indigo-900 dark:text-white">SynKro</h1>
-          <div className="flex space-x-4">
+          <h1 className="text-xl font-bold text-foreground">SynKro Profile</h1>
+          <div className="flex space-x-2">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => router.push("/dashboard")}
-              className="border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-gray-700"
             >
-              ← Back
+              {" "}
+              Dashboard{" "}
             </Button>
-            <Button
-              variant="outline"
-              onClick={onLogout}
-              className="border-blue-500 text-blue-500 dark:border-blue-400 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-gray-700"
-            >
-              Logout ↩
+            <Button variant="ghost" size="sm" onClick={onLogout}>
+              {" "}
+              Logout{" "}
             </Button>
           </div>
         </div>
       </nav>
 
-      <main className="flex-1 flex items-center justify-center p-6 pt-20">
-        <Card className="w-full max-w-4xl p-8 bg-white/90 dark:bg-gray-800/90 rounded-2xl shadow-2xl border border-blue-200 dark:border-gray-700">
-          <CardContent className="flex flex-col items-center space-y-8">
-            <div className="relative w-40 h-40 border-4 border-gradient-to-r from-cyan-400 to-blue-500 dark:from-cyan-500 dark:to-blue-700 rounded-full overflow-hidden bg-gray-50 flex items-center justify-center">
-              <Image
-                src="/user.png"
-                alt="Profile"
-                width={160}
-                height={160}
-                className="rounded-full"
-              />
-              <Button
-                size="sm"
-                className="absolute bottom-0 right-0 transform translate-y-1/2 translate-x-1/2 bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white rounded-full p-2 shadow-md"
-              >
-                <UserCircle className="w-5 h-5" />
-              </Button>
-            </div>
-
-            <div className="w-full">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-indigo-900 dark:text-white">Notifications</h3>
+      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pt-6 sm:pt-8">
+        <Card className="w-full bg-card rounded-xl shadow-lg border border-border">
+          <CardContent className="p-6 md:p-8 space-y-8">
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 pb-6 border-b border-border">
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0">
+                <Image
+                  src="/user.png"
+                  alt={`${formData.username || "User"}'s Profile`}
+                  width={128}
+                  height={128}
+                  priority
+                  className="rounded-full border-4 border-border object-cover aspect-square bg-muted"
+                />
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="absolute bottom-0 right-0 rounded-full w-8 h-8 border-2 border-card"
+                  title="Change Picture (Not Implemented)"
+                >
+                  {" "}
+                  <Edit3 className="w-4 h-4" />{" "}
+                </Button>
               </div>
-              <div className="space-y-2">
-                {notifications.length > 0 ? (
-                  notifications.map((notif) => (
-                    <motion.div
-                      key={notif._id}
-                      className={`p-3 rounded-lg flex justify-between items-center ${
-                        notif.read ? "bg-gray-100 dark:bg-gray-700" : "bg-blue-100 dark:bg-blue-800"
-                      }`}
-                      onClick={() => markNotificationAsRead(notif._id)}
+              <div className="text-center sm:text-left flex-grow">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
+                  {formData.username || "Username"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {formData.email || "email@example.com"}
+                </p>
+                <div className="flex justify-center sm:justify-start space-x-3 mt-2">
+                  {formData.github && (
+                    <a
+                      href={
+                        formData.github.startsWith("http")
+                          ? formData.github
+                          : `https://${formData.github}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-primary"
+                      title="GitHub"
                     >
-                      <div>
-                        <p className="text-sm text-gray-800 dark:text-gray-200">{notif.message}</p>
-                        {notif.link && (
-                          <a
-                            href={notif.link}
-                            className="text-xs text-blue-500 dark:text-blue-400 hover:underline"
-                          >
-                            View
-                          </a>
-                        )}
-                      </div>
-                      {!notif.read && (
-                        <span className="text-xs text-blue-500 dark:text-blue-400">New</span>
-                      )}
-                    </motion.div>
-                  ))
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-1.5 6-6.5.08-1.3-.32-2.7-.94-4-.27-.8-.71-1.48-1.3-2.12-.28-.15-.56-.27-.84-.35-.42-.12-.85-.18-1.28-.18-1.1 0-2.1.48-3.1 1.32-.6.48-1 1.17-1.2 1.8-.15.3-.24.6-.3.9-.07.3-.1.6-.1.9-.1.6-.1 1.2 0 1.8.1.6.25 1.1.45 1.6.4.9.9 1.7 1.5 2.4.7.7 1.5 1.3 2.4 1.7.9.4 1.8.7 2.7.8.4.1.8.1 1.2.1H21m-6-6v4m-6 0v4m-6-4v4m6-12v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4m-6 0h6" />
+                      </svg>
+                    </a>
+                  )}
+                  {formData.linkedin && (
+                    <a
+                      href={
+                        formData.linkedin.startsWith("http")
+                          ? formData.linkedin
+                          : `https://${formData.linkedin}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-primary"
+                      title="LinkedIn"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                        <rect x="2" y="9" width="4" height="12" />
+                        <circle cx="4" cy="4" r="2" />
+                      </svg>
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="mt-4 sm:mt-0 flex-shrink-0 self-center sm:self-start">
+                {editProfileMode ? (
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleSaveProfile}>
+                      {" "}
+                      <Check className="w-4 h-4 mr-1" /> Save Changes{" "}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleCancelEdit}
+                    >
+                      {" "}
+                      Cancel{" "}
+                    </Button>
+                  </div>
                 ) : (
-                  <p className="text-gray-600 dark:text-gray-400">No notifications</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditProfileMode(true)}
+                  >
+                    {" "}
+                    <Edit3 className="w-4 h-4 mr-1" /> Edit Profile{" "}
+                  </Button>
                 )}
               </div>
             </div>
 
             <div className="w-full">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-indigo-900 dark:text-white">Profile Details</h3>
-                <div>
-                  {editProfileMode ? (
-                    <>
-                      <Button
-                        size="sm"
-                        onClick={handleSaveProfile}
-                        className="bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white rounded-full p-2 shadow-md mr-2"
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={() => setEditProfileMode(false)}
-                        className="bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full p-2 shadow-md"
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      size="sm"
-                      onClick={() => setEditProfileMode(true)}
-                      className="bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white rounded-full p-2 shadow-md"
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Profile Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                {[
+                  "username",
+                  "prn",
+                  "batch",
+                  "email",
+                  "mobile",
+                  "github",
+                  "linkedin",
+                ].map((field) => (
+                  <div key={field} className="space-y-1.5">
+                    <label
+                      htmlFor={`profile-${field}`}
+                      className="text-sm font-medium text-muted-foreground"
                     >
-                      Edit Profile
-                    </Button>
-                  )}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {["username", "prn", "batch", "email", "mobile", "github", "linkedin"].map((field) => (
-                  <div key={field} className="space-y-2">
-                    <label className="text-gray-600 dark:text-gray-300 text-sm font-medium">
-                      {field.toUpperCase()}
+                      {field.charAt(0).toUpperCase() + field.slice(1)}
+                      {["username", "prn", "batch", "mobile"].includes(
+                        field
+                      ) && <span className="text-destructive ml-1">*</span>}
                     </label>
                     <Input
-                      type={field === "email" ? "email" : field === "mobile" ? "tel" : "text"}
+                      id={`profile-${field}`}
+                      type={
+                        field === "email"
+                          ? "email"
+                          : field === "mobile"
+                          ? "tel"
+                          : field.includes("Link") ||
+                            field === "github" ||
+                            field === "linkedin"
+                          ? "url"
+                          : "text"
+                      }
                       name={field}
-                      value={formData[field as keyof FormData]}
+                      value={formData[field as keyof FormData] || ""}
                       onChange={handleChange}
                       disabled={field === "email" || !editProfileMode}
-                      placeholder={`Enter ${field}`}
-                      className="w-full p-4 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 bg-gray-50 dark:bg-gray-700 dark:text-white"
+                      placeholder={`Enter your ${field}`}
+                      required={["username", "prn", "batch", "mobile"].includes(
+                        field
+                      )}
+                      className={
+                        !editProfileMode && field !== "email"
+                          ? "disabled:opacity-100 disabled:cursor-default bg-transparent border-none p-0 shadow-none focus-visible:ring-0 h-auto font-medium text-foreground"
+                          : ""
+                      }
                     />
+                    {field === "email" && editProfileMode && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Email cannot be changed.
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -825,101 +1199,162 @@ export default function Page() {
 
             <div className="w-full">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-indigo-900 dark:text-white">Skills</h3>
-                <Button
-                  size="sm"
-                  onClick={() => setEditProfileMode(true)}
-                  className="bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white rounded-full p-2 shadow-md"
-                >
-                  Edit Skills
-                </Button>
+                <h3 className="text-lg font-semibold text-foreground">
+                  Skills
+                </h3>
+                {!editProfileMode && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setEditProfileMode(true)}
+                  >
+                    {" "}
+                    <Edit3 className="w-4 h-4 mr-1" /> Edit Skills
+                  </Button>
+                )}
               </div>
-              {editProfileMode && (
-                <div className="mt-4 space-y-3">
-                  {Object.keys(skillsCategories).map((category, index) => (
-                    <Accordion key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md">
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>{category.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                          {skillsCategories[category].map((skill) => (
-                            <label key={skill.id} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={skill.checked}
-                                onChange={() => handleSkillToggle(category, skill.id)}
-                                className="form-checkbox accent-blue-500 dark:accent-blue-400"
-                              />
-                              <span className="text-gray-700 dark:text-gray-300">{skill.name}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
-                </div>
-              )}
-              <div className="mt-4">
-                <h4 className="text-lg font-medium text-indigo-900 dark:text-white">Selected Skills:</h4>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {formData.skills.length > 0 ? (
+              <div className="mb-4 border border-border rounded-md p-4 bg-background">
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                  Selected Skills:
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {formData.skills?.length > 0 ? (
                     formData.skills.map((skill, index) => (
                       <span
                         key={index}
-                        className="inline-block bg-gradient-to-r from-blue-200 to-blue-300 dark:from-blue-600 dark:to-blue-800 rounded-full px-3 py-1 text-sm font-semibold text-gray-800 dark:text-gray-200"
+                        className="inline-block bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium"
                       >
                         {skill}
                       </span>
                     ))
                   ) : (
-                    <span className="text-gray-600 dark:text-gray-400">No skills selected</span>
+                    <span className="text-sm text-muted-foreground italic">
+                      No skills selected.{" "}
+                      {editProfileMode
+                        ? "Select skills below."
+                        : "Click 'Edit Profile' or 'Edit Skills' to add."}
+                    </span>
                   )}
                 </div>
               </div>
+              {editProfileMode && (
+                <div className="space-y-2 max-h-96 overflow-y-auto pr-2 rounded-md border border-border p-4 bg-background">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Select the skills you possess:
+                  </p>
+                  {Object.entries(skillsCategories).map(
+                    ([category, skills]) => (
+                      <Accordion
+                        key={category}
+                        defaultExpanded={false}
+                        className="!bg-card !text-foreground !shadow-none !border !border-border !rounded-md !before:hidden expanded:!my-2"
+                      >
+                        <AccordionSummary
+                          expandIcon={
+                            <ExpandMoreIcon className="!text-muted-foreground" />
+                          }
+                          className="!min-h-[40px] [&.Mui-expanded]:!min-h-[40px]"
+                        >
+                          <Typography className="!text-sm !font-medium">
+                            {category
+                              .replace(/([A-Z])/g, " $1")
+                              .replace(/^./, (str) => str.toUpperCase())}
+                          </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails className="!pt-0 !pb-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2">
+                            {skills.map((skill) => (
+                              <label
+                                key={skill.id}
+                                className="flex items-center space-x-2 cursor-pointer group"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={!!skill.checked}
+                                  onChange={() =>
+                                    handleSkillToggle(category, skill.id)
+                                  }
+                                  className="form-checkbox h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary bg-background cursor-pointer"
+                                />
+                                <span className="text-sm text-muted-foreground group-hover:text-foreground">
+                                  {skill.name}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </AccordionDetails>
+                      </Accordion>
+                    )
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="w-full">
-              <h3 className="text-xl font-semibold text-indigo-900 dark:text-white mb-4">Badges</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {badges.map((badge, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center p-4 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-700 dark:to-blue-900 rounded-lg shadow-md border border-blue-200 dark:border-blue-800"
-                  >
-                    <span className="text-3xl mr-3">{badge.icon}</span>
-                    <div>
-                      <h4 className="text-md font-semibold text-indigo-900 dark:text-white">{badge.name}</h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">{badge.description}</p>
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Badges
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {badges?.length > 0 ? (
+                  badges.map((badge, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col items-center text-center p-3 bg-muted rounded-lg border border-border"
+                      title={badge.description}
+                    >
+                      <span className="text-3xl mb-1">{badge.icon}</span>
+                      <h4 className="text-xs font-semibold text-foreground">
+                        {badge.name}
+                      </h4>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-sm col-span-full text-center py-4">
+                    No badges earned yet.
+                  </p>
+                )}
               </div>
             </div>
 
             <div className="w-full">
-              <h3 className="text-xl font-semibold text-indigo-900 dark:text-white mb-4">Projects</h3>
-              <div className="space-y-6">
-                {projects.map((project, index) => (
-                  <ProjectCard key={index} project={project} availableUsers={availableUsers} />
-                ))}
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-foreground">
+                  My Projects
+                </h3>
+                <Button size="sm" onClick={handleNewProject}>
+                  {" "}
+                  <Plus className="w-4 h-4 mr-1" /> New Project{" "}
+                </Button>
               </div>
-            </div>
-
-            <div className="w-full flex justify-center">
-              <Button
-                className="flex items-center gap-2 bg-gradient-to-r from-cyan-400 to-cyan-700 dark:from-cyan-500 dark:to-cyan-800 text-white py-3 px-8 rounded-xl text-lg"
-                onClick={handleNewProject}
-              >
-                <Plus className="w-6 h-6" />
-                New
-              </Button>
+              <div className="space-y-4">
+                {projects?.length > 0 ? (
+                  projects.map((project) => (
+                    <ProjectCard
+                      key={project._id || project.title}
+                      project={project}
+                      availableUsers={availableUsers}
+                    />
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-sm text-center py-4">
+                    You haven&apos;t created or joined any projects yet.
+                  </p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
       </main>
 
-      {showProjectPopup && <ProjectPopup onClose={() => setShowProjectPopup(false)} onAddProject={addProject} />}
+      <AnimatePresence>
+        {showProjectPopup && (
+          <ProjectPopup
+            userId={userId}
+            onClose={() => setShowProjectPopup(false)}
+            onAddProject={addProject}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
