@@ -3,23 +3,23 @@ import { connectToDatabase } from "@/dbConfig/dbConfig";
 import Notification from "@/models/notificationModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest) {
   try {
     await connectToDatabase();
+
+    // Extract 'id' from URL path
+    const segments = request.nextUrl.pathname.split("/");
+    const id = segments[3];  // Adjust index if your route structure differs
+    if (!id) {
+      return NextResponse.json({ error: "Notification ID is required" }, { status: 400 });
+    }
+
     let userId: string;
     try {
       userId = await getDataFromToken(request);
     } catch (error) {
       console.error("Mark Notification Read: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
-    }
-
-    const { id } = params; // Explicitly destructure params
-    if (!id) {
-      return NextResponse.json({ error: "Notification ID is required" }, { status: 400 });
     }
 
     const notification = await Notification.findOneAndUpdate(
