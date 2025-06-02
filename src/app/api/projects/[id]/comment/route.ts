@@ -5,11 +5,18 @@ import User from "@/models/userModel";
 import Notification from "@/models/notificationModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
+
+    const segments = request.nextUrl.pathname.split("/");
+    const projectId = segments[3]; // Adjust index as needed
+
+    if (!projectId) {
+      return NextResponse.json({ error: "Project ID is required" }, { status: 400 });
+    }
+
     const userId = await getDataFromToken(request);
-    const projectId = params.id;
     const { text } = await request.json();
 
     if (!text?.trim()) {
@@ -29,14 +36,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     await project.save();
 
-    // Award 10 points to commenter
     await User.findByIdAndUpdate(userId, { $inc: { points: 10 } });
 
-    // Notify project creator (if not the commenter)
     if (project.createdBy._id.toString() !== userId) {
+      const commenter = await User.findById(userId);
       const notification = new Notification({
         recipient: project.createdBy._id,
-        message: `${(await User.findById(userId)).username} commented on your project "${project.title}"`,
+        message: `${commenter?.username} commented on your project "${project.title}"`,
         link: `/projects/${projectId}`,
         read: false,
         type: "comment",

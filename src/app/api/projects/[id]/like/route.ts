@@ -6,11 +6,18 @@ import Notification from "@/models/notificationModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import mongoose from "mongoose";
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
     const userId = await getDataFromToken(request);
-    const projectId = params.id;
+
+    // Extract projectId from URL path: /api/projects/[id]/like
+    const segments = request.nextUrl.pathname.split("/");
+    // Example: ['', 'api', 'projects', 'projectId', 'like']
+    const projectId = segments[3];
+    if (!projectId) {
+      return NextResponse.json({ error: "Project ID is required" }, { status: 400 });
+    }
 
     const project = await Project.findById(projectId).populate("createdBy", "username");
     if (!project) {
@@ -18,7 +25,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     const userObjectId = new mongoose.Types.ObjectId(userId);
-    const isLiked = project.likes.includes(userObjectId);
+    const isLiked = project.likes.some((id: mongoose.Types.ObjectId) => id.equals(userObjectId));
 
     if (isLiked) {
       project.likes = project.likes.filter((id: mongoose.Types.ObjectId) => !id.equals(userObjectId));
@@ -26,16 +33,20 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       project.likes.push(userObjectId);
       // Award 10 points to liker
       await User.findByIdAndUpdate(userId, { $inc: { points: 10 } });
+
       // Notify project creator (if not the liker)
       if (project.createdBy._id.toString() !== userId) {
-        const notification = new Notification({
-          recipient: project.createdBy._id,
-          message: `${(await User.findById(userId)).username} liked your project "${project.title}"`,
-          link: `/projects/${projectId}`,
-          read: false,
-          type: "like",
-        });
-        await notification.save();
+        const liker = await User.findById(userId);
+        if (liker) {
+          const notification = new Notification({
+            recipient: project.createdBy._id,
+            message: `${liker.username} liked your project "${project.title}"`,
+            link: `/projects/${projectId}`,
+            read: false,
+            type: "like",
+          });
+          await notification.save();
+        }
       }
     }
 

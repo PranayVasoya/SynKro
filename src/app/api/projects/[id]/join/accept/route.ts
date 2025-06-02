@@ -12,9 +12,10 @@ interface PopulatedUser {
   username: string;
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
+
     let userId: string;
     try {
       userId = await getDataFromToken(request);
@@ -23,7 +24,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 
-    const { id } = await params;
+    const segments = request.nextUrl.pathname.split("/");
+    const id = segments[3];
+    if (!id) {
+      return NextResponse.json({ error: "Project ID is required" }, { status: 400 });
+    }
+
     const { joinRequestId } = await request.json();
 
     if (!joinRequestId) {
