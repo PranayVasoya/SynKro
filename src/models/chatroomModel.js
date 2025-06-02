@@ -1,23 +1,25 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const chatroomSchema = new mongoose.Schema({
+const { Schema, model, models } = mongoose;
+
+const chatroomSchema = new Schema({
   title: {
     type: String,
     required: [true, "Please provide a chatroom title"],
     trim: true,
   },
   project: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "Project",
     required: true,
   },
   members: [{
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "User",
   }],
   messages: [{
     sender: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "User",
     },
     text: String,
@@ -32,4 +34,5 @@ const chatroomSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.models.Chatroom || mongoose.model("Chatroom", chatroomSchema);
+const Chatroom = models.Chatroom || model("Chatroom", chatroomSchema);
+export default Chatroom;

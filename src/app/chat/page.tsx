@@ -175,6 +175,7 @@ export default function Page() {
           <h2 className="text-2xl font-bold text-foreground text-center mb-6">Chat Rooms</h2>
           <div className="space-y-4">
             {chats.map((chat, idx) => (
+              console.log(idx),
               <motion.div
                 key={chat._id}
                 initial={{ opacity: 0, x: -20 }}

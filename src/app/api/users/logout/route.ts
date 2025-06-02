@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 connectToDatabase();
 
 export async function GET(request: NextRequest) {
+    console.log("Request URL:", request.url)
     try {
          const response = NextResponse.json({
             message: "Logout Successfully",

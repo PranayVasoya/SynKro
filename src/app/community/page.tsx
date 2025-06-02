@@ -117,7 +117,7 @@ const DiscussionSidebar = ({ forum, onClose }: { forum: Forum; onClose: () => vo
 
 export default function Community() {
   const router = useRouter();
-  const [forums, setForums] = useState<Forum[]>([
+  const [forums] = useState<Forum[]>([
     { id: "1", title: "General Discussion", description: "Talk about anything related to SynKro.", posts: 45 },
     { id: "2", title: "Project Help", description: "Get help with your projects.", posts: 23 },
     { id: "3", title: "Ideas & Feedback", description: "Share your ideas and feedback.", posts: 15 },
@@ -167,6 +167,7 @@ export default function Community() {
           </h2>
           <div className="space-y-6">
             {forums.map((forum, idx) => (
+              console.log(idx),
               <motion.div
                 key={forum.id}
                 initial={{ opacity: 0, x: -20 }}

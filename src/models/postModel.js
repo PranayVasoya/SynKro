@@ -1,6 +1,8 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const postSchema = new mongoose.Schema({
+const { Schema, model, models } = mongoose;
+
+const postSchema = new Schema({
   forumId: {
     type: String,
     required: [true, "Please provide a forum ID"],
@@ -16,12 +18,12 @@ const postSchema = new mongoose.Schema({
     trim: true,
   },
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
   project: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: "Project",
   },
   createdAt: {
@@ -30,4 +32,5 @@ const postSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.models.Post || mongoose.model("Post", postSchema);
+const Post = models.Post || model("Post", postSchema);
+export default Post;

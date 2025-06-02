@@ -9,19 +9,38 @@ export async function GET(request: NextRequest) {
     let userId: string;
     try {
       userId = await getDataFromToken(request);
+      console.log("User ID from token:", userId);
     } catch (error) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid or expired token: " + error },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search")?.trim();
 
-    const query: any = {};
+    type RegexCondition = {
+      $regex: string;
+      $options: string;
+    };
+
+    type Query = {
+      $or?: {
+        title?: RegexCondition;
+        description?: RegexCondition;
+        techStack?: RegexCondition;
+      }[];
+    };
+
+    const query: Query = {};
+
     if (search) {
+      const condition: RegexCondition = { $regex: search, $options: "i" };
       query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { techStack: { $regex: search, $options: "i" } },
+        { title: condition },
+        { description: condition },
+        { techStack: condition },
       ];
     }
 

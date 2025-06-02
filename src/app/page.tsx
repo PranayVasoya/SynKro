@@ -8,11 +8,10 @@ import { motion } from "framer-motion";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-customDarkGray">
-      {/* Navbar */}
       <Navbar />
 
       {/* Hero Section */}
-      <div className="relative bg-white dark:bg-customDarkGray w-full overflow-hidden py-32">
+      <section className="relative bg-white dark:bg-customDarkGray w-full overflow-hidden py-32">
         <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center px-8 py-12 lg:px-44 lg:py-16">
           <div className="flex flex-col items-center lg:items-start gap-y-4 lg:gap-y-6">
             <p className="text-3xl text-center lg:text-start lg:text-4xl font-semibold text-gray-900 dark:text-white">
@@ -67,7 +66,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Gear Image as Background Element */}
+        {/* Gear Image */}
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -83,7 +82,7 @@ export default function Home() {
             }}
           />
         </motion.div>
-      </div>
+      </section>
 
       {/* About Section */}
       <section className="py-32 bg-gray-100 dark:bg-customMediumGray">

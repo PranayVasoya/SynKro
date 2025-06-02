@@ -18,6 +18,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     let userId: string;
     try {
       userId = await getDataFromToken(request);
+      console.log("User ID from token:", userId);
     } catch (error) {
       console.error("Fetch Posts: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });

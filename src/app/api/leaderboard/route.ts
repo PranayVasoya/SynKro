@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
-import Project from "@/models/projectModel";
 
 interface LeaderboardEntry {
   _id: string;
@@ -12,6 +11,7 @@ interface LeaderboardEntry {
 }
 
 export async function GET(request: NextRequest) {
+  console.log("Request URL:", request.url);
   try {
     await connectToDatabase();
 

@@ -8,7 +8,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search")?.trim();
 
-    const query: any = {};
+    type Query = {
+      username?: {
+        $regex: string;
+        $options: string;
+      }
+    }
+
+    const query: Query = {};
+    
     if (search) {
       query.username = { $regex: search, $options: "i" };
     }
