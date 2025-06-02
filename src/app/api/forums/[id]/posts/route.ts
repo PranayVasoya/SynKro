@@ -4,7 +4,7 @@ import Post from "@/models/postModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import mongoose from "mongoose";
 
-interface Post {
+interface PostType {
   _id: mongoose.Types.ObjectId;
   title: string;
   content: string;
@@ -12,9 +12,23 @@ interface Post {
   createdAt: Date;
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+function extractForumId(request: NextRequest): string | null {
+  const segments = request.nextUrl.pathname.split("/");
+  // Adjust index according to your route structure
+  // Example: /api/forums/{id}/posts -> index 3 is id
+  if (segments.length > 3) return segments[3];
+  return null;
+}
+
+export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
+
+    const forumId = extractForumId(request);
+    if (!forumId) {
+      return NextResponse.json({ error: "Forum ID missing" }, { status: 400 });
+    }
+
     let userId: string;
     try {
       userId = await getDataFromToken(request);
@@ -24,17 +38,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
 
-    const posts = await Post.find({ forumId: params.id })
+    const posts = await Post.find({ forumId })
       .populate("createdBy", "username")
       .sort({ createdAt: -1 });
 
-    const formattedPosts = posts.map((post: Post) => ({
+    const formattedPosts = posts.map((post: PostType) => ({
       _id: post._id.toString(),
       title: post.title,
       content: post.content,
-      createdBy: {
-        username: post.createdBy.username,
-      },
+      createdBy: { username: post.createdBy.username },
       createdAt: post.createdAt,
     }));
 
@@ -44,7 +56,6 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       data: formattedPosts,
     });
   } catch (error: unknown) {
-    console.error("Fetch Posts: Error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
@@ -52,9 +63,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
+
+    const forumId = extractForumId(request);
+    if (!forumId) {
+      return NextResponse.json({ error: "Forum ID missing" }, { status: 400 });
+    }
+
     let userId: string;
     try {
       userId = await getDataFromToken(request);
@@ -69,7 +86,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     const post = new Post({
-      forumId: params.id,
+      forumId,
       title: content.trim().substring(0, 50) + (content.length > 50 ? "..." : ""),
       content: content.trim(),
       createdBy: userId,
@@ -96,7 +113,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       },
     });
   } catch (error: unknown) {
-    console.error("Create Post: Error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
