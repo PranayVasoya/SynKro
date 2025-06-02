@@ -13,9 +13,20 @@ interface Message {
   time: Date;
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+function extractChatroomId(request: NextRequest): string | null {
+  const segments = request.nextUrl.pathname.split("/");
+  return segments.length >= 4 ? segments.at(-2) ?? null : null;
+}
+
+export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
+
+    const chatroomId = extractChatroomId(request);
+    if (!chatroomId) {
+      return NextResponse.json({ error: "Chatroom ID missing" }, { status: 400 });
+    }
+
     let userId: string;
     try {
       userId = await getDataFromToken(request);
@@ -23,17 +34,20 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
       console.error("Fetch Messages: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
-    const chatroom = await Chatroom.findOne({ _id: params.id, members: userId })
+
+    const chatroom = await Chatroom.findOne({ _id: chatroomId, members: userId })
       .populate("messages.sender", "username");
     if (!chatroom) {
       return NextResponse.json({ error: "Chatroom not found or access denied" }, { status: 404 });
     }
+
     const messages = chatroom.messages.map((msg: Message) => ({
       id: msg._id.toString(),
       text: msg.text,
       sender: msg.sender._id.toString() === userId ? "me" : msg.sender.username,
       time: msg.time,
     }));
+
     return NextResponse.json({
       message: "Messages fetched successfully",
       success: true,
@@ -48,9 +62,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
   try {
     await connectToDatabase();
+
+    const chatroomId = extractChatroomId(request);
+    if (!chatroomId) {
+      return NextResponse.json({ error: "Chatroom ID missing" }, { status: 400 });
+    }
+
     let userId: string;
     try {
       userId = await getDataFromToken(request);
@@ -58,30 +78,30 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       console.error("Send Message: Error:", error);
       return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
     }
+
     const { text } = await request.json();
     if (!text?.trim()) {
       return NextResponse.json({ error: "Message text is required" }, { status: 400 });
     }
-    const chatroom = await Chatroom.findOne({ _id: params.id, members: userId });
+
+    const chatroom = await Chatroom.findOne({ _id: chatroomId, members: userId });
     if (!chatroom) {
       return NextResponse.json({ error: "Chatroom not found or access denied" }, { status: 404 });
     }
-    
+
     const newMessage = {
       sender: userId,
       text: text.trim(),
       time: new Date(),
     };
-    
+
     chatroom.messages.push(newMessage);
     await chatroom.save();
-    
-    // Populate sender for notification
-    const populatedChatroom = await Chatroom.findById(params.id)
+
+    const populatedChatroom = await Chatroom.findById(chatroomId)
       .populate("messages.sender", "username");
     const savedMessage = populatedChatroom.messages[populatedChatroom.messages.length - 1];
-    
-    // Create notifications for other chatroom members
+
     const sender = await User.findById(userId).select("username");
     const notificationPromises = chatroom.members
       .filter((memberId: mongoose.Types.ObjectId) => memberId.toString() !== userId)
