@@ -31,16 +31,9 @@ export default function SignInPage() {
     setLoading(true);
     setError(null);
 
-    if (!formData.email || !formData.password) {
-      console.log("Missing email or password");
-      toast.error("Please enter both email and password.");
-      setLoading(false);
-      return;
-    }
-
     if (!emailValid) {
       console.log("Invalid email format");
-      toast.error("Please enter a valid '@sitpune.edu.in' email.");
+      toast.error("Please use your SIT email ending with @sitpune.edu.in");
       setLoading(false);
       return;
     }
@@ -51,6 +44,7 @@ export default function SignInPage() {
         formData
       );
       toast.success("Sign-in successful!");
+
       const isProfileComplete = response.data.data.profileComplete;
       if (!isProfileComplete) {
         router.push("/profile");
@@ -62,18 +56,22 @@ export default function SignInPage() {
 
       if (axios.isAxiosError(err)) {
         const serverError = err.response?.data as ApiErrorResponse;
-        errorMessage =
-          serverError?.message ||
-          serverError?.error ||
-          err.message ||
-          errorMessage;
+        const status = err.response?.status;
+        if (status === 400) {
+          errorMessage = "Invalid email or password. Please try again.";
+        } else {
+          errorMessage =
+            serverError?.message ||
+            serverError?.error ||
+            err.message ||
+            errorMessage;
+        }
       } else if (err instanceof Error) {
         errorMessage = err.message;
       }
 
       console.error("Signin error:", err);
       setError(errorMessage);
-      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -143,19 +141,15 @@ export default function SignInPage() {
               <input
                 id="email"
                 type="email"
-                placeholder={formData.email ? "" : "Enter your Email"}
+                placeholder={formData.email ? "" : "Enter your Email-ID"}
                 value={formData.email}
                 required
                 onChange={(e) => {
                   setFormData({ ...formData, email: e.target.value });
-                  if (
-                    e.target.value &&
-                    e.target.value.endsWith("@sitpune.edu.in")
-                  ) {
-                    setEmailValid(true);
-                  } else {
-                    setEmailValid(false);
-                  }
+                  setEmailValid(
+                    !e.target.value.startsWith("@") &&
+                      e.target.value.endsWith("@sitpune.edu.in")
+                  );
                 }}
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-customPurple dark:focus:ring-customPurple focus:border-transparent bg-white dark:bg-customDarkGray transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
               />
