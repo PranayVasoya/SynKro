@@ -1114,11 +1114,11 @@ export default function Dashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -5 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-popover shadow-lg rounded-md border border-border z-50 overflow-hidden max-h-96 overflow-y-auto"
+                    className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-popover shadow-lg rounded-md border border-popover-border z-50 overflow-hidden max-h-96 overflow-y-auto"
                     onClick={(e) => e.stopPropagation()}
                     data-testid="notifications-dropdown"
                   >
-                    <div className="p-2 px-3 border-b border-border">
+                    <div className="p-2 px-3 border-b border-popover-border">
                       <h4 className="text-sm font-semibold text-popover-foreground">
                         Notifications
                       </h4>
@@ -1173,7 +1173,7 @@ export default function Dashboard() {
                         ))}
                       </div>
                     )}
-                    <div className="p-2 px-3 border-t border-border text-center">
+                    <div className="p-2 px-3 border-t border-popover-border text-center">
                       <Button
                         variant="link"
                         size="sm"
@@ -1224,9 +1224,9 @@ export default function Dashboard() {
               Explore Projects
             </h2>
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
-              className="hidden sm:flex md:hidden"
+              className="hidden sm:flex md:hidden border border-border"
               onClick={() => setShowProjectPopup(true)}
               data-testid="create-project-main-tablet"
             >

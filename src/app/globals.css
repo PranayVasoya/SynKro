@@ -4,76 +4,107 @@
 @tailwind utilities;
 
 @layer base {
+  /* --- Light Mode --- */
   :root {
-    /* Define LIGHT mode variables */
-    --background: 0 0% 100%; /* White */
-    --secondary-background: 214.3 31.8% 91.4%; /* Light Gray */
-    --foreground: 222.2 84% 4.9%; /* Dark Gray */
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 222.2 84% 4.9%; /* Dark Gray */
+    --background: 0 0% 90%;
+    --foreground: 0 0% 0%;
+
+    --primary: 240 80% 75%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
+    --secondary-background: 0 80% 60%;
+
+    --accent: 0 80% 60%;
+    --accent-foreground: 0 80% 40%;
+
+    --muted: 0 0% 95%;
+    --muted-foreground: 220 20% 50%;
+
+    --border: 0 0% 80%;
+
+    --input: 0 0% 90%;
+
+    --ring: 240 80% 75%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 245 80% 80%; /* Example: Map to your customPurple conceptually? Or define a separate primary */
-    --primary-foreground: 255 100% 100%; /* White text on primary */
-    --secondary: 210 40% 96.1%; /* Light Gray */
-    --secondary-foreground: 222.2 47.4% 11.2%; /* Dark Gray */
-    --muted: 210 40% 96.1%; /* Light Gray */
-    --muted-foreground: 215.4 16.3% 46.9%; /* Medium Gray */
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%; /* Red */
-    --destructive-foreground: 0 0% 98%; /* Light text on red */
-    --border: 214.3 31.8% 91.4%; /* Light Gray Border */
-    --input: 214.3 31.8% 91.4%; /* Light Gray Input Border */
-    --ring: 245 80% 80%; /* Ring color - often matches primary */
+    --popover-foreground: 0 0% 0%;
+    --popover-border: 0 0% 80%;
 
-    --radius: 0.75rem; /* Example border radius */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 80% 70%;
 
-    /* Chart colors (examples) */
+    --radius: 0.75rem;
+
     --chart-1: 220 70% 50%;
     --chart-2: 160 70% 50%;
     --chart-3: 40 70% 50%;
     --chart-4: 280 70% 50%;
     --chart-5: 0 70% 50%;
+
+    --navbar: 0 0% 100%;
+    --navbar-foreground: 0 0% 0%;
+    --navbar-border: 0 0% 80%;
+
+    --button-border: 0 0% 0%;
   }
 
+  /* --- Dark Mode --- */
   .dark {
-    /* Define DARK mode variables */
-    --background: 0 0% 18%; /* customDarkGray */
-    --foreground: 210 40% 98%; /* White / Light Gray */
-    --card: 0 0% 30%; /* customMediumGray */
-    --card-foreground: 210 40% 98%; /* White / Light Gray */
-    --popover: 0 0% 25%; /* customMediumGray */
-    --popover-foreground: 210 40% 98%;
-    --primary: 240 79% 75%; /* customPurple */
-    --primary-foreground: 255 100% 100%; /* White text */
-    --secondary: 217.2 32.6% 17.5%; /* Darker Gray/Blue */
-    --secondary-foreground: 210 40% 98%;
-    --muted: 0 0% 18%;
-    --muted-foreground: 215 20.2% 65.1%; /* Lighter Gray for muted text */
+    --background: 0 0% 20%;
+    --foreground: 0 0% 100%;
+
+    --primary: 240 80% 75%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 50.6%; /* Darker Red */
-    --destructive-foreground: 0 0% 98%;
-    --border: 217.2 32.6% 17.5%; /* Dark Border */
-    --input: 0 0% 18%; /* Dark Input Border */
-    --ring: 245 80% 80%; /* Ring color - can be same as light or different */
 
-    /* Keep --radius the same usually */
-    /* Adjust chart colors for dark mode if needed */
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 90%;
+
+    --border: 0 0% 15%;
+
+    --input: 0 0% 15%;
+
+    --ring: 245 80% 80%;
+
+    --card: 0 0% 30%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 25%;
+    --popover-foreground: 0 0% 100%;
+    --popover-border: 0 0% 10%;
+
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 100%;
+
     --chart-1: 220 70% 60%;
     --chart-2: 160 70% 60%;
     --chart-3: 40 70% 60%;
     --chart-4: 280 70% 60%;
     --chart-5: 0 70% 60%;
+
+    --navbar: 0 0% 20%;
+    --navbar-foreground: 0 0% 100%;
+    --navbar-border: 0 0% 30%;
+
+    --button-border: 0 0% 100%;
   }
 }
 
 @layer base {
   * {
-    @apply border-border; /* Apply default border color */
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground; /* Apply default bg/text colors */
+    @apply bg-background text-foreground;
   }
 }

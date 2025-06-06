@@ -1,11 +1,9 @@
 "use client";
 
-// React & Next.js Imports
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-// UI Component Imports
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,15 +13,19 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-// Icon Imports
 import { Plus, X, Edit3, Check, Link as LinkIcon } from "lucide-react";
 
-// Utility Imports
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
-// --- Interfaces ---
+import {
+  INITIAL_SKILLS_CATEGORIES,
+  type SkillsCategories,
+} from "@/constants/skills";
+
+import Navbar from "@/components/Navbar";
+
 interface ApiErrorResponse {
   message?: string;
   error?: string;
@@ -40,16 +42,6 @@ interface Project {
   teamMembers: string[];
   lookingForMembers: boolean;
   status: "active" | "completed";
-}
-
-interface Skill {
-  id: string;
-  name: string;
-  checked: boolean;
-}
-
-interface SkillsCategories {
-  [key: string]: Skill[];
 }
 
 interface FormData {
@@ -78,7 +70,6 @@ interface UserLookup {
   username: string;
 }
 
-// --- Project Popup Component ---
 const ProjectPopup = ({
   userId,
   onClose,
@@ -171,6 +162,7 @@ const ProjectPopup = ({
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
+      {/* New Project Modal */}
       <motion.div
         initial={{ scale: 0.95, opacity: 0, y: 10 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -194,12 +186,12 @@ const ProjectPopup = ({
         </div>
         <form
           onSubmit={handleSubmit}
-          className="space-y-3 max-h-[70vh] overflow-y-auto pr-2"
+          className="space-y-3 max-h-[70vh] overflow-y-auto pr-2 pl-1"
         >
           <div>
             <label
               htmlFor="popup-proj-title"
-              className="block text-sm font-medium text-muted-foreground mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Project Title
             </label>
@@ -210,12 +202,13 @@ const ProjectPopup = ({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter project title"
               required
+              className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
             />
           </div>
           <div>
             <label
               htmlFor="popup-proj-desc"
-              className="block text-sm font-medium text-muted-foreground mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Description
             </label>
@@ -231,7 +224,7 @@ const ProjectPopup = ({
           <div>
             <label
               htmlFor="popup-proj-stack"
-              className="block text-sm font-medium text-muted-foreground mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Tech Stack (comma separated)
             </label>
@@ -241,13 +234,14 @@ const ProjectPopup = ({
               value={techStack}
               onChange={(e) => setTechStack(e.target.value)}
               placeholder="e.g., React, Node.js, MongoDB"
+              className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
             />
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <label
                 htmlFor="popup-proj-repo"
-                className="block text-sm font-medium text-muted-foreground mb-1"
+                className="block text-sm font-medium text-foreground mb-1"
               >
                 Repo Link
               </label>
@@ -257,12 +251,13 @@ const ProjectPopup = ({
                 value={repoLink}
                 onChange={(e) => setRepoLink(e.target.value)}
                 placeholder="https://github.com/..."
+                className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
               />
             </div>
             <div className="flex-1">
               <label
                 htmlFor="popup-proj-live"
-                className="block text-sm font-medium text-muted-foreground mb-1"
+                className="block text-sm font-medium text-foreground mb-1"
               >
                 Live Link
               </label>
@@ -272,11 +267,12 @@ const ProjectPopup = ({
                 value={liveLink}
                 onChange={(e) => setLiveLink(e.target.value)}
                 placeholder="https://your-project.com"
+                className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
               />
             </div>
           </div>
           <div className="space-y-2 pt-2">
-            <label className="flex items-center text-sm font-medium text-muted-foreground gap-2 cursor-pointer">
+            <label className="flex items-center text-sm font-medium text-foreground gap-2 cursor-pointer mb-4 w-fit">
               <input
                 id="popup-proj-members-check"
                 type="checkbox"
@@ -289,7 +285,7 @@ const ProjectPopup = ({
             <div>
               <label
                 htmlFor="popup-proj-team-search"
-                className="block text-sm font-medium text-muted-foreground mb-1"
+                className="block text-sm font-medium text-foreground mb-1"
               >
                 Add Team Members (Optional)
               </label>
@@ -299,6 +295,7 @@ const ProjectPopup = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search users by username..."
+                className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
               />
               <div className="max-h-32 overflow-y-auto mt-2 border border-border rounded-md p-2 space-y-1 bg-background">
                 {searchQuery && filteredUsers.length > 0 ? (
@@ -346,7 +343,7 @@ const ProjectPopup = ({
     </motion.div>
   );
 };
-// --- End ProjectPopup Component ---
+// --- End New Project Modal Component ---
 
 // --- Profile Page Component ---
 export default function ProfilePage() {
@@ -366,193 +363,9 @@ export default function ProfilePage() {
   const [showProjectPopup, setShowProjectPopup] = useState(false);
   const [editProfileMode, setEditProfileMode] = useState(false);
   const [availableUsers, setAvailableUsers] = useState<UserLookup[]>([]);
-  const [skillsCategories, setSkillsCategories] = useState<SkillsCategories>({
-    // This list should ideally be fetched or defined in a separate constants file
-    programmingLanguages: [
-      { id: "c", name: "C", checked: false },
-      { id: "cpp", name: "C++", checked: false },
-      { id: "csharp", name: "C#", checked: false },
-      { id: "go", name: "Go", checked: false },
-      { id: "java", name: "Java", checked: false },
-      { id: "js", name: "JS", checked: false },
-      { id: "ts", name: "TS", checked: false },
-      { id: "php", name: "PHP", checked: false },
-      { id: "python", name: "Python", checked: false },
-      { id: "ruby", name: "Ruby", checked: false },
-      { id: "rust", name: "Rust", checked: false },
-      { id: "scala", name: "Scala", checked: false },
-      { id: "kotlin", name: "Kotlin", checked: false },
-      { id: "erlang", name: "Erlang", checked: false },
-      { id: "coffeescript", name: "CoffeeScript", checked: false },
-      { id: "elixir", name: "Elixir", checked: false },
-      { id: "dart", name: "Dart", checked: false },
-      { id: "r", name: "R", checked: false },
-      { id: "swift", name: "Swift", checked: false },
-      { id: "objectivec", name: "Objective-C", checked: false },
-      { id: "perl", name: "Perl", checked: false },
-    ],
-    frontendDevelopment: [
-      { id: "vue", name: "Vue.js", checked: false },
-      { id: "react", name: "React", checked: false },
-      { id: "svelte", name: "Svelte", checked: false },
-      { id: "angular", name: "Angular", checked: false },
-      { id: "ember", name: "Ember", checked: false },
-      { id: "backbone", name: "Backbone", checked: false },
-      { id: "bootstrap", name: "Bootstrap", checked: false },
-      { id: "css", name: "CSS", checked: false },
-      { id: "html", name: "HTML", checked: false },
-      { id: "pug", name: "Pug", checked: false },
-      { id: "sass", name: "Sass", checked: false },
-      { id: "less", name: "Less", checked: false },
-      { id: "webcomponents", name: "Web Components", checked: false },
-      { id: "babel", name: "Babel", checked: false },
-      { id: "qt", name: "Qt", checked: false },
-      { id: "d3", name: "D3.js", checked: false },
-      { id: "lit", name: "Lit", checked: false },
-      { id: "preact", name: "Preact", checked: false },
-      { id: "stencil", name: "Stencil", checked: false },
-      { id: "materialui", name: "Material-UI", checked: false },
-      { id: "tailwindcss", name: "Tailwind CSS", checked: false },
-      { id: "bulma", name: "Bulma", checked: false },
-      { id: "foundation", name: "Foundation", checked: false },
-    ],
-    backendDevelopment: [
-      { id: "node", name: "Node.js", checked: false },
-      { id: "express", name: "Express", checked: false },
-      { id: "nestjs", name: "NestJS", checked: false },
-      { id: "django", name: "Django", checked: false },
-      { id: "flask", name: "Flask", checked: false },
-      { id: "laravel", name: "Laravel", checked: false },
-      { id: "rails", name: "Ruby on Rails", checked: false },
-      { id: "spring", name: "Spring Boot", checked: false },
-      { id: "fastapi", name: "FastAPI", checked: false },
-      { id: "asp", name: "ASP.NET", checked: false },
-      { id: "grails", name: "Grails", checked: false },
-    ],
-    mobileAppDevelopment: [
-      { id: "android", name: "Android", checked: false },
-      { id: "ios", name: "iOS", checked: false },
-      { id: "flutter", name: "Flutter", checked: false },
-      { id: "reactnative", name: "React Native", checked: false },
-      { id: "xamarin", name: "Xamarin", checked: false },
-      { id: "ionic", name: "Ionic", checked: false },
-      {
-        id: "kotlinmultiplatform",
-        name: "Kotlin Multiplatform",
-        checked: false,
-      },
-      { id: "capacitor", name: "Capacitor", checked: false },
-      { id: "cordova", name: "Cordova", checked: false },
-    ],
-    aiml: [
-      { id: "tensorflow", name: "TensorFlow", checked: false },
-      { id: "pytorch", name: "PyTorch", checked: false },
-      { id: "scikitlearn", name: "Scikit-learn", checked: false },
-      { id: "keras", name: "Keras", checked: false },
-      { id: "opencv", name: "OpenCV", checked: false },
-      { id: "huggingface", name: "Hugging Face", checked: false },
-    ],
-    database: [
-      { id: "mongodb", name: "MongoDB", checked: false },
-      { id: "postgresql", name: "PostgreSQL", checked: false },
-      { id: "mysql", name: "MySQL", checked: false },
-      { id: "sqlite", name: "SQLite", checked: false },
-      { id: "redis", name: "Redis", checked: false },
-      { id: "cassandra", name: "Cassandra", checked: false },
-      { id: "dynamodb", name: "DynamoDB", checked: false },
-      { id: "firebase", name: "Firebase", checked: false },
-      { id: "elasticsearch", name: "Elasticsearch", checked: false },
-      { id: "mariadb", name: "MariaDB", checked: false },
-      { id: "couchdb", name: "CouchDB", checked: false },
-      { id: "cockroachdb", name: "CockroachDB", checked: false },
-      { id: "neo4j", name: "Neo4j", checked: false },
-      { id: "oracle", name: "Oracle", checked: false },
-    ],
-    dataVisualization: [
-      { id: "chartjs", name: "Chart.js", checked: false },
-      { id: "d3viz", name: "D3.js", checked: false },
-      { id: "tableau", name: "Tableau", checked: false },
-      { id: "powerbi", name: "Power BI", checked: false },
-      { id: "apacheairflow", name: "Apache Airflow", checked: false },
-    ],
-    devops: [
-      { id: "kubernetes", name: "Kubernetes", checked: false },
-      { id: "docker", name: "Docker", checked: false },
-      { id: "jenkins", name: "Jenkins", checked: false },
-      { id: "ansible", name: "Ansible", checked: false },
-      { id: "terraform", name: "Terraform", checked: false },
-      { id: "aws", name: "AWS", checked: false },
-      { id: "gcp", name: "Google Cloud", checked: false },
-      { id: "azure", name: "Azure", checked: false },
-      { id: "heroku", name: "Heroku", checked: false },
-      { id: "netlify", name: "Netlify", checked: false },
-    ],
-    baas: [
-      { id: "firebasebaas", name: "Firebase", checked: false },
-      { id: "supabase", name: "Supabase", checked: false },
-      { id: "hasura", name: "Hasura", checked: false },
-      { id: "parse", name: "Parse", checked: false },
-    ],
-    framework: [
-      { id: "adonisjs", name: "AdonisJS", checked: false },
-      { id: "codeigniter", name: "CodeIgniter", checked: false },
-      { id: "cakephp", name: "CakePHP", checked: false },
-      { id: "phalcon", name: "Phalcon", checked: false },
-      { id: "dotnet", name: ".NET", checked: false },
-      { id: "spring", name: "Spring", checked: false },
-      { id: "play", name: "Play Framework", checked: false },
-      { id: "sails", name: "Sails.js", checked: false },
-      { id: "hapi", name: "Hapi.js", checked: false },
-    ],
-    testing: [
-      { id: "cypress", name: "Cypress", checked: false },
-      { id: "selenium", name: "Selenium", checked: false },
-      { id: "jest", name: "Jest", checked: false },
-      { id: "mocha", name: "Mocha", checked: false },
-      { id: "jasmine", name: "Jasmine", checked: false },
-      { id: "playwright", name: "Playwright", checked: false },
-    ],
-    software: [
-      { id: "photoshop", name: "Photoshop", checked: false },
-      { id: "illustrator", name: "Illustrator", checked: false },
-      { id: "xd", name: "Adobe XD", checked: false },
-      { id: "figma", name: "Figma", checked: false },
-      { id: "blender", name: "Blender", checked: false },
-      { id: "unity", name: "Unity", checked: false },
-      { id: "unreal", name: "Unreal Engine", checked: false },
-      { id: "maya", name: "Maya", checked: false },
-      { id: "3dsmax", name: "3ds Max", checked: false },
-      { id: "aftereffects", name: "After Effects", checked: false },
-    ],
-    staticSiteGenerators: [
-      { id: "gatsby", name: "Gatsby", checked: false },
-      { id: "gridsome", name: "Gridsome", checked: false },
-      { id: "hugo", name: "Hugo", checked: false },
-      { id: "nextjs", name: "Next.js", checked: false },
-      { id: "nuxtjs", name: "Nuxt.js", checked: false },
-      { id: "eleventy", name: "Eleventy", checked: false },
-      { id: "jekyll", name: "Jekyll", checked: false },
-      { id: "hexo", name: "Hexo", checked: false },
-      { id: "middleman", name: "Middleman", checked: false },
-      { id: "scully", name: "Scully", checked: false },
-      { id: "vuepress", name: "VuePress", checked: false },
-      { id: "docusaurus", name: "Docusaurus", checked: false },
-      { id: "zola", name: "Zola", checked: false },
-    ],
-    gameEngines: [
-      { id: "unity", name: "Unity", checked: false },
-      { id: "unreal", name: "Unreal Engine", checked: false },
-    ],
-    automation: [
-      { id: "ifttt", name: "IFTTT", checked: false },
-      { id: "zapier", name: "Zapier", checked: false },
-    ],
-    other: [
-      { id: "linux", name: "Linux", checked: false },
-      { id: "git", name: "Git", checked: false },
-      { id: "npm", name: "NPM", checked: false },
-    ],
-  });
+  const [skillsCategories, setSkillsCategories] = useState<SkillsCategories>(
+    () => JSON.parse(JSON.stringify(INITIAL_SKILLS_CATEGORIES))
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | undefined>(undefined);
 
@@ -620,7 +433,7 @@ export default function ProfilePage() {
       }
     },
     [router]
-  ); // Dependency: router
+  );
 
   // --- Initial Data Fetch UseEffect ---
   useEffect(() => {
@@ -632,7 +445,6 @@ export default function ProfilePage() {
   }, [fetchProfileData]);
 
   // --- Helper & Handler Functions ---
-
   const updateSkillChecks = (savedSkills: string[]) => {
     setSkillsCategories((prevCategories) => {
       const updated: SkillsCategories = {};
@@ -1016,352 +828,351 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-muted dark:bg-background">
-      <nav className="w-full bg-card shadow-sm border-b border-border p-3 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-foreground">SynKro</h1>
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push("/dashboard")}
-            >
-              {" "}
-              Dashboard{" "}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={onLogout}>
-              {" "}
-              Logout{" "}
-            </Button>
-          </div>
-        </div>
-      </nav>
+    <div className="flex flex-col min-h-screen bg-background">
+      <Navbar />
+      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pt-6 sm:pt-8 bg-background">
+        <Card className="w-full bg-card rounded-xl shadow-lg border border-border p-6 md:p-8 space-y-8">
+          {/* Profile Header */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 pb-6 border-b border-border">
+            {/* Editable Profile Picture */}
+            <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0">
+              <Image /*  Default picture for now  */
+                src="/user.png"
+                alt={`${formData.username || "User"}'s Profile`}
+                width={128}
+                height={128}
+                priority
+                className="rounded-full border-4 border-border object-cover aspect-square bg-muted"
+              />
+              <Button
+                size="icon"
+                variant="secondary"
+                className="absolute bottom-0 right-0 rounded-full w-8 h-8 border-2 border-card"
+                title="Change Picture (Not Implemented)"
+              >
+                <Edit3 className="w-4 h-4" />
+              </Button>
+            </div>
+            {/* --- End of Editable Profile Picture --- */}
 
-      <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pt-6 sm:pt-8">
-        <Card className="w-full bg-card rounded-xl shadow-lg border border-border">
-          <CardContent className="p-6 md:p-8 space-y-8">
-            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 pb-6 border-b border-border">
-              <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0">
-                <Image
-                  src="/user.png"
-                  alt={`${formData.username || "User"}'s Profile`}
-                  width={128}
-                  height={128}
-                  priority
-                  className="rounded-full border-4 border-border object-cover aspect-square bg-muted"
-                />
+            {/* Basic User Details */}
+            <div className="text-center sm:text-left flex-grow">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
+                {formData.username || "Username"}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {formData.email || "email@example.com"}
+              </p>
+              <div className="flex justify-center sm:justify-start space-x-3 mt-2">
+                {formData.github && (
+                  <a
+                    href={
+                      formData.github.startsWith("http")
+                        ? formData.github
+                        : `https://${formData.github}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary"
+                    title="GitHub"
+                  >
+                    {/* TODO: change GitHib icon */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-1.5 6-6.5.08-1.3-.32-2.7-.94-4-.27-.8-.71-1.48-1.3-2.12-.28-.15-.56-.27-.84-.35-.42-.12-.85-.18-1.28-.18-1.1 0-2.1.48-3.1 1.32-.6.48-1 1.17-1.2 1.8-.15.3-.24.6-.3.9-.07.3-.1.6-.1.9-.1.6-.1 1.2 0 1.8.1.6.25 1.1.45 1.6.4.9.9 1.7 1.5 2.4.7.7 1.5 1.3 2.4 1.7.9.4 1.8.7 2.7.8.4.1.8.1 1.2.1H21m-6-6v4m-6 0v4m-6-4v4m6-12v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4m-6 0h6" />
+                    </svg>
+                  </a>
+                )}
+                {formData.linkedin && (
+                  <a
+                    href={
+                      formData.linkedin.startsWith("http")
+                        ? formData.linkedin
+                        : `https://${formData.linkedin}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary"
+                    title="LinkedIn"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                      <rect x="2" y="9" width="4" height="12" />
+                      <circle cx="4" cy="4" r="2" />
+                    </svg>
+                  </a>
+                )}
+              </div>
+            </div>
+            {/* --- End of Basic User Details --- */}
+
+            {/* Edit Profile Button */}
+            <div className="mt-4 sm:mt-0 flex-shrink-0 self-center sm:self-start">
+              {editProfileMode ? (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={handleSaveProfile}
+                    className="bg-primary hover:bg-primary/70 text-primary-foreground"
+                  >
+                    <Check className="w-4 h-4 mr-1" /> Save Changes
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleCancelEdit}
+                    className="bg-secondary hover:bg-secondary/70 text-secondary-foreground border border-border"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
                 <Button
-                  size="icon"
+                  size="sm"
                   variant="secondary"
-                  className="absolute bottom-0 right-0 rounded-full w-8 h-8 border-2 border-card"
-                  title="Change Picture (Not Implemented)"
+                  onClick={() => setEditProfileMode(true)}
+                  className="bg-secondary hover:bg-secondary/70 text-secondary-foreground border border-border"
+                >
+                  <Edit3 className="w-4 h-4 mr-1" /> Edit Profile
+                </Button>
+              )}
+            </div>
+            {/* --- End of Edit Profile Button --- */}
+          </div>
+          {/* --- End of Profile Header --- */}
+
+          {/* Profile Details Section */}
+          <div className="w-full">
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              Profile Details
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              {[
+                "username",
+                "prn",
+                "batch",
+                "email",
+                "mobile",
+                "github",
+                "linkedin",
+              ].map((field) => (
+                <div key={field} className="space-y-1.5">
+                  <label
+                    htmlFor={`profile-${field}`}
+                    className="text-sm font-medium text-foreground"
+                  >
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                    {["username", "prn", "batch", "mobile"].includes(field) && (
+                      <span className="text-destructive ml-1">*</span>
+                    )}
+                  </label>
+                  <Input
+                    id={`profile-${field}`}
+                    type={
+                      field === "email"
+                        ? "email"
+                        : field === "mobile"
+                        ? "tel"
+                        : field.includes("Link") ||
+                          field === "github" ||
+                          field === "linkedin"
+                        ? "url"
+                        : "text"
+                    }
+                    name={field}
+                    value={formData[field as keyof FormData] || ""}
+                    onChange={handleChange}
+                    disabled={field === "email" || !editProfileMode}
+                    placeholder={`Enter your ${field}`}
+                    required={["username", "prn", "batch", "mobile"].includes(
+                      field
+                    )}
+                    className={"h-auto font-medium bg-background text-foreground border border-border focus:ring-2 focus:ring-ring focus:outline-none p-2 disabled:opacity-80 disabled:cursor-default disabled:bg-transparent disabled:shadow-none disabled:text-muted-foreground focus-visible:ring-0".concat(
+                      field !== "email" && !editProfileMode
+                        ? " disabled:border-none disabled:p-0"
+                        : " disabled:border-muted"
+                    )}
+                  />
+                  {field === "email" && editProfileMode && (
+                    <p className="text-xs text-muted-foreground mt-1 italic">
+                      Email cannot be changed.
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* End of Profile Details Section */}
+
+          {/* Skills and Badges Section */}
+          <div className="w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Skills</h3>
+              {!editProfileMode && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setEditProfileMode(true)}
+                  className="bg-secondary hover:bg-secondary/70 text-secondary-foreground border border-border"
                 >
                   {" "}
-                  <Edit3 className="w-4 h-4" />{" "}
+                  <Edit3 className="w-4 h-4 mr-1" /> Edit Skills
                 </Button>
-              </div>
-              <div className="text-center sm:text-left flex-grow">
-                <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
-                  {formData.username || "Username"}
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {formData.email || "email@example.com"}
-                </p>
-                <div className="flex justify-center sm:justify-start space-x-3 mt-2">
-                  {formData.github && (
-                    <a
-                      href={
-                        formData.github.startsWith("http")
-                          ? formData.github
-                          : `https://${formData.github}`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary"
-                      title="GitHub"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-1.5 6-6.5.08-1.3-.32-2.7-.94-4-.27-.8-.71-1.48-1.3-2.12-.28-.15-.56-.27-.84-.35-.42-.12-.85-.18-1.28-.18-1.1 0-2.1.48-3.1 1.32-.6.48-1 1.17-1.2 1.8-.15.3-.24.6-.3.9-.07.3-.1.6-.1.9-.1.6-.1 1.2 0 1.8.1.6.25 1.1.45 1.6.4.9.9 1.7 1.5 2.4.7.7 1.5 1.3 2.4 1.7.9.4 1.8.7 2.7.8.4.1.8.1 1.2.1H21m-6-6v4m-6 0v4m-6-4v4m6-12v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4m-6 0h6" />
-                      </svg>
-                    </a>
-                  )}
-                  {formData.linkedin && (
-                    <a
-                      href={
-                        formData.linkedin.startsWith("http")
-                          ? formData.linkedin
-                          : `https://${formData.linkedin}`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-primary"
-                      title="LinkedIn"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                        <rect x="2" y="9" width="4" height="12" />
-                        <circle cx="4" cy="4" r="2" />
-                      </svg>
-                    </a>
-                  )}
-                </div>
-              </div>
-              <div className="mt-4 sm:mt-0 flex-shrink-0 self-center sm:self-start">
-                {editProfileMode ? (
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={handleSaveProfile}>
-                      {" "}
-                      <Check className="w-4 h-4 mr-1" /> Save Changes{" "}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={handleCancelEdit}
-                    >
-                      {" "}
-                      Cancel{" "}
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setEditProfileMode(true)}
-                  >
-                    {" "}
-                    <Edit3 className="w-4 h-4 mr-1" /> Edit Profile{" "}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="w-full">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
-                Profile Details
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                {[
-                  "username",
-                  "prn",
-                  "batch",
-                  "email",
-                  "mobile",
-                  "github",
-                  "linkedin",
-                ].map((field) => (
-                  <div key={field} className="space-y-1.5">
-                    <label
-                      htmlFor={`profile-${field}`}
-                      className="text-sm font-medium text-muted-foreground"
-                    >
-                      {field.charAt(0).toUpperCase() + field.slice(1)}
-                      {["username", "prn", "batch", "mobile"].includes(
-                        field
-                      ) && <span className="text-destructive ml-1">*</span>}
-                    </label>
-                    <Input
-                      id={`profile-${field}`}
-                      type={
-                        field === "email"
-                          ? "email"
-                          : field === "mobile"
-                          ? "tel"
-                          : field.includes("Link") ||
-                            field === "github" ||
-                            field === "linkedin"
-                          ? "url"
-                          : "text"
-                      }
-                      name={field}
-                      value={formData[field as keyof FormData] || ""}
-                      onChange={handleChange}
-                      disabled={field === "email" || !editProfileMode}
-                      placeholder={`Enter your ${field}`}
-                      required={["username", "prn", "batch", "mobile"].includes(
-                        field
-                      )}
-                      className={
-                        !editProfileMode && field !== "email"
-                          ? "disabled:opacity-100 disabled:cursor-default bg-transparent border-none p-0 shadow-none focus-visible:ring-0 h-auto font-medium text-foreground"
-                          : ""
-                      }
-                    />
-                    {field === "email" && editProfileMode && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Email cannot be changed.
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="w-full">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Skills
-                </h3>
-                {!editProfileMode && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setEditProfileMode(true)}
-                  >
-                    {" "}
-                    <Edit3 className="w-4 h-4 mr-1" /> Edit Skills
-                  </Button>
-                )}
-              </div>
-              <div className="mb-4 border border-border rounded-md p-4 bg-background">
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">
-                  Selected Skills:
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {formData.skills?.length > 0 ? (
-                    formData.skills.map((skill, index) => (
-                      <span
-                        key={index}
-                        className="inline-block bg-primary/10 text-primary rounded-full px-3 py-1 text-xs font-medium"
-                      >
-                        {skill}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-sm text-muted-foreground italic">
-                      No skills selected.{" "}
-                      {editProfileMode
-                        ? "Select skills below."
-                        : "Click 'Edit Profile' or 'Edit Skills' to add."}
-                    </span>
-                  )}
-                </div>
-              </div>
-              {editProfileMode && (
-                <div className="space-y-2 max-h-96 overflow-y-auto pr-2 rounded-md border border-border p-4 bg-background">
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Select the skills you possess:
-                  </p>
-                  {Object.entries(skillsCategories).map(
-                    ([category, skills]) => (
-                      <Accordion
-                        key={category}
-                        defaultExpanded={false}
-                        className="!bg-card !text-foreground !shadow-none !border !border-border !rounded-md !before:hidden expanded:!my-2"
-                      >
-                        <AccordionSummary
-                          expandIcon={
-                            <ExpandMoreIcon className="!text-muted-foreground" />
-                          }
-                          className="!min-h-[40px] [&.Mui-expanded]:!min-h-[40px]"
-                        >
-                          <Typography className="!text-sm !font-medium">
-                            {category
-                              .replace(/([A-Z])/g, " $1")
-                              .replace(/^./, (str) => str.toUpperCase())}
-                          </Typography>
-                        </AccordionSummary>
-                        <AccordionDetails className="!pt-0 !pb-3">
-                          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2">
-                            {skills.map((skill) => (
-                              <label
-                                key={skill.id}
-                                className="flex items-center space-x-2 cursor-pointer group"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={!!skill.checked}
-                                  onChange={() =>
-                                    handleSkillToggle(category, skill.id)
-                                  }
-                                  className="form-checkbox h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary bg-background cursor-pointer"
-                                />
-                                <span className="text-sm text-muted-foreground group-hover:text-foreground">
-                                  {skill.name}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        </AccordionDetails>
-                      </Accordion>
-                    )
-                  )}
-                </div>
               )}
             </div>
 
-            <div className="w-full">
-              <h3 className="text-lg font-semibold text-foreground mb-4">
-                Badges
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {badges?.length > 0 ? (
-                  badges.map((badge, index) => (
-                    <div
+            <div className="mb-4 border border-border rounded-md p-4 bg-muted">
+              <h4 className="text-sm font-medium text-muted-foreground mb-2">
+                Selected Skills:
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {formData.skills?.length > 0 ? (
+                  formData.skills.map((skill, index) => (
+                    <span
                       key={index}
-                      className="flex flex-col items-center text-center p-3 bg-muted rounded-lg border border-border"
-                      title={badge.description}
+                      className="inline-block bg-primary/20 text-primary rounded-full px-3 py-1 text-xs font-semibold"
                     >
-                      <span className="text-3xl mb-1">{badge.icon}</span>
-                      <h4 className="text-xs font-semibold text-foreground">
-                        {badge.name}
-                      </h4>
-                    </div>
+                      {skill}
+                    </span>
                   ))
                 ) : (
-                  <p className="text-muted-foreground text-sm col-span-full text-center py-4">
-                    No badges earned yet.
-                  </p>
+                  <span className="text-sm text-muted-foreground italic">
+                    No skills selected.{" "}
+                    {editProfileMode
+                      ? "Select skills below."
+                      : "Click 'Edit Profile' or 'Edit Skills' to add."}
+                  </span>
                 )}
               </div>
             </div>
 
-            <div className="w-full">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-foreground">
-                  My Projects
-                </h3>
-                <Button size="sm" onClick={handleNewProject}>
-                  {" "}
-                  <Plus className="w-4 h-4 mr-1" /> New Project{" "}
-                </Button>
+            {editProfileMode && (
+              <div className="space-y-2 max-h-96 overflow-y-auto rounded-md border border-border p-4 bg-background">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Select the skills you possess:
+                </p>
+                {Object.entries(skillsCategories).map(([category, skills]) => (
+                  <Accordion
+                    key={category}
+                    defaultExpanded={false}
+                    className="!bg-card !text-foreground !shadow-none !border !border-border !rounded-md !before:hidden expanded:!my-2"
+                  >
+                    <AccordionSummary
+                      expandIcon={
+                        <ExpandMoreIcon className="!text-muted-foreground" />
+                      }
+                      className="!min-h-[40px] [&.Mui-expanded]:!min-h-[40px]"
+                    >
+                      <Typography className="!text-sm !font-medium">
+                        {category
+                          .replace(/([A-Z])/g, " $1")
+                          .replace(/^./, (str) => str.toUpperCase())}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails className="!pt-0 !pb-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-2">
+                        {skills.map((skill) => (
+                          <label
+                            key={skill.id}
+                            className="flex items-center space-x-2 cursor-pointer group"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={!!skill.checked}
+                              onChange={() =>
+                                handleSkillToggle(category, skill.id)
+                              }
+                              className="form-checkbox h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary bg-background cursor-pointer"
+                            />
+                            <span className="text-sm text-muted-foreground group-hover:text-foreground">
+                              {skill.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </AccordionDetails>
+                  </Accordion>
+                ))}
               </div>
-              <div className="space-y-4">
-                {projects?.length > 0 ? (
-                  projects.map((project) => (
-                    <ProjectCard
-                      key={project._id || project.title}
-                      project={project}
-                      availableUsers={availableUsers}
-                    />
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-sm text-center py-4">
-                    You haven&apos;t created or joined any projects yet.
-                  </p>
-                )}
-              </div>
+            )}
+          </div>
+
+          <div className="w-full">
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              Badges
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {badges?.length > 0 ? (
+                badges.map((badge, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center text-center p-3 bg-muted rounded-lg border border-border"
+                    title={badge.description}
+                  >
+                    <span className="text-3xl mb-1">{badge.icon}</span>
+                    <h4 className="text-xs font-semibold text-foreground">
+                      {badge.name}
+                    </h4>
+                  </div>
+                ))
+              ) : (
+                <p className="text-muted-foreground text-sm col-span-full text-center py-4">
+                  No badges earned yet.
+                </p>
+              )}
             </div>
-          </CardContent>
+          </div>
+
+          <div className="w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-foreground">
+                My Projects
+              </h3>
+              <Button
+                size="sm"
+                className="bg-primary hover:bg-primary/70 text-primary-foreground"
+                onClick={handleNewProject}
+              >
+                {" "}
+                <Plus className="w-4 h-4 mr-1" /> New Project{" "}
+              </Button>
+            </div>
+            <div className="space-y-4">
+              {projects?.length > 0 ? (
+                projects.map((project) => (
+                  <ProjectCard
+                    key={project._id || project.title}
+                    project={project}
+                    availableUsers={availableUsers}
+                  />
+                ))
+              ) : (
+                <p className="text-muted-foreground text-sm text-center py-4">
+                  You haven&apos;t created or joined any projects yet.
+                </p>
+              )}
+            </div>
+          </div>
         </Card>
       </main>
 
