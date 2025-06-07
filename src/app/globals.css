@@ -20,11 +20,11 @@
     --accent-foreground: 0 80% 40%;
 
     --muted: 0 0% 95%;
-    --muted-foreground: 220 20% 50%;
+    --muted-foreground: 0 0% 40%;
 
     --border: 0 0% 80%;
 
-    --input: 0 0% 90%;
+    --input: 0 0% 95%;
 
     --ring: 240 80% 75%;
 
@@ -35,8 +35,8 @@
     --popover-foreground: 0 0% 0%;
     --popover-border: 0 0% 80%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 80% 70%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
 
     --radius: 0.75rem;
 
@@ -50,7 +50,7 @@
     --navbar-foreground: 0 0% 0%;
     --navbar-border: 0 0% 80%;
 
-    --button-border: 0 0% 0%;
+    --button-border: 0 0% 80%;
   }
 
   /* --- Dark Mode --- */
@@ -72,7 +72,7 @@
 
     --border: 0 0% 15%;
 
-    --input: 0 0% 15%;
+    --input: 0 0% 25%;
 
     --ring: 245 80% 80%;
 
@@ -83,7 +83,7 @@
     --popover-foreground: 0 0% 100%;
     --popover-border: 0 0% 10%;
 
-    --destructive: 0 60% 50%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --chart-1: 220 70% 60%;
@@ -96,7 +96,7 @@
     --navbar-foreground: 0 0% 100%;
     --navbar-border: 0 0% 30%;
 
-    --button-border: 0 0% 100%;
+    --button-border: 0 0% 10%;
   }
 }
 
