@@ -289,16 +289,17 @@ export default function ProfilePage() {
   };
 
   // --- Main Render ---
-  if (isLoading) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
-        Loading Profile...
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
+  //       Loading Profile...
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <Toaster position="top-center" reverseOrder={false} />
       <Navbar />
       <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pt-6 sm:pt-8 bg-background">
         <Card className="w-full bg-card rounded-xl shadow-lg border border-border p-6 md:p-8 space-y-8">
@@ -314,13 +315,13 @@ export default function ProfilePage() {
                 priority
                 className="rounded-full border-4 border-border object-cover aspect-square bg-muted"
               />
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="absolute bottom-0 right-0 bg-secondary rounded-full p-1 border border-button-border hover:bg-muted transition-colors"
+              <Button
+                variant="secondary"
+                size="icon"
+                className="size-8 absolute bottom-0 right-0 rounded-full"
               >
-                <Edit3 className="w-5 h-5" />
-              </motion.button>
+                <Edit3 className="w-4 h-4" />
+              </Button>
             </div>
             {/* --- End of Editable Profile Picture --- */}
 
@@ -394,10 +395,9 @@ export default function ProfilePage() {
               {editProfileMode ? (
                 <div className="flex gap-2">
                   <Button
-                    size="sm"
                     variant="default"
+                    size="sm"
                     onClick={handleSaveProfile}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     <Check className="w-4 h-4 mr-1" /> Save Changes
                   </Button>
@@ -406,17 +406,15 @@ export default function ProfilePage() {
                     size="sm"
                     variant="secondary"
                     onClick={handleCancelEdit}
-                    className="bg-secondary hover:bg-destructive text-secondary-foreground hover:text-white border border-button-border"
                   >
                     Cancel
                   </Button>
                 </div>
               ) : (
                 <Button
-                  size="sm"
                   variant="secondary"
+                  size="sm"
                   onClick={() => setEditProfileMode(true)}
-                  className="bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-button-border"
                 >
                   <Edit3 className="w-4 h-4 mr-1" /> Edit Profile
                 </Button>
@@ -506,13 +504,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-foreground">Skills</h3>
               {!editProfileMode ? (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => setEditProfileMode(true)}
-                  className="bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-button-border"
-                >
-                  {" "}
+                <Button variant="secondary" size="sm">
                   <Edit3 className="w-4 h-4 mr-1" /> Edit Skills
                 </Button>
               ) : (
@@ -648,8 +640,8 @@ export default function ProfilePage() {
                 My Projects
               </h3>
               <Button
+                variant="default"
                 size="sm"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 onClick={handleNewProject}
               >
                 <Plus className="w-4 h-4 mr-1" /> New Project

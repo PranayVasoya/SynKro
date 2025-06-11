@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios"; // Import AxiosError
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "../theme-context";
 
@@ -928,8 +928,7 @@ export default function Dashboard() {
     <div
       className={`flex min-h-screen w-full relative bg-muted dark:bg-background text-foreground ${theme}`}
     >
-      {" "}
-      {/* Light mode contrast fix */}
+      <Toaster position="top-center" reverseOrder={false} />
       {/* Desktop Sidebar */}
       <aside
         className="hidden md:flex flex-col w-64 bg-card p-4 space-y-6 border-r border-border h-screen sticky top-0 shadow-sm z-[90]"

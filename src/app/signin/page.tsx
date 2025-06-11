@@ -1,29 +1,37 @@
 "use client";
 
+import axios from "axios";
+import { motion } from "framer-motion";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+// Components
 import Navbar from "@components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
-import { motion } from "framer-motion";
-import { Eye, EyeOff } from "lucide-react";
 
-interface ApiErrorResponse {
-  message?: string;
-  error?: string;
-}
+// Interfaces
+import { ApiErrorResponse } from "@/interfaces/api";
+
+// Icons
+import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function SignInPage() {
   const router = useRouter();
 
+  const [emailPlaceholder, setEmailPlaceholder] = useState(
+    "Enter your Email-ID"
+  );
+  const [passwordPlaceholder, setPasswordPlaceholder] = useState(
+    "Enter your Password"
+  );
+
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [showPassword, setShowPassword] = useState(false);
-
   const [emailValid, setEmailValid] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -33,7 +41,7 @@ export default function SignInPage() {
 
     if (!emailValid) {
       console.log("Invalid email format");
-      toast.error("Please use your SIT email ending with @sitpune.edu.in");
+      setError("Please use your SIT email ending with @sitpune.edu.in");
       setLoading(false);
       return;
     }
@@ -93,14 +101,12 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen bg-white dark:bg-customDarkGray">
+    <div className="flex flex-col items-center w-full min-h-screen bg-background">
       <Toaster position="top-center" reverseOrder={false} />
+      <Navbar />
 
-      <div className="w-full bg-white dark:bg-customDarkGray shadow-md sticky top-0 z-50">
-        <Navbar />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 w-full flex-1 items-center p-6 gap-6 max-w-7xl mx-auto">
+      <div className="bg-background grid grid-cols-1 md:grid-cols-2 w-full flex-1 items-center p-6 gap-6 max-w-7xl mx-auto">
+        {/* Illustration */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -116,23 +122,27 @@ export default function SignInPage() {
             priority
           />
         </motion.div>
+        {/* --- End of Illsutration --- */}
 
+        {/* Sign In Section */}
         <motion.div
-          className="flex flex-col items-center justify-center text-center gap-8 md:gap-10 h-full md:order-last" // Form last
-          variants={containerVariants}
+          className="flex flex-col items-center justify-center text-center gap-8 md:gap-10 h-full md:order-last"
           initial="hidden"
           animate="visible"
         >
           <motion.p
+            className="text-2xl md:text-3xl font-bold text-foreground"
             variants={itemVariants}
-            className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white"
           >
             Good to see you again. <br /> What will you create today?
           </motion.p>
 
           <motion.form
             onSubmit={handleSignIn}
-            className="w-full max-w-sm flex flex-col items-center space-y-4 bg-gray-50 dark:bg-customMediumGray p-6 rounded-xl shadow-lg border border-gray-300 dark:border-gray-600" // Adjusted styles
+            className="w-full max-w-sm flex flex-col items-center space-y-4 bg-card p-6 rounded-xl shadow-lg border border-border"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
           >
             <motion.div className="w-full" variants={itemVariants}>
               <label htmlFor="email" className="sr-only">
@@ -141,7 +151,11 @@ export default function SignInPage() {
               <input
                 id="email"
                 type="email"
-                placeholder={formData.email ? "" : "Enter your Email-ID"}
+                placeholder={emailPlaceholder}
+                onFocus={() => setEmailPlaceholder("")}
+                onBlur={(e) =>
+                  !e.target.value && setEmailPlaceholder("Enter your Email-ID")
+                }
                 value={formData.email}
                 required
                 onChange={(e) => {
@@ -151,7 +165,7 @@ export default function SignInPage() {
                       e.target.value.endsWith("@sitpune.edu.in")
                   );
                 }}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-customPurple dark:focus:ring-customPurple focus:border-transparent bg-white dark:bg-customDarkGray transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
+                className="w-full p-3 border border-border rounded-lg text-center text-foreground focus:outline-none focus:ring-2 focus:ring-customPurple focus:border-transparent bg-background transition-all duration-200 placeholder-placeholder"
               />
             </motion.div>
 
@@ -162,20 +176,24 @@ export default function SignInPage() {
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder={formData.password ? "" : "Enter your Password"}
+                placeholder={passwordPlaceholder}
+                onFocus={() => setPasswordPlaceholder("")}
+                onBlur={(e) =>
+                  !e.target.value && setPasswordPlaceholder("Enter your Password")
+                }
                 value={formData.password}
                 required
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full p-3 pl-10 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg text-center text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-customPurple dark:focus:ring-customPurple focus:border-transparent bg-white dark:bg-customDarkGray transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500"
+                className="w-full p-3 px-10 border border-border rounded-lg text-center text-foreground focus:outline-none focus:ring-2 focus:ring-customPurple focus:border-transparent bg-background transition-all duration-200 placeholder-placeholder"
               />
-
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 aria-label={showPassword ? "Hide password" : "Show password"}
+                tabIndex={-1}
               >
                 {showPassword ? (
                   <EyeOff className="h-5 w-5" />
@@ -185,21 +203,18 @@ export default function SignInPage() {
               </button>
             </motion.div>
 
-            <motion.button
-              variants={itemVariants}
-              whileHover={{ scale: 1.03, backgroundColor: "#7a7ad9" }}
-              whileTap={{ scale: 0.97 }}
+            <Button
+              variant="default"
+              size="xl"
               type="submit"
               disabled={loading}
-              style={{ backgroundColor: loading ? "" : "#8c8bf1" }}
-              className={`w-full p-3 mt-1 border border-transparent rounded-lg transition font-semibold ${
-                loading
-                  ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                  : "text-white"
-              }`}
+              style={{
+                backgroundColor: loading ? "" : "muted",
+                color: loading ? "" : "foreground",
+              }}
             >
               {loading ? "Signing In..." : "Sign In"}
-            </motion.button>
+            </Button>
 
             {error && (
               <motion.p
@@ -215,17 +230,18 @@ export default function SignInPage() {
 
           <motion.div
             variants={itemVariants}
-            className="text-md text-gray-700 dark:text-gray-300"
+            className="text-md text-muted-foreground"
           >
             Don&apos;t have an account?{" "}
             <Link
               href="/signup"
-              className="text-customPurple hover:underline font-medium"
+              className="text-primary hover:underline font-medium"
             >
               Click here.
             </Link>
           </motion.div>
         </motion.div>
+        {/* --- End of Sign In Section --- */}
       </div>
     </div>
   );
