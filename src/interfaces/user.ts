@@ -1,4 +1,9 @@
-export interface FormData {
+export interface UserLookup {
+  _id: string;
+  username: string;
+}
+
+export interface ProfileFormData {
   username: string;
   prn: string;
   batch: string;
@@ -11,16 +16,14 @@ export interface FormData {
 export interface UserData {
   _id: string;
   username: string;
-  prn: string;
-  batch: string;
   email: string;
-  mobile: string;
-  github: string;
-  linkedin: string;
-  skills: string[];
-}
-
-export interface UserLookup {
-  _id: string;
-  username: string;
+  prn?: string;
+  batch?: string;
+  mobile?: string;
+  github?: string;
+  linkedin?: string;
+  skills?: string[];
+  profileComplete?: boolean;
+  role:string;
+  points: number;
 }

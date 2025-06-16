@@ -1,5 +1,7 @@
 "use client";
 
+// TODO: add a "Go to Dashboard ->" button
+
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -8,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 // Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import ProjectPopup from "@/components/profile/ProjectPopup";
 import ProjectCard from "@/components/profile/ProjectCard";
 import Accordion from "@mui/material/Accordion";
@@ -20,9 +22,8 @@ import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
 
 // Interfaces
-import { FormData, UserData, UserLookup } from "@/interfaces/user";
+import { ProfileFormData, UserData, UserLookup } from "@/interfaces/user";
 import { Project } from "@/interfaces/project";
-import { ApiErrorResponse } from "@/interfaces/api";
 
 // Icons
 import { Plus, Edit3, Check } from "lucide-react";
@@ -38,7 +39,7 @@ import Navbar from "@/components/Navbar";
 // --- Profile Page Component ---
 export default function ProfilePage() {
   const router = useRouter();
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ProfileFormData>({
     username: "",
     prn: "",
     batch: "",
@@ -77,7 +78,7 @@ export default function ProfilePage() {
         }
 
         setUserId(user._id);
-        const currentFormData: FormData = {
+        const currentFormData: ProfileFormData = {
           username: user.username || "",
           prn: user.prn || "",
           batch: user.batch || "",
@@ -93,7 +94,9 @@ export default function ProfilePage() {
         // Assuming /api/projects returns *all* projects, filter for user's projects here
         // If /api/projects is meant to *only* return user's projects, this filter isn't needed
         const userProjects = (projectsRes.data.data || []).filter(
-          (p) => p.createdBy === user._id || p.teamMembers.includes(user._id)
+          (p) =>
+            p.createdBy?._id === user._id ||
+            p.teamMembers.some((member) => member._id === user._id)
         );
         setProjects(userProjects);
         setAvailableUsers(allUsersRes.data.data || []);
@@ -219,6 +222,8 @@ export default function ProfilePage() {
           ...updatePayload,
           _id: userId,
           email: originalData.email,
+          role: originalData.role,
+          points: originalData.points,
         };
         setOriginalData(newOriginalData);
       } else {
@@ -250,17 +255,17 @@ export default function ProfilePage() {
 
   const handleCancelEdit = () => {
     if (originalData) {
-      const formDataToRestore: FormData = {
+      const formDataToRestore: ProfileFormData = {
         username: originalData.username,
-        prn: originalData.prn,
-        batch: originalData.batch,
-        mobile: originalData.mobile,
-        github: originalData.github,
-        linkedin: originalData.linkedin,
-        skills: originalData.skills,
+        prn: originalData.prn || "",
+        batch: originalData.batch || "",
+        mobile: originalData.mobile || "",
+        github: originalData.github || "",
+        linkedin: originalData.linkedin || "",
+        skills: originalData.skills || [],
       };
       setFormData(formDataToRestore);
-      updateSkillChecks(originalData.skills);
+      updateSkillChecks(originalData.skills || []);
     } else {
       console.warn("Cannot cancel edit: Original data not available.");
     }
@@ -289,13 +294,13 @@ export default function ProfilePage() {
   };
 
   // --- Main Render ---
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
-  //       Loading Profile...
-  //     </div>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
+        Loading Profile...
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -431,48 +436,50 @@ export default function ProfilePage() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
               {["username", "prn", "batch", "mobile", "github", "linkedin"].map(
-                (field) => (
-                  <div key={field} className="space-y-1.5">
-                    <label
-                      htmlFor={`profile-${field}`}
-                      className="text-sm font-medium text-foreground"
-                    >
-                      {field.charAt(0).toUpperCase() + field.slice(1)}
-                      {["username", "prn", "batch", "mobile"].includes(
-                        field
-                      ) && <span className="text-destructive ml-1">*</span>}
-                    </label>
-                    <Input
-                      id={`profile-${field}`}
-                      type={
-                        field === "mobile"
-                          ? "tel"
-                          : field.includes("Link") ||
-                            field === "github" ||
-                            field === "linkedin"
-                          ? "url"
-                          : "text"
-                      }
-                      name={field}
-                      value={
-                        formData[
-                          field as keyof Omit<FormData, "skills" | "email">
-                        ] || ""
-                      }
-                      onChange={handleChange}
-                      disabled={!editProfileMode}
-                      placeholder={`Enter your ${field}`}
-                      required={["username", "prn", "batch", "mobile"].includes(
-                        field
-                      )}
-                      className={"h-auto font-medium bg-input text-foreground border border-border focus:ring-2 focus:ring-ring focus:outline-none p-2 disabled:opacity-80 disabled:cursor-default disabled:bg-transparent disabled:shadow-none disabled:text-muted-foreground focus-visible:ring-0".concat(
-                        field !== "email" && !editProfileMode
-                          ? " disabled:border-none disabled:p-0"
-                          : " disabled:border-muted"
-                      )}
-                    />
-                  </div>
-                )
+                (fieldKey) => {
+                  const field = fieldKey as keyof ProfileFormData;
+                  return (
+                    <div key={field} className="space-y-1.5">
+                      <label
+                        htmlFor={`profile-${field}`}
+                        className="text-sm font-medium text-foreground"
+                      >
+                        {field.charAt(0).toUpperCase() + field.slice(1)}
+                        {["username", "prn", "batch", "mobile"].includes(
+                          field
+                        ) && <span className="text-destructive ml-1">*</span>}
+                      </label>
+                      <Input
+                        id={`profile-${field}`}
+                        type={
+                          field === "mobile"
+                            ? "tel"
+                            : field.includes("Link") ||
+                              field === "github" ||
+                              field === "linkedin"
+                            ? "url"
+                            : "text"
+                        }
+                        name={field}
+                        value={formData[field] || ""}
+                        onChange={handleChange}
+                        disabled={!editProfileMode}
+                        placeholder={`Enter your ${field}`}
+                        required={[
+                          "username",
+                          "prn",
+                          "batch",
+                          "mobile",
+                        ].includes(field)}
+                        className={"h-auto font-medium bg-input text-foreground border border-border focus:ring-2 focus:ring-ring focus:outline-none p-2 disabled:opacity-80 disabled:cursor-default disabled:bg-transparent disabled:shadow-none disabled:text-muted-foreground focus-visible:ring-0".concat(
+                          !editProfileMode
+                            ? " disabled:border-none disabled:p-0"
+                            : " disabled:border-muted"
+                        )}
+                      />
+                    </div>
+                  );
+                }
               )}
 
               <div className="space-y-1.5">
@@ -639,11 +646,7 @@ export default function ProfilePage() {
               <h3 className="text-lg font-semibold text-foreground">
                 My Projects
               </h3>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleNewProject}
-              >
+              <Button variant="default" size="sm" onClick={handleNewProject}>
                 <Plus className="w-4 h-4 mr-1" /> New Project
               </Button>
             </div>
@@ -655,7 +658,7 @@ export default function ProfilePage() {
                     key={project._id || project.title}
                     project={project}
                     availableUsers={availableUsers}
-                    creatorUsername="formData.username"
+                    creatorUsername={formData.username}
                   />
                 ))
               ) : (

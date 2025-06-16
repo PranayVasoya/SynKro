@@ -50,6 +50,8 @@ export default {
         },
         
         foreground: "hsl(var(--foreground))",
+
+        golden: "hsl(var(--golden))",
         
         input: "hsl(var(--input))",
         
