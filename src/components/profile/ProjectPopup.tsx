@@ -4,8 +4,8 @@ import toast from "react-hot-toast";
 import { motion } from "framer-motion";
 
 // Interfaces
-import { Project } from "@/interfaces/project";
-import { UserLookup } from "@/interfaces/user";
+import type { UserLookup } from "@/interfaces/user";
+import type { ProjectSubmissionData } from "@/interfaces/project";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -21,18 +21,39 @@ const ProjectPopup = ({
 }: {
   userId: string | undefined;
   onClose: () => void;
-  onAddProject: (project: Omit<Project, "_id" | "createdBy">) => Promise<void>;
+  onAddProject: (projectPayload: ProjectSubmissionData) => Promise<void>;
 }) => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [techStack, setTechStack] = useState("");
-  const [repoLink, setRepoLink] = useState("");
-  const [liveLink, setLiveLink] = useState("");
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    techStack: "",
+    repoLink: "",
+    liveLink: "",
+    searchQuery: "",
+  });
   const [lookingForMembers, setLookingForMembers] = useState(false);
   const [teamMembers, setTeamMembers] = useState<string[]>([]);
   const [availableUsers, setAvailableUsers] = useState<UserLookup[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [titlePlaceholder, setTitlePlaceholder] = useState(
+    "Enter project title"
+  );
+  const [descriptionPlaceholder, setDescriptionPlaceholder] = useState(
+    "Describe your project"
+  );
+  const [techStackPlaceholder, setTechStackPlaceholder] = useState(
+    "e.g., React, Node.js, MongoDB"
+  );
+  const [repoLinkPlaceholder, setRepoLinkPlaceholder] = useState(
+    "https://github.com/..."
+  );
+  const [liveLinkPlaceholder, setLiveLinkPlaceholder] = useState(
+    "https://your-project.com"
+  );
+  const [searchQueryPlaceholder, setSearchQueryPlaceholder] = useState(
+    "Search users by username"
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -57,31 +78,31 @@ const ProjectPopup = ({
   const filteredUsers = availableUsers.filter(
     (user) =>
       user._id !== userId &&
-      user.username.toLowerCase().includes(searchQuery.toLowerCase())
+      user.username.toLowerCase().includes(formData.searchQuery.toLowerCase())
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !description.trim()) {
+    if (!formData.title.trim() || !formData.description.trim()) {
       toast.error("Title and description are required");
       return;
     }
     setIsSubmitting(true);
-    const projectData: Omit<Project, "_id" | "createdBy"> = {
-      title,
-      description,
-      techStack: techStack
+    const projectPayload: ProjectSubmissionData = {
+      title: formData.title,
+      description: formData.description,
+      techStack: formData.techStack
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean),
-      repoLink: repoLink || undefined,
-      liveLink: liveLink || undefined,
+      repoLink: formData.repoLink || undefined,
+      liveLink: formData.liveLink || undefined,
       lookingForMembers,
-      teamMembers,
+      teamMembersIDs: teamMembers,
       status: "active",
     };
     try {
-      await onAddProject(projectData);
+      await onAddProject(projectPayload);
       onClose();
     } catch (error) {
       console.error("Error submitting project from popup:", error);
@@ -142,10 +163,16 @@ const ProjectPopup = ({
             <Input
               id="popup-proj-title"
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter project title"
+              placeholder={titlePlaceholder}
+              onFocus={() => setTitlePlaceholder("")}
+              onBlur={(e) =>
+                !e.target.value && setTitlePlaceholder("Enter project title")
+              }
+              value={formData.title}
               required
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
             />
           </div>
@@ -158,11 +185,18 @@ const ProjectPopup = ({
             </label>
             <textarea
               id="popup-proj-desc"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your project"
+              placeholder={descriptionPlaceholder}
+              onFocus={() => setDescriptionPlaceholder("")}
+              onBlur={(e) =>
+                !e.target.value &&
+                setDescriptionPlaceholder("Describe your project")
+              }
+              value={formData.description}
               required
-              className="w-full min-h-[80px] p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
+              onChange={(e) => {
+                setFormData({ ...formData, description: e.target.value });
+              }}
+              className="w-full min-h-[80px] p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y placeholder:text-placeholder"
             />
           </div>
           <div>
@@ -175,9 +209,17 @@ const ProjectPopup = ({
             <Input
               id="popup-proj-stack"
               type="text"
-              value={techStack}
-              onChange={(e) => setTechStack(e.target.value)}
-              placeholder="e.g., React, Node.js, MongoDB"
+              placeholder={techStackPlaceholder}
+              value={formData.techStack}
+              onFocus={() => setTechStackPlaceholder("")}
+              onBlur={(e) =>
+                !e.target.value &&
+                setTechStackPlaceholder("e.g., React, Node.js, MongoDB")
+              }
+              required
+              onChange={(e) => {
+                setFormData({ ...formData, techStack: e.target.value });
+              }}
               className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
             />
           </div>
@@ -192,9 +234,17 @@ const ProjectPopup = ({
               <Input
                 id="popup-proj-repo"
                 type="url"
-                value={repoLink}
-                onChange={(e) => setRepoLink(e.target.value)}
-                placeholder="https://github.com/..."
+                placeholder={repoLinkPlaceholder}
+                onFocus={() => setRepoLinkPlaceholder("")}
+                onBlur={(e) =>
+                  !e.target.value &&
+                  setRepoLinkPlaceholder("https://github.com/...")
+                }
+                value={formData.repoLink}
+                required
+                onChange={(e) => {
+                  setFormData({ ...formData, repoLink: e.target.value });
+                }}
                 className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
               />
             </div>
@@ -208,9 +258,16 @@ const ProjectPopup = ({
               <Input
                 id="popup-proj-live"
                 type="url"
-                value={liveLink}
-                onChange={(e) => setLiveLink(e.target.value)}
-                placeholder="https://your-project.com"
+                placeholder={liveLinkPlaceholder}
+                onFocus={() => setLiveLinkPlaceholder("")}
+                onBlur={(e) =>
+                  !e.target.value &&
+                  setLiveLinkPlaceholder("https://your-project.com")
+                }
+                value={formData.liveLink}
+                onChange={(e) => {
+                  setFormData({ ...formData, liveLink: e.target.value });
+                }}
                 className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
               />
             </div>
@@ -236,13 +293,20 @@ const ProjectPopup = ({
               <Input
                 id="popup-proj-team-search"
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search users by username..."
+                placeholder={searchQueryPlaceholder}
+                onFocus={() => setSearchQueryPlaceholder("")}
+                onBlur={(e) =>
+                  !e.target.value &&
+                  setSearchQueryPlaceholder("Search users by username")
+                }
+                value={formData.searchQuery}
+                onChange={(e) =>
+                  setFormData({ ...formData, searchQuery: e.target.value })
+                }
                 className="w-full min-h-fit p-2 border rounded-md focus:ring-2 focus:ring-ring focus:outline-none bg-background text-foreground border-border transition-colors resize-y"
               />
               <div className="max-h-32 overflow-y-auto mt-2 border border-border rounded-md p-2 space-y-1 bg-background">
-                {searchQuery && filteredUsers.length > 0 ? (
+                {formData.searchQuery && filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
                     <label
                       key={user._id}
@@ -261,7 +325,7 @@ const ProjectPopup = ({
                   ))
                 ) : (
                   <p className="text-muted-foreground text-xs text-center py-2">
-                    {searchQuery
+                    {formData.searchQuery
                       ? "No matching users found"
                       : "Start typing to search users"}
                   </p>
@@ -272,7 +336,7 @@ const ProjectPopup = ({
           <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               onClick={onClose}
               disabled={isSubmitting}
             >

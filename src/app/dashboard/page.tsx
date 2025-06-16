@@ -571,7 +571,7 @@ export default function Dashboard() {
           <div className="w-full flex-1 relative" ref={searchRef}>
             <motion.input
               type="text"
-              className="w-full p-3 bg-background text-foreground border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base placeholder-muted-foreground transition-colors shadow-md"
+              className="w-full p-3 bg-background text-foreground border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base placeholder-placeholder transition-colors shadow-md"
               placeholder="Search projects, users..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
