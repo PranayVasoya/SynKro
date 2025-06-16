@@ -57,14 +57,14 @@ const ProjectCard = ({
       </h5>
       <div className="flex flex-wrap gap-1.5">
         {project.teamMembers?.length > 0 ? (
-          project.teamMembers.map((memberId, index) => {
-            const member = availableUsers.find((user) => user._id === memberId);
+          project.teamMembers.map((teamMemberObject, index) => {
+            const member = availableUsers.find((availableUser) => availableUser._id === teamMemberObject._id);
             return (
               <span
                 key={index}
                 className="inline-block bg-muted rounded-full px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
               >
-                {member ? member.username : "..."}
+                { member ? member.username : teamMemberObject.username }
               </span>
             );
           })
