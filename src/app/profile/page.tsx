@@ -23,7 +23,7 @@ import Image from "next/image";
 
 // Interfaces
 import { ProfileFormData, UserData, UserLookup } from "@/interfaces/user";
-import { Project } from "@/interfaces/project";
+import { Project, ProjectSubmissionData } from "@/interfaces/project";
 
 // Icons
 import { Plus, Edit3, Check } from "lucide-react";
@@ -277,19 +277,19 @@ export default function ProfilePage() {
   };
 
   const addProject = async (
-    projectData: Omit<Project, "_id" | "createdBy">
+    projectPayload: ProjectSubmissionData
   ) => {
     try {
       const response = await axios.post<{ data: Project }>(
         "/api/projects/create",
-        projectData
+        projectPayload
       );
       setProjects((prevProjects) => [response.data.data, ...prevProjects]);
       toast.success("Project created successfully!");
     } catch (error) {
       console.error("Error adding project:", error);
       toast.error("Failed to create project.");
-      throw error; // Re-throw for popup
+      throw error; // Re-throw for popup's isSubmitting state
     }
   };
 
