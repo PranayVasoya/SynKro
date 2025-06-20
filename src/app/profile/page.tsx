@@ -276,9 +276,7 @@ export default function ProfilePage() {
     setShowProjectPopup(true);
   };
 
-  const addProject = async (
-    projectPayload: ProjectSubmissionData
-  ) => {
+  const addProject = async (projectPayload: ProjectSubmissionData) => {
     try {
       const response = await axios.post<{ data: Project }>(
         "/api/projects/create",
@@ -312,7 +310,7 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 pb-6 border-b border-border">
             {/* Editable Profile Picture */}
             <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0">
-              <Image /*  Default picture for now  */
+              <Image /* Default picture for now */
                 src="/user.png"
                 alt={`${formData.username || "User"}'s Profile`}
                 width={128}
@@ -496,7 +494,7 @@ export default function ProfilePage() {
                   value={emailToDisplay}
                   disabled
                   placeholder="Email address"
-                  className="h-auto font-medium bg-transparent text-muted-foreground border-none p-0 disabled:opacity-80 disabled:cursor-default disabled:shadow-none"
+                  className="h-auto font-medium bg-transparent text-muted-foreground border border-border p-2 rounded-md overflow-x-auto whitespace-nowrap max-w-full"
                 />
                 <p className="text-xs text-muted-foreground/80 mt-1 italic">
                   Email cannot be changed.
@@ -510,13 +508,9 @@ export default function ProfilePage() {
           <div className="w-full">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-foreground">Skills</h3>
-              {!editProfileMode ? (
-                <Button variant="secondary" size="sm">
-                  <Edit3 className="w-4 h-4 mr-1" /> Edit Skills
-                </Button>
-              ) : (
-                <p className="italic text-muted-foreground text-xs ">
-                  Scroll up to save or cancel changes.
+              {!editProfileMode && (
+                <p className="italic text-muted-foreground text-xs">
+                  Click &apos;Edit Profile&apos; above to modify skills.
                 </p>
               )}
             </div>
@@ -540,7 +534,7 @@ export default function ProfilePage() {
                     No skills selected.{" "}
                     {editProfileMode
                       ? "Select skills below."
-                      : "Click 'Edit Skills' to add."}
+                      : "Click 'Edit Profile' to add."}
                   </span>
                 )}
               </div>

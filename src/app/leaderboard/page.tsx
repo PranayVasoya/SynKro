@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"; // Added useRef for potential future use
 import { useRouter } from "next/navigation";
-import { Trophy, X } from "lucide-react";
+import { ArrowLeft, Trophy, X } from "lucide-react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import { Button } from "@/components/ui/button"; // Assuming ui/button
 
 // --- Type Definition ---
@@ -113,18 +113,20 @@ const Leaderboard = () => {
 
   return (
     // Use theme colors for main background (muted in light mode)
-    <div className="flex flex-col min-h-screen bg-muted dark:bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background">
+      <Toaster position="top-center" reverseOrder={false} />
       {/* Navbar - Use theme colors */}
       <nav className="w-full bg-card shadow-sm p-4 sticky top-0 z-40 border-b border-border">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-bold text-foreground">SynKro</h1>
+          <h1 className="text-3xl font-bold text-foreground">SynKro</h1>
           <Button
             variant="outline"
             size="sm"
             onClick={() => router.push("/dashboard")}
             aria-label="Back to Dashboard"
+            className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 rounded-full px-4 py-2 transition-all duration-300 transform hover:scale-105 hover:shadow-md hover:font-bold" // Added hover:font-bold
           >
-            ← Back
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
         </div>
       </nav>
