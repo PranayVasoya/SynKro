@@ -1,7 +1,5 @@
 "use client";
 
-// TODO: add a "Go to Dashboard ->" button
-
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -22,7 +20,7 @@ import toast, { Toaster } from "react-hot-toast";
 import Image from "next/image";
 
 // Interfaces
-import { ProfileFormData, UserData, UserLookup } from "@/interfaces/user";
+import { ProfileFormData, UserData } from "@/interfaces/user";
 import { Project, ProjectSubmissionData } from "@/interfaces/project";
 
 // Icons
@@ -52,12 +50,12 @@ export default function ProfilePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showProjectPopup, setShowProjectPopup] = useState(false);
   const [editProfileMode, setEditProfileMode] = useState(false);
-  const [availableUsers, setAvailableUsers] = useState<UserLookup[]>([]);
   const [skillsCategories, setSkillsCategories] = useState<SkillsCategories>(
     () => JSON.parse(JSON.stringify(INITIAL_SKILLS_CATEGORIES))
   );
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | undefined>(undefined);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // Centralized hover state
 
   const emailToDisplay = originalData?.email || "";
 
@@ -66,10 +64,9 @@ export default function ProfilePage() {
     async (signal: AbortSignal) => {
       setIsLoading(true);
       try {
-        const [userRes, projectsRes, allUsersRes] = await Promise.all([
+        const [userRes, projectsRes] = await Promise.all([
           axios.get<{ data: UserData }>("/api/users/me", { signal }),
           axios.get<{ data: Project[] }>("/api/projects", { signal }),
-          axios.get<{ data: UserLookup[] }>("/api/users", { signal }),
         ]);
 
         const user = userRes.data.data;
@@ -92,14 +89,12 @@ export default function ProfilePage() {
         updateSkillChecks(user.skills || []);
 
         // Assuming /api/projects returns *all* projects, filter for user's projects here
-        // If /api/projects is meant to *only* return user's projects, this filter isn't needed
         const userProjects = (projectsRes.data.data || []).filter(
           (p) =>
             p.createdBy?._id === user._id ||
             p.teamMembers.some((member) => member._id === user._id)
         );
         setProjects(userProjects);
-        setAvailableUsers(allUsersRes.data.data || []);
       } catch (error: unknown) {
         if (axios.isCancel(error)) {
           console.log("Data fetching cancelled.");
@@ -167,7 +162,6 @@ export default function ProfilePage() {
     });
 
     if (toggledSkillName) {
-      // Read the *intended next* state directly after setting it for accurate update
       const isChecked = !skillsCategories[category]?.find(
         (s) => s.id === skillId
       )?.checked;
@@ -291,6 +285,56 @@ export default function ProfilePage() {
     }
   };
 
+  const handleLike = async (projectId: string) => {
+    if (!userId) {
+      toast.error("Please log in to like projects.");
+      return;
+    }
+    try {
+      const response = await axios.post(`/api/projects/${projectId}/like`, { userId });
+      const updatedLikes = response.data.likes || [{ _id: Date.now().toString(), userId, createdAt: new Date().toISOString() }]; // Fallback
+      setProjects((prevProjects) =>
+        prevProjects.map((p) =>
+          p._id === projectId ? { ...p, likes: updatedLikes } : p
+        )
+      );
+      toast.success("Project liked!");
+    } catch (error) {
+      console.error("Error liking project:", error);
+      toast.error("Failed to like project.");
+    }
+  };
+
+  const handleComment = async (
+    projectId: string,
+    text: string,
+    inputRef: React.RefObject<HTMLInputElement | null>
+  ) => {
+    if (!userId) {
+      toast.error("Please log in to comment.");
+      return;
+    }
+    try {
+      const response = await axios.post(`/api/projects/${projectId}/comment`, {
+        userId,
+        text,
+      });
+      const newComment = response.data.comment || { _id: Date.now().toString(), text, userId: { _id: userId }, createdAt: new Date().toISOString() }; // Fallback
+      setProjects((prevProjects) =>
+        prevProjects.map((p) =>
+          p._id === projectId ? { ...p, comments: [...(p.comments || []), newComment] } : p
+        )
+      );
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+      toast.success("Comment added!");
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      toast.error("Failed to add comment.");
+    }
+  };
+
   // --- Main Render ---
   if (isLoading) {
     return (
@@ -305,12 +349,12 @@ export default function ProfilePage() {
       <Toaster position="top-center" reverseOrder={false} />
       <Navbar />
       <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pt-6 sm:pt-8 bg-background">
-        <Card className="w-full bg-card rounded-xl shadow-lg border border-border p-6 md:p-8 space-y-8">
+        <Card className="w-full bg-card rounded-xl shadow-lg p-6 md:p-8 space-y-8"> {/* No border */}
           {/* Profile Header */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 pb-6 border-b border-border">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6 pb-6">
             {/* Editable Profile Picture */}
             <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0">
-              <Image /* Default picture for now */
+              <Image
                 src="/user.png"
                 alt={`${formData.username || "User"}'s Profile`}
                 width={128}
@@ -321,7 +365,7 @@ export default function ProfilePage() {
               <Button
                 variant="secondary"
                 size="icon"
-                className="size-8 absolute bottom-0 right-0 rounded-full"
+                className="size-8 absolute bottom-0 right-0 rounded-full hover:bg-purple-500 hover:text-white transition-colors"
               >
                 <Edit3 className="w-4 h-4" />
               </Button>
@@ -398,29 +442,34 @@ export default function ProfilePage() {
               {editProfileMode ? (
                 <div className="flex gap-2">
                   <Button
-                    variant="default"
+                    variant="secondary"
                     size="sm"
+                    className="hover:bg-purple-500 hover:text-white transition-colors"
                     onClick={handleSaveProfile}
                   >
                     <Check className="w-4 h-4 mr-1" /> Save Changes
                   </Button>
 
                   <Button
-                    size="sm"
                     variant="secondary"
+                    size="sm"
+                    className="hover:bg-purple-500 hover:text-white transition-colors"
                     onClick={handleCancelEdit}
                   >
                     Cancel
                   </Button>
                 </div>
               ) : (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setEditProfileMode(true)}
-                >
-                  <Edit3 className="w-4 h-4 mr-1" /> Edit Profile
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="hover:bg-purple-500 hover:text-white transition-colors"
+                    onClick={() => setEditProfileMode(true)}
+                  >
+                    <Edit3 className="w-4 h-4 mr-1" /> Edit Profile
+                  </Button>
+                </div>
               )}
             </div>
             {/* --- End of Edit Profile Button --- */}
@@ -469,11 +518,9 @@ export default function ProfilePage() {
                           "batch",
                           "mobile",
                         ].includes(field)}
-                        className={"h-auto font-medium bg-input text-foreground border border-border focus:ring-2 focus:ring-ring focus:outline-none p-2 disabled:opacity-80 disabled:cursor-default disabled:bg-transparent disabled:shadow-none disabled:text-muted-foreground focus-visible:ring-0".concat(
-                          !editProfileMode
-                            ? " disabled:border-none disabled:p-0"
-                            : " disabled:border-muted"
-                        )}
+                        className={
+                          "h-auto font-medium bg-input text-foreground border-0 focus:ring-2 focus:ring-ring focus:outline-none p-2 disabled:opacity-80 disabled:cursor-default disabled:bg-transparent disabled:shadow-none disabled:text-muted-foreground focus-visible:ring-0"
+                        }
                       />
                     </div>
                   );
@@ -487,16 +534,10 @@ export default function ProfilePage() {
                 >
                   Email
                 </label>
-                <Input
-                  id="profile-email"
-                  type="email"
-                  name="email"
-                  value={emailToDisplay}
-                  disabled
-                  placeholder="Email address"
-                  className="h-auto font-medium bg-transparent text-muted-foreground border border-border p-2 rounded-md overflow-x-auto whitespace-nowrap max-w-full"
-                />
-                <p className="text-xs text-muted-foreground/80 mt-1 italic">
+                <p className="text-sm text-muted-foreground break-words">
+                  {emailToDisplay || "Email address"}
+                </p>
+                <p className="text-xs text-muted-foreground/80 italic">
                   Email cannot be changed.
                 </p>
               </div>
@@ -515,7 +556,7 @@ export default function ProfilePage() {
               )}
             </div>
 
-            <div className="mb-4 border border-border rounded-md p-4 bg-input">
+            <div className="mb-4 rounded-md p-4 bg-input"> {/* No border */}
               <h4 className="text-sm font-medium text-muted-foreground mb-2">
                 Selected Skills:
               </h4>
@@ -541,21 +582,23 @@ export default function ProfilePage() {
             </div>
 
             {editProfileMode && (
-              <div className="space-y-2 max-h-96 overflow-y-auto rounded-md border border-border p-4 pt-0 bg-input">
-                <p className="text-sm text-muted-foreground sticky top-0 bg-input z-10 pt-4 pb-2 border-b-2 border-border">
+              <div className="space-y-2 max-h-96 overflow-y-auto rounded-md p-4 pt-0 bg-input"> {/* No border */}
+                <p className="text-sm text-muted-foreground sticky top-0 bg-input z-10 pt-4 pb-2"> {/* Removed border-b-2 */}
                   Select the skills you possess:
                 </p>
                 {Object.entries(skillsCategories).map(([category, skills]) => (
                   <Accordion
                     key={category}
                     defaultExpanded={false}
-                    className="!bg-card  !text-foreground !shadow-none !border !border-border !rounded-md !before:hidden expanded:!my-2"
+                    className="!bg-card !text-foreground !shadow-none !rounded-md !before:hidden expanded:!my-2" // No border
+                    sx={{ "&:before": { display: "none" } }} // Ensure no default border
                   >
                     <AccordionSummary
                       expandIcon={
                         <ExpandMoreIcon className="!text-muted-foreground" />
                       }
-                      className="!min-h-[40px] [&.Mui-expanded]:!min-h-[40px]"
+                      className="!min-h-[40px] [&.Mui-expanded]:!min-h-[40px] border-t-0"
+                      sx={{ borderTop: "none" }} // Override Material-UI top border
                     >
                       <Typography className="!text-sm !font-medium">
                         {category
@@ -599,26 +642,39 @@ export default function ProfilePage() {
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {INITIAL_BADGES?.length > 0 ? (
-                INITIAL_BADGES.map((badge, index) => (
+                INITIAL_BADGES.map((badge, idx) => (
                   <motion.div
-                    key={index}
-                    className="flex flex-col items-center text-center p-5 bg-muted rounded-lg border border-border"
+                    key={idx}
+                    className="flex flex-col items-center text-center p-5 bg-muted rounded-lg relative" // No border
                     transition={{ duration: 0.2 }}
-                    whileHover={{
-                      scale: 1.05,
-                      cursor: "pointer",
-                      border: "1px solid hsl(var(--primary))",
-                    }}
+                    onMouseEnter={() => setHoveredIndex(idx)}
+                    onMouseLeave={() => setHoveredIndex(null)}
                   >
-                    <span className="text-3xl mb-1">{badge.icon}</span>
+                    <AnimatePresence>
+                      {hoveredIndex === idx && (
+                        <motion.span
+                          className="absolute inset-0 bg-neutral-200 dark:bg-slate-800/[0.8] rounded-lg"
+                          initial={{ opacity: 0 }}
+                          animate={{
+                            opacity: 0.8,
+                            transition: { duration: 0.15 },
+                          }}
+                          exit={{
+                            opacity: 0,
+                            transition: { duration: 0.15, delay: 0.2 },
+                          }}
+                        />
+                      )}
+                    </AnimatePresence>
+                    <span className="text-3xl mb-1 z-10 relative">{badge.icon}</span>
                     <motion.h4
-                      className="text-xs font-semibold text-foreground mt-2"
+                      className="text-xs font-semibold text-foreground mt-2 z-10 relative"
                       whileHover={{ cursor: "text" }}
                     >
                       {badge.name}
                     </motion.h4>
                     <motion.h5
-                      className="text-xs font-medium text-muted-foreground mt-2"
+                      className="text-xs font-medium text-muted-foreground mt-2 z-10 relative"
                       whileHover={{ cursor: "text" }}
                     >
                       {badge.description}
@@ -651,8 +707,10 @@ export default function ProfilePage() {
                   <ProjectCard
                     key={project._id || project.title}
                     project={project}
-                    availableUsers={availableUsers}
-                    creatorUsername={formData.username}
+                    user={originalData || {}}
+                    handleLike={handleLike}
+                    handleComment={handleComment}
+                    router={router}
                   />
                 ))
               ) : (

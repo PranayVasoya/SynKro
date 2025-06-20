@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, easeOut } from "framer-motion";
 import { HelpCircle } from "lucide-react";
 import Navbar from "@/components/Navbar"; // Assuming correct path
 
@@ -50,9 +50,16 @@ export default function FAQPage() { // Renamed for clarity
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.98 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.3, ease: "easeOut" } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.3,
+        ease: easeOut, // ✅ use the imported easing function
+      },
+    },
   };
-
 
   return (
     // Main page background - using bg-muted for light mode contrast as in Dashboard

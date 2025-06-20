@@ -1,6 +1,8 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
+import dynamic from "next/dynamic"; // For client-side components
 import { ThemeProvider } from "./theme-context";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "600", "700"], display: "swap" });
@@ -11,12 +13,12 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false }); // Client-side only
   return (
     <html lang="en">
       <body className={`${poppins.className} bg-white dark:bg-customDarkGray`}>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <Navbar />
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

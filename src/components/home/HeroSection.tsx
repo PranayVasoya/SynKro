@@ -22,14 +22,16 @@ export default function HeroSection() {
             <br />
             SynKro community
           </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="text-lg font-semibold text-muted-foreground"
-          >
-            Sync karo yaar!
-          </motion.p>
+          <div className="flex justify-start items-center w-full">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              className="text-lg font-semibold text-muted-foreground"
+            >
+              Sync karo yaar!
+            </motion.p>
+          </div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

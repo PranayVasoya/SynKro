@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef, useCallback } from "react";
 import toast, { Toaster } from "react-hot-toast";
+import { Typewriter } from "react-simple-typewriter";
 
 // Components
 import { Button } from "@/components/ui/button";
@@ -35,13 +36,20 @@ import {
 // Main Dashboard Component
 export default function Dashboard() {
   const router = useRouter();
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsFirstLoad(false), 1000); // Let animation finish once
+    return () => clearTimeout(timer);
+  }, []);
   const { theme, toggleTheme } = useTheme();
+  const [showTyped, setShowTyped] = useState(true);
 
   // UI State
   const [showSidebar, setShowSidebar] = useState(false);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [showNotifications, setShowNotifications] = useState(false);
+  const [hoveredIcon, setHoveredIcon] = useState<string | null>(null); // State to track hovered icon
 
   // Data & Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null (loading), true (authenticated), false (not authenticated)
@@ -370,89 +378,92 @@ export default function Dashboard() {
   ];
 
   // --- Reusable Components ---
-  const MenuLinks = () => (
-    <motion.div
-      className="flex flex-col space-y-1 w-full"
-      variants={{
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
-      }}
-      initial="hidden"
-      animate="visible"
-    >
-      {menuItemsDefinition.map((item, idx) => (
-        <div
-          key={idx}
-          className="relative"
-          ref={item.label === "Settings" ? settingsRef : null}
+  const MenuLinks = ({ animate }: { animate: boolean }) => (
+  <motion.div
+    className="flex flex-col space-y-1 w-full"
+    variants={{
+      hidden: { opacity: 0 },
+      visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
+    }}
+    initial={animate ? "hidden" : false}
+    animate={animate ? "visible" : false}
+  >
+    {menuItemsDefinition.map((item, idx) => (
+      <div
+        key={idx}
+        className="relative"
+        ref={item.label === "Settings" ? settingsRef : null}
+      >
+        <motion.button
+          type="button"
+          variants={{
+            hidden: { opacity: 0, x: -20 },
+            visible: { opacity: 1, x: 0 },
+          }}
+          initial={animate ? "hidden" : false}
+          animate={animate ? "visible" : false}
+          className="flex items-center text-foreground cursor-pointer px-3 py-2 hover:bg-muted rounded-md transition-colors duration-200 w-full text-left"
+          onClick={(e) => {
+            item.action(e);
+          }}
+          whileHover={{ x: 3 }}
+          whileTap={{ scale: 0.98 }}
+          data-testid={`menu-${item.label.toLowerCase()}`}
         >
-          <motion.button
-            type="button"
-            variants={{
-              hidden: { opacity: 0, x: -20 },
-              visible: { opacity: 1, x: 0 },
-            }}
-            className="flex items-center text-foreground cursor-pointer px-3 py-2 hover:bg-muted rounded-md transition-colors duration-200 w-full text-left"
-            onClick={(e) => {
-              item.action(e);
-            }}
-            whileHover={{ x: 3 }}
-            whileTap={{ scale: 0.98 }}
-            data-testid={`menu-${item.label.toLowerCase()}`}
-          >
-            {item.icon}{" "}
-            <span className="ml-3 font-medium text-sm">{item.label}</span>
-          </motion.button>
-          <AnimatePresence>
-            {item.label === "Settings" && showSettingsDropdown && (
-              <motion.div
-                initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className="absolute left-0 top-full mt-1 w-48 bg-popover shadow-lg rounded-md border border-border z-[120] overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
+          {item.icon}{" "}
+          <span className="ml-3 font-medium text-sm">{item.label}</span>
+        </motion.button>
+
+        <AnimatePresence>
+          {item.label === "Settings" && showSettingsDropdown && (
+            <motion.div
+              initial={{ opacity: 0, y: -5, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -5, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute left-0 top-full mt-1 w-48 bg-popover shadow-lg rounded-md border border-border z-[120] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  toggleTheme();
+                  setShowSettingsDropdown(false);
+                }}
+                className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
+                data-testid="menu-theme-toggle"
               >
-                <button
-                  type="button"
-                  onClick={() => {
-                    toggleTheme();
+                {theme === "light" ? (
+                  <Moon className="w-4 h-4 mr-2" />
+                ) : (
+                  <Sun className="w-4 h-4 mr-2" />
+                )}{" "}
+                Toggle Theme
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  try {
+                    router.push("/faq");
                     setShowSettingsDropdown(false);
-                  }}
-                  className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
-                  data-testid="menu-theme-toggle"
-                >
-                  {theme === "light" ? (
-                    <Moon className="w-4 h-4 mr-2" />
-                  ) : (
-                    <Sun className="w-4 h-4 mr-2" />
-                  )}{" "}
-                  Toggle Theme
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    try {
-                      router.push("/faq");
-                      setShowSettingsDropdown(false);
-                      setShowSidebar(false);
-                    } catch (_err) {
-                      console.error("Nav to /faq failed", _err);
-                      toast.error("FAQ page not found.");
-                    }
-                  }}
-                  className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
-                  data-testid="menu-faq"
-                >
-                  <HelpCircle className="w-4 h-4 mr-2" /> FAQ
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      ))}
-    </motion.div>
-  );
+                    setShowSidebar(false);
+                  } catch (_err) {
+                    console.error("Nav to /faq failed", _err);
+                    toast.error("FAQ page not found.");
+                  }
+                }}
+                className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
+                data-testid="menu-faq"
+              >
+                <HelpCircle className="w-4 h-4 mr-2" /> FAQ
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    ))}
+  </motion.div>
+);
 
   const MenuIcon = ({
     onClick,
@@ -506,7 +517,7 @@ export default function Dashboard() {
         >
           SynKro
         </motion.h1>
-        <MenuLinks />
+        <MenuLinks animate={isFirstLoad} />
       </aside>
       {/* Mobile Sidebar */}
       <AnimatePresence>
@@ -543,7 +554,7 @@ export default function Dashboard() {
                   isClose={true}
                 />
               </div>
-              <MenuLinks />
+              <MenuLinks animate={isFirstLoad} />
             </motion.aside>
           </>
         )}
@@ -582,71 +593,86 @@ export default function Dashboard() {
             <AnimatePresence>
               {(searchResults.projects.length > 0 ||
                 searchResults.users.length > 0) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  className="absolute top-full mt-2 w-full bg-popover rounded-md shadow-lg border border-border z-50 max-h-80 overflow-y-auto"
-                  data-testid="search-results"
-                >
-                  {searchResults.projects.length > 0 && (
-                    <div className="p-2">
-                      <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1 uppercase tracking-wider">
-                        Projects
-                      </h3>
-                      {searchResults.projects.map((project) => (
-                        <Button
-                          variant="ghost"
-                          key={project._id}
-                          className="w-full text-left justify-start px-3 py-1.5 h-auto text-sm text-popover-foreground hover:bg-accent transition-colors rounded"
-                          onClick={() => {
-                            router.push(`/projects/${project._id}`);
-                            setSearchText("");
-                            setSearchResults({ projects: [], users: [] });
-                          }}
-                        >
-                          {project.title}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                  {searchResults.users.length > 0 && (
-                    <div className="p-2 border-t border-border">
-                      <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1 uppercase tracking-wider">
-                        Users
-                      </h3>
-                      {searchResults.users.map((user) => (
-                        <Button
-                          variant="ghost"
-                          key={user._id}
-                          className="w-full text-left justify-start px-3 py-1.5 h-auto text-sm text-popover-foreground hover:bg-accent transition-colors rounded"
-                          onClick={() => {
-                            router.push(`/profile/${user._id}`);
-                            setSearchText("");
-                            setSearchResults({ projects: [], users: [] });
-                          }}
-                        >
-                          {user.username}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                </motion.div>
-              )}
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    className="absolute top-full mt-2 w-full bg-popover rounded-md shadow-lg border border-border z-50 max-h-80 overflow-y-auto"
+                    data-testid="search-results"
+                  >
+                    {searchResults.projects.length > 0 && (
+                      <div className="p-2">
+                        <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1 uppercase tracking-wider">
+                          Projects
+                        </h3>
+                        {searchResults.projects.map((project) => (
+                          <Button
+                            variant="ghost"
+                            key={project._id}
+                            className="w-full text-left justify-start px-3 py-1.5 h-auto text-sm text-popover-foreground hover:bg-accent transition-colors rounded"
+                            onClick={() => {
+                              router.push(`/projects/${project._id}`);
+                              setSearchText("");
+                              setSearchResults({ projects: [], users: [] });
+                            }}
+                          >
+                            {project.title}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                    {searchResults.users.length > 0 && (
+                      <div className="p-2 border-t border-border">
+                        <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1 uppercase tracking-wider">
+                          Users
+                        </h3>
+                        {searchResults.users.map((user) => (
+                          <Button
+                            variant="ghost"
+                            key={user._id}
+                            className="w-full text-left justify-start px-3 py-1.5 h-auto text-sm text-popover-foreground hover:bg-accent transition-colors rounded"
+                            onClick={() => {
+                              router.push(`/profile/${user._id}`);
+                              setSearchText("");
+                              setSearchResults({ projects: [], users: [] });
+                            }}
+                          >
+                            {user.username}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
             </AnimatePresence>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-1 sm:space-x-2">
+          <div className="flex items-center space-x-1 sm:space-x-2 relative">
             <Button
               variant="ghost"
               size="icon"
               onClick={handleLeaderboard}
-              className="text-golden hover:bg-golden/10 w-8 h-8 sm:w-10 sm:h-10"
+              className="text-golden hover:bg-golden/10 w-8 h-8 sm:w-10 sm:h-10 relative"
               aria-label="Leaderboard"
               data-testid="leaderboard-button"
+              onMouseEnter={() => setHoveredIcon("leaderboard")}
+              onMouseLeave={() => setHoveredIcon(null)}
             >
               <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
+              <AnimatePresence>
+                {hoveredIcon === "leaderboard" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.1 }}
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap"
+                  >
+                    Leaderboard
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Button>
             <div className="relative" ref={notificationsRef}>
               <Button
@@ -659,12 +685,27 @@ export default function Dashboard() {
                 className="text-primary hover:bg-primary/10 w-8 h-8 sm:w-10 sm:h-10 relative"
                 aria-label="Notifications"
                 data-testid="notifications-button"
+                onMouseEnter={() => setHoveredIcon("notifications")}
+                onMouseLeave={() => setHoveredIcon(null)}
               >
                 <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
                 {notifications.some((n) => !n.read) && (
                   <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 block h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
                 )}
               </Button>
+              <AnimatePresence>
+                {hoveredIcon === "notifications" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.1 }}
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap"
+                  >
+                    Notifications
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <AnimatePresence>
                 {showNotifications && (
                   <motion.div
@@ -691,11 +732,10 @@ export default function Dashboard() {
                           <button
                             type="button"
                             key={notification._id}
-                            className={`w-full text-left px-3 py-2.5 text-sm text-popover-foreground hover:bg-muted transition-colors block ${
-                              !notification.read
+                            className={`w-full text-left px-3 py-2.5 text-sm text-popover-foreground hover:bg-muted transition-colors block ${!notification.read
                                 ? "font-medium"
                                 : "opacity-70 bg-accent"
-                            }`}
+                              }`}
                             onClick={() => {
                               if (!notification.read)
                                 markNotificationAsRead(notification._id);
@@ -748,11 +788,26 @@ export default function Dashboard() {
               variant="ghost"
               size="icon"
               onClick={onLogout}
-              className="text-destructive hover:bg-destructive/10 w-8 h-8 sm:w-10 sm:h-10"
+              className="text-destructive hover:bg-destructive/10 w-8 h-8 sm:w-10 sm:h-10 relative"
               aria-label="Logout"
               data-testid="logout-button"
+              onMouseEnter={() => setHoveredIcon("logout")}
+              onMouseLeave={() => setHoveredIcon(null)}
             >
               <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+              <AnimatePresence>
+                {hoveredIcon === "logout" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.1 }}
+                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap"
+                  >
+                    Logout
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Button>
           </div>
         </motion.div>
@@ -765,7 +820,24 @@ export default function Dashboard() {
           className="w-full text-center mb-8 md:mb-10 py-4"
         >
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
-            Welcome back, {user.username || "Developer"}!
+            Welcome back,{" "}
+            {user.username ? (
+              showTyped ? (
+                <Typewriter
+                  words={[user.username]}
+                  typeSpeed={100}
+                  cursor
+                  cursorStyle=""
+                  onLoopDone={() => setShowTyped(false)}
+                  loop={1}
+                />
+              ) : (
+                user.username
+              )
+            ) : (
+              "Developer"
+            )}
+            !
           </h1>
           <p className="text-muted-foreground mt-1 text-base sm:text-lg">
             Explore projects or start your own.
