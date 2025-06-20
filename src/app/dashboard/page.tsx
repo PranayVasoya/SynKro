@@ -1,15 +1,20 @@
 "use client";
 
 import axios from "axios";
-import { useTheme } from "../theme-context";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 // Components
 import { Button } from "@/components/ui/button";
 import ProjectCard from "@/components/dashboard/ProjectCard";
+import MenuIcon from "@/components/dashboard/MenuIcon";
+import MenuLinks, {
+  MenuItemDefinition,
+} from "@/components/dashboard/MenuLinks";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 
 // Interfaces
 import type { ApiErrorResponse } from "@/interfaces/api";
@@ -20,22 +25,15 @@ import type { UserData } from "@/interfaces/user";
 // Icons
 import {
   Cog,
-  Bell,
-  Trophy,
   MessageCircle,
-  Sun,
-  Moon,
-  HelpCircle,
   Users,
-  LogOut,
   User,
-  X,
 } from "lucide-react";
 
 // Main Dashboard Component
 export default function Dashboard() {
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   // UI State
   const [showSidebar, setShowSidebar] = useState(false);
@@ -58,6 +56,68 @@ export default function Dashboard() {
   const notificationsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
+  // Memoized values & Callbacks
+  const fetchProjects = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const res = await axios.get<{ data: Project[] }>("/api/projects");
+      setProjects(res.data?.data || []);
+    } catch (err) {
+      console.error("Failed to fetch projects", err);
+      toast.error("Failed to load projects");
+      setProjects([]);
+    }
+  }, [isAuthenticated]);
+  const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const res = await axios.get<{ data: NotificationData[] }>(
+        "/api/notifications"
+      );
+      setNotifications(res.data?.data || []);
+    } catch (err) {
+      console.error("Failed to fetch notifications", err);
+      setNotifications([]);
+    }
+  }, [isAuthenticated]);
+  const menuItemsDefinition = useMemo(
+    (): MenuItemDefinition[] => [
+      {
+        label: "Chat",
+        icon: <MessageCircle className="w-5 h-5" />,
+        action: () => {
+          router.push("/chat");
+          setShowSidebar(false);
+        },
+      },
+      {
+        label: "Community",
+        icon: <Users className="w-5 h-5" />,
+        action: () => {
+          router.push("/community");
+          setShowSidebar(false);
+        },
+      },
+      {
+        label: "Profile",
+        icon: <User className="w-5 h-5" />,
+        action: () => {
+          router.push(`/profile`);
+          setShowSidebar(false);
+        },
+      },
+      {
+        label: "Settings",
+        icon: <Cog className="w-5 h-5" />,
+        action: (e: React.MouseEvent) => {
+          e.stopPropagation();
+          setShowSettingsDropdown((prev) => !prev);
+        },
+      },
+    ],
+    [router, user?._id]
+  );
+
   // Fetch User (runs once on mount to determine authentication and get user data)
   useEffect(() => {
     const fetchUser = async () => {
@@ -79,38 +139,10 @@ export default function Dashboard() {
     fetchUser();
   }, [router]);
 
-  // Fetch Projects (memoized)
-  const fetchProjects = useCallback(async () => {
-    if (!isAuthenticated) return;
-    try {
-      const res = await axios.get<{ data: Project[] }>("/api/projects");
-      setProjects(res.data?.data || []);
-    } catch (err) {
-      console.error("Failed to fetch projects", err);
-      toast.error("Failed to load projects");
-      setProjects([]);
-    }
-  }, [isAuthenticated]);
-
-  // Fetch Notifications (memoized)
-  const fetchNotifications = useCallback(async () => {
-    if (!isAuthenticated) return;
-    try {
-      const res = await axios.get<{ data: NotificationData[] }>(
-        "/api/notifications"
-      );
-      setNotifications(res.data?.data || []);
-    } catch (err) {
-      console.error("Failed to fetch notifications", err);
-      setNotifications([]);
-    }
-  }, [isAuthenticated]);
-
   // Effects to call memoized fetch functions
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
-
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
@@ -156,7 +188,6 @@ export default function Dashboard() {
     handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, [showSidebar]);
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -196,6 +227,11 @@ export default function Dashboard() {
     );
   }
 
+  // --- Theme Toggle State ---
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+
   // --- Event Handlers ---
   const handleLeaderboard = () => {
     try {
@@ -205,7 +241,6 @@ export default function Dashboard() {
       toast.error("Leaderboard page not found.");
     }
   };
-
   const onLogout = async () => {
     try {
       await axios.get("/api/users/logout");
@@ -231,7 +266,6 @@ export default function Dashboard() {
       toast.error(errorMessage);
     }
   };
-
   const handleLike = async (projectId: string) => {
     if (!user._id) return toast.error("Login required");
     try {
@@ -276,7 +310,6 @@ export default function Dashboard() {
       toast.error(errorMessage);
     }
   };
-
   const handleComment = async (
     projectId: string,
     text: string,
@@ -317,7 +350,6 @@ export default function Dashboard() {
       }
     }
   };
-
   const markNotificationAsRead = async (notificationId: string) => {
     setNotifications((prev) =>
       prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
@@ -332,163 +364,10 @@ export default function Dashboard() {
       );
     }
   };
-
-  // --- Sidebar Menu Items Definition ---
-  const menuItemsDefinition = [
-    {
-      label: "Chat",
-      icon: <MessageCircle className="w-5 h-5" />,
-      action: () => {
-        router.push("/chat");
-        setShowSidebar(false);
-      },
-    },
-    {
-      label: "Community",
-      icon: <Users className="w-5 h-5" />,
-      action: () => {
-        router.push("/community");
-        setShowSidebar(false);
-      },
-    },
-    {
-      label: "Profile",
-      icon: <User className="w-5 h-5" />,
-      action: () => {
-        router.push(`/profile`);
-        setShowSidebar(false);
-      },
-    },
-    {
-      label: "Settings",
-      icon: <Cog className="w-5 h-5" />,
-      action: (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setShowSettingsDropdown((prev) => !prev);
-      },
-    },
-  ];
-
-  // --- Reusable Components ---
-  const MenuLinks = () => (
-    <motion.div
-      className="flex flex-col space-y-1 w-full"
-      variants={{
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
-      }}
-      initial="hidden"
-      animate="visible"
-    >
-      {menuItemsDefinition.map((item, idx) => (
-        <div
-          key={idx}
-          className="relative"
-          ref={item.label === "Settings" ? settingsRef : null}
-        >
-          <motion.button
-            type="button"
-            variants={{
-              hidden: { opacity: 0, x: -20 },
-              visible: { opacity: 1, x: 0 },
-            }}
-            className="flex items-center text-foreground cursor-pointer px-3 py-2 hover:bg-muted rounded-md transition-colors duration-200 w-full text-left"
-            onClick={(e) => {
-              item.action(e);
-            }}
-            whileHover={{ x: 3 }}
-            whileTap={{ scale: 0.98 }}
-            data-testid={`menu-${item.label.toLowerCase()}`}
-          >
-            {item.icon}{" "}
-            <span className="ml-3 font-medium text-sm">{item.label}</span>
-          </motion.button>
-          <AnimatePresence>
-            {item.label === "Settings" && showSettingsDropdown && (
-              <motion.div
-                initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className="absolute left-0 top-full mt-1 w-48 bg-popover shadow-lg rounded-md border border-border z-[120] overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    toggleTheme();
-                    setShowSettingsDropdown(false);
-                  }}
-                  className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
-                  data-testid="menu-theme-toggle"
-                >
-                  {theme === "light" ? (
-                    <Moon className="w-4 h-4 mr-2" />
-                  ) : (
-                    <Sun className="w-4 h-4 mr-2" />
-                  )}{" "}
-                  Toggle Theme
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    try {
-                      router.push("/faq");
-                      setShowSettingsDropdown(false);
-                      setShowSidebar(false);
-                    } catch (_err) {
-                      console.error("Nav to /faq failed", _err);
-                      toast.error("FAQ page not found.");
-                    }
-                  }}
-                  className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
-                  data-testid="menu-faq"
-                >
-                  <HelpCircle className="w-4 h-4 mr-2" /> FAQ
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      ))}
-    </motion.div>
-  );
-
-  const MenuIcon = ({
-    onClick,
-    isClose = false,
-  }: {
-    onClick: (e: React.MouseEvent) => void;
-    isClose?: boolean;
-  }) => (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={onClick}
-      className="text-foreground z-[130]"
-      aria-label={isClose ? "Close menu" : "Open menu"}
-      data-testid={isClose ? "menu-close" : "menu-open"}
-    >
-      {isClose ? (
-        <X className="w-6 h-6" />
-      ) : (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-          />
-        </svg>
-      )}
-    </Button>
-  );
-  // --- End Reusable Components ---
+  const handleSearchResultClick = () => {
+    setSearchText("");
+    setSearchResults({ projects: [], users: [] });
+  };
 
   // --- JSX Structure ---
   return (
@@ -506,7 +385,16 @@ export default function Dashboard() {
         >
           SynKro
         </motion.h1>
-        <MenuLinks />
+        <MenuLinks
+          menuItems={menuItemsDefinition}
+          settingsRef={settingsRef}
+          showSettingsDropdown={showSettingsDropdown}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          router={router}
+          setShowSettingsDropdown={setShowSettingsDropdown}
+          setShowSidebar={setShowSidebar}
+        />
       </aside>
       {/* Mobile Sidebar */}
       <AnimatePresence>
@@ -543,219 +431,38 @@ export default function Dashboard() {
                   isClose={true}
                 />
               </div>
-              <MenuLinks />
+              <MenuLinks
+                menuItems={menuItemsDefinition}
+                settingsRef={settingsRef}
+                showSettingsDropdown={showSettingsDropdown}
+                theme={theme}
+                toggleTheme={toggleTheme}
+                router={router}
+                setShowSettingsDropdown={setShowSettingsDropdown}
+                setShowSidebar={setShowSidebar}
+              />
             </motion.aside>
           </>
         )}
       </AnimatePresence>
+
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col items-center p-4 sm:p-6 w-full overflow-y-auto bg-background">
-        {/* Header Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="w-full flex flex-row items-center gap-3 sm:gap-4 mb-6 bg-card rounded-lg shadow-lg p-3 sm:p-4 border border-border relative z-10"
-        >
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex-shrink-0">
-            <MenuIcon
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowSidebar(true);
-              }}
-            />
-          </div>
-
-          {/* Search Input & Results */}
-          <div className="w-full flex-1 relative" ref={searchRef}>
-            <motion.input
-              type="text"
-              className="w-full p-3 bg-background text-foreground border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base placeholder-placeholder transition-colors shadow-md"
-              placeholder="Search projects, users..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              whileFocus={{ scale: 1.01 }}
-              transition={{ duration: 0.1 }}
-              aria-label="Search"
-            />
-            <AnimatePresence>
-              {(searchResults.projects.length > 0 ||
-                searchResults.users.length > 0) && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  className="absolute top-full mt-2 w-full bg-popover rounded-md shadow-lg border border-border z-50 max-h-80 overflow-y-auto"
-                  data-testid="search-results"
-                >
-                  {searchResults.projects.length > 0 && (
-                    <div className="p-2">
-                      <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1 uppercase tracking-wider">
-                        Projects
-                      </h3>
-                      {searchResults.projects.map((project) => (
-                        <Button
-                          variant="ghost"
-                          key={project._id}
-                          className="w-full text-left justify-start px-3 py-1.5 h-auto text-sm text-popover-foreground hover:bg-accent transition-colors rounded"
-                          onClick={() => {
-                            router.push(`/projects/${project._id}`);
-                            setSearchText("");
-                            setSearchResults({ projects: [], users: [] });
-                          }}
-                        >
-                          {project.title}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                  {searchResults.users.length > 0 && (
-                    <div className="p-2 border-t border-border">
-                      <h3 className="text-xs font-semibold text-muted-foreground px-2 mb-1 uppercase tracking-wider">
-                        Users
-                      </h3>
-                      {searchResults.users.map((user) => (
-                        <Button
-                          variant="ghost"
-                          key={user._id}
-                          className="w-full text-left justify-start px-3 py-1.5 h-auto text-sm text-popover-foreground hover:bg-accent transition-colors rounded"
-                          onClick={() => {
-                            router.push(`/profile/${user._id}`);
-                            setSearchText("");
-                            setSearchResults({ projects: [], users: [] });
-                          }}
-                        >
-                          {user.username}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-1 sm:space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleLeaderboard}
-              className="text-golden hover:bg-golden/10 w-8 h-8 sm:w-10 sm:h-10"
-              aria-label="Leaderboard"
-              data-testid="leaderboard-button"
-            >
-              <Trophy className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
-            <div className="relative" ref={notificationsRef}>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowNotifications((prev) => !prev);
-                }}
-                className="text-primary hover:bg-primary/10 w-8 h-8 sm:w-10 sm:h-10 relative"
-                aria-label="Notifications"
-                data-testid="notifications-button"
-              >
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-                {notifications.some((n) => !n.read) && (
-                  <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 block h-2 w-2 rounded-full bg-destructive ring-2 ring-card" />
-                )}
-              </Button>
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-popover shadow-lg rounded-md border border-popover-border z-50 overflow-hidden max-h-96 overflow-y-auto"
-                    onClick={(e) => e.stopPropagation()}
-                    data-testid="notifications-dropdown"
-                  >
-                    <div className="p-2 px-3 border-b border-popover-border">
-                      <h4 className="text-sm font-semibold text-muted-foreground">
-                        Notifications
-                      </h4>
-                    </div>
-                    {notifications.length === 0 ? (
-                      <div className="px-3 py-4 text-sm text-center text-muted-foreground">
-                        No new notifications
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-border">
-                        {notifications.map((notification) => (
-                          <button
-                            type="button"
-                            key={notification._id}
-                            className={`w-full text-left px-3 py-2.5 text-sm text-popover-foreground hover:bg-muted transition-colors block ${
-                              !notification.read
-                                ? "font-medium"
-                                : "opacity-70 bg-accent"
-                            }`}
-                            onClick={() => {
-                              if (!notification.read)
-                                markNotificationAsRead(notification._id);
-                              if (notification.link) {
-                                try {
-                                  router.push(notification.link);
-                                } catch (err) {
-                                  console.error(
-                                    "Navigation to /faq failed",
-                                    err
-                                  );
-                                  toast.error("Invalid notification link."); // TODO: check this later
-                                }
-                              }
-                              setShowNotifications(false);
-                            }}
-                          >
-                            <p className="line-clamp-2">
-                              {notification.message}
-                            </p>
-                            <span className="text-xs text-muted-foreground mt-0.5 block">
-                              {new Date(
-                                notification.createdAt
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                                hour: "numeric",
-                                minute: "2-digit",
-                              })}
-                            </span>
-                            {/* TODO: Add "Mark all as Read" (Double Tick) and "Clear All" (Dustbin) buttons */}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <div className="p-2 px-3 border-t border-popover-border text-center">
-                      <Button
-                        variant="link"
-                        size="sm"
-                        className="text-xs text-primary"
-                      >
-                        View All (Not implemented)
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onLogout}
-              className="text-destructive hover:bg-destructive/10 w-8 h-8 sm:w-10 sm:h-10"
-              aria-label="Logout"
-              data-testid="logout-button"
-            >
-              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Button>
-          </div>
-        </motion.div>
+        <DashboardHeader 
+          searchText={searchText}
+          onSearchTextChange={setSearchText}
+          searchResults={searchResults}
+          onSearchResultClick={handleSearchResultClick}
+          searchRef={searchRef}
+          onToggleMobileSidebar={() => setShowSidebar(prev => !prev)}
+          onLeaderboardClick={handleLeaderboard}
+          onToggleNotifications={() => setShowNotifications(prev => !prev)}
+          onLogoutClick={onLogout}
+          showNotifications={showNotifications}
+          notifications={notifications}
+          notificationsRef={notificationsRef}
+          onMarkNotificationAsRead={markNotificationAsRead}
+        />
 
         {/* Welcome Message */}
         <motion.div

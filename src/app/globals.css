@@ -111,6 +111,23 @@
     --secondary: 0 0% 20%;
     --secondary-foreground: 0 0% 100%;
   }
+
+  /* --- Smooth Theme Transition --- */
+  body,
+  div,
+  nav,
+  aside,
+  main,
+  header,
+  footer,
+  section,
+  article,
+  h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea
+  {
+    transition-property: color, background-color, border-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
 }
 
 @layer base {
