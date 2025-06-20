@@ -2,9 +2,9 @@
 
 import { motion, easeOut } from "framer-motion";
 import { HelpCircle } from "lucide-react";
-import Navbar from "@/components/Navbar"; // Assuming correct path
+import Navbar from "@/components/Navbar";
 
-export default function FAQPage() { // Renamed for clarity
+export default function FAQPage() {
   const faqs = [
     {
       question: "What is SynKro?",
