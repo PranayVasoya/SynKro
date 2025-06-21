@@ -1,3 +1,4 @@
+// src/app/api/projects/create/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/dbConfig/dbConfig";
 import Project from "@/models/projectModel";
@@ -13,7 +14,7 @@ interface CreateProjectRequestBody {
   techStack: string[];
   repoLink?: string;
   liveLink?: string;
-  teamMembers: string[];
+  teamMembers: string[]; // Array of user IDs as strings
   lookingForMembers: boolean;
   status: "active" | "completed";
 }
@@ -39,9 +40,9 @@ export async function POST(request: NextRequest) {
       console.log("Create Project: Invalid techStack");
       return NextResponse.json({ error: "Tech stack must be an array" }, { status: 400 });
     }
-    if (!Array.isArray(teamMembers)) {
+    if (!Array.isArray(teamMembers) || teamMembers.some((id) => typeof id !== "string")) {
       console.log("Create Project: Invalid teamMembers");
-      return NextResponse.json({ error: "Team members must be an array" }, { status: 400 });
+      return NextResponse.json({ error: "Team members must be an array of strings" }, { status: 400 });
     }
     if (!["active", "completed"].includes(status)) {
       console.log("Create Project: Invalid status");
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
       repoLink: repoLink?.trim() || "",
       liveLink: liveLink?.trim() || "",
       createdBy: userId,
-      teamMembers: [...new Set([userId, ...teamMembers])],
+      teamMembers: [...new Set([userId, ...teamMembers])], // Ensure unique IDs
       lookingForMembers,
       status,
     });

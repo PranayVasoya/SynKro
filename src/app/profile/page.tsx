@@ -32,8 +32,6 @@ import {
 } from "@/constants/skills";
 import { INITIAL_BADGES } from "@/constants/badges";
 
-import Navbar from "@/components/Navbar";
-
 // --- Profile Page Component ---
 export default function ProfilePage() {
   const router = useRouter();
@@ -141,7 +139,11 @@ export default function ProfilePage() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    // Only allow changes for github and linkedin in edit mode
+    if (editProfileMode && (name === "github" || name === "linkedin")) {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSkillToggle = (category: string, skillId: string) => {
@@ -272,15 +274,28 @@ export default function ProfilePage() {
 
   const addProject = async (projectPayload: ProjectSubmissionData) => {
     try {
+      console.log("Create Project: Request body:", projectPayload);
+      // Map teamMembersIDs to teamMembers as an array of strings
+      const transformedPayload = {
+        ...projectPayload,
+        teamMembers: projectPayload.teamMembersIDs || [], // Use teamMembersIDs if provided
+      };
+      delete transformedPayload.teamMembersIDs; // Remove the original field
+
       const response = await axios.post<{ data: Project }>(
         "/api/projects/create",
-        projectPayload
+        transformedPayload
       );
       setProjects((prevProjects) => [response.data.data, ...prevProjects]);
       toast.success("Project created successfully!");
     } catch (error) {
-      console.error("Error adding project:", error);
-      toast.error("Failed to create project.");
+      console.error("Create Project: Error:", error);
+      if (axios.isAxiosError(error)) {
+        console.log("Create Project: Server response:", error.response?.data);
+        toast.error(error.response?.data?.message || "Failed to create project.");
+      } else {
+        toast.error("Failed to create project.");
+      }
       throw error; // Re-throw for popup's isSubmitting state
     }
   };
@@ -347,7 +362,7 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Toaster position="top-center" reverseOrder={false} />
-      <Navbar />
+      {/* Removed Navbar import and render, relying on layout.tsx */}
       <main className="flex-1 w-full max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 pt-6 sm:pt-8 bg-background">
         <Card className="w-full bg-card rounded-xl shadow-lg p-6 md:p-8 space-y-8"> {/* No border */}
           {/* Profile Header */}
@@ -485,6 +500,7 @@ export default function ProfilePage() {
               {["username", "prn", "batch", "mobile", "github", "linkedin"].map(
                 (fieldKey) => {
                   const field = fieldKey as keyof ProfileFormData;
+                  const isEditable = editProfileMode && ["github", "linkedin"].includes(field);
                   return (
                     <div key={field} className="space-y-1.5">
                       <label
@@ -510,7 +526,7 @@ export default function ProfilePage() {
                         name={field}
                         value={formData[field] || ""}
                         onChange={handleChange}
-                        disabled={!editProfileMode}
+                        disabled={!isEditable} // Disable for username, prn, batch, mobile in edit mode
                         placeholder={`Enter your ${field}`}
                         required={[
                           "username",

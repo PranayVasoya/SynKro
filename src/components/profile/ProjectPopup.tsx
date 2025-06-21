@@ -241,7 +241,6 @@ const ProjectPopup = ({
                   setRepoLinkPlaceholder("https://github.com/...")
                 }
                 value={formData.repoLink}
-                required
                 onChange={(e) => {
                   setFormData({ ...formData, repoLink: e.target.value });
                 }}

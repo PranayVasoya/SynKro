@@ -2,7 +2,7 @@
 
 import React, { RefObject } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import MenuIcon from "./MenuIcon";
 import SearchResultsDropdown from "./SearchResultsDropdown";
@@ -54,7 +54,7 @@ export default function DashboardHeader({
   notificationsRef,
   onMarkNotificationAsRead,
 }: DashboardHeaderProps) {
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <motion.div

@@ -2,7 +2,6 @@
 
 import { motion, easeOut } from "framer-motion";
 import { HelpCircle } from "lucide-react";
-import Navbar from "@/components/Navbar";
 
 export default function FAQPage() {
   const faqs = [
@@ -64,7 +63,6 @@ export default function FAQPage() {
   return (
     // Main page background - using bg-muted for light mode contrast as in Dashboard
     <div className="flex flex-col min-h-screen bg-muted dark:bg-background">
-      <Navbar />
 
       {/* Centered content area */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">

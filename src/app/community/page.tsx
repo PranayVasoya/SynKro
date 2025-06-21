@@ -1,13 +1,13 @@
 "use client";
 
+// Components
 import { useState, useEffect, FormEvent, useRef } from "react"; // Added useRef
-import { useRouter } from "next/navigation";
 import { Users, ChevronRight, X, Send } from "lucide-react"; // Added Send and X
 import { motion, AnimatePresence } from "framer-motion";
-import axios, { AxiosError } from "axios"; // Added AxiosError
+import axios from "axios"; // Added AxiosError
 import { toast, Toaster } from "react-hot-toast"; // Added Toaster
 import { Button } from "@/components/ui/button"; // Added Button
-import Navbar from "@/components/Navbar"; // Using global Navbar
+import type { Variants } from "framer-motion";
 
 // --- Interfaces (Assume these are in @/interfaces or @/types) ---
 interface Forum {
@@ -36,7 +36,6 @@ interface ApiErrorResponse {
   error?: string;
 }
 // --- End Interfaces ---
-
 
 // --- DiscussionSidebar Component ---
 const DiscussionSidebar = ({
@@ -77,12 +76,12 @@ const DiscussionSidebar = ({
     setIsPosting(true);
 
     const optimisticPost: Post = { // Create a temporary optimistic post
-        _id: `temp-${Date.now()}`,
-        content: newPostContent,
-        createdBy: { username: "You" }, // Placeholder
-        createdAt: new Date().toISOString(),
+      _id: `temp-${Date.now()}`,
+      content: newPostContent,
+      createdBy: { username: "You" }, // Placeholder
+      createdAt: new Date().toISOString(),
     };
-    setPosts(prev => [...prev, optimisticPost]);
+    setPosts((prev) => [...prev, optimisticPost]);
     const postToSend = newPostContent;
     setNewPostContent("");
 
@@ -92,19 +91,22 @@ const DiscussionSidebar = ({
         // title: "Optional Post Title", // If your API expects a title
       });
       // Replace optimistic post with actual server response
-      setPosts(prev => prev.map(p => p._id === optimisticPost._id ? response.data.data : p));
+      setPosts((prev) =>
+        prev.map((p) => (p._id === optimisticPost._id ? response.data.data : p))
+      );
     } catch (error: unknown) {
       console.error("Error sending post:", error);
       let errorMessage = "Failed to send post.";
       if (axios.isAxiosError(error)) {
         const serverError = error.response?.data as ApiErrorResponse | undefined;
-        errorMessage = serverError?.message || serverError?.error || error.message || errorMessage;
+        errorMessage =
+          serverError?.message || serverError?.error || error.message || errorMessage;
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
       toast.error(errorMessage);
       // Revert optimistic update
-      setPosts(prev => prev.filter(p => p._id !== optimisticPost._id));
+      setPosts((prev) => prev.filter((p) => p._id !== optimisticPost._id));
       setNewPostContent(postToSend);
     } finally {
       setIsPosting(false);
@@ -134,7 +136,7 @@ const DiscussionSidebar = ({
       {/* Posts Area */}
       <div className="flex-1 p-4 space-y-4 overflow-y-auto bg-background dark:bg-muted/20"> {/* Changed bg */}
         {posts.length === 0 && (
-            <div className="text-center text-muted-foreground py-10">No posts in this forum yet. Be the first!</div>
+          <div className="text-center text-muted-foreground py-10">No posts in this forum yet. Be the first!</div>
         )}
         {posts.map((post) => (
           <motion.div
@@ -149,7 +151,11 @@ const DiscussionSidebar = ({
             <div className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
               Posted by {post.createdBy?.username || "User"} on{" "}
               {new Date(post.createdAt).toLocaleDateString("en-US", {
-                year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
               })}
             </div>
           </motion.div>
@@ -165,14 +171,15 @@ const DiscussionSidebar = ({
             onChange={(e) => setNewPostContent(e.target.value)}
             placeholder="Share your thoughts..."
             // Use bg-input for consistency
-            className="flex-1 p-2 border rounded-md bg-input text-foreground border-border focus:outline-none focus:ring-2 focus:ring-primary resize-none h-12 leading-tight" // Adjusted h-12
+            className="flex-1 p-2 border rounded-md bg-input text-foreground border-border focus:outline-none focus:ring-2 focus:ring-primary resize-none h-12 leading-tight"
             rows={1} // Start with 1 row, will expand if needed by CSS or JS
             disabled={isPosting}
             onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) { // Send on Enter, new line on Shift+Enter
-                    e.preventDefault();
-                    handleSendPost(e);
-                }
+              if (e.key === "Enter" && !e.shiftKey) {
+                // Send on Enter, new line on Shift+Enter
+                e.preventDefault();
+                handleSendPost(e);
+              }
             }}
           />
           <Button
@@ -188,12 +195,9 @@ const DiscussionSidebar = ({
     </motion.div>
   );
 };
-// --- End DiscussionSidebar Component ---
-
 
 // --- Main Community Page ---
-export default function CommunityPage() { // Renamed Community to CommunityPage
-  const router = useRouter();
+export default function CommunityPage() {
   // Using useState for forums if they might be fetched later
   const [forums, setForums] = useState<Forum[]>([]);
   const [isLoadingForums, setIsLoadingForums] = useState(true);
@@ -210,7 +214,7 @@ export default function CommunityPage() { // Renamed Community to CommunityPage
         // setForums(response.data.data || []);
 
         // Using mock data for now:
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate fetch
+        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate fetch
         setForums([
           { _id: "1", title: "General Discussion", description: "Talk about anything related to SynKro.", postsCount: 45 },
           { _id: "2", title: "Project Collaboration", description: "Find team members or join existing projects.", postsCount: 102 },
@@ -228,7 +232,6 @@ export default function CommunityPage() { // Renamed Community to CommunityPage
     fetchForums();
   }, []);
 
-
   const handleForumSelect = (forum: Forum) => {
     setSelectedForum(forum);
     setShowDiscussionSidebar(true);
@@ -244,16 +247,23 @@ export default function CommunityPage() { // Renamed Community to CommunityPage
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
   };
-  const listItemVariants = {
+  const listItemVariants: Variants = {
     hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 150, damping: 20 }},
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        type: "spring" as const, // ✅ Fix: explicit string literal
+        stiffness: 150,
+        damping: 20,
+      },
+    },
   };
 
   return (
     // Consistent page background
     <div className="flex flex-col min-h-screen bg-muted dark:bg-background">
       <Toaster position="top-center" reverseOrder={false} />
-      <Navbar /> {/* Global Navbar */}
 
       <main className="flex-1 flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8 relative overflow-x-hidden"> {/* Allow sidebar to overflow */}
         <motion.div
@@ -271,10 +281,10 @@ export default function CommunityPage() { // Renamed Community to CommunityPage
           </div>
 
           {isLoadingForums ? (
-             <div className="text-center text-muted-foreground py-10">Loading forums...</div>
+            <div className="text-center text-muted-foreground py-10">Loading forums...</div>
           ) : forums.length === 0 ? (
-             <div className="text-center text-muted-foreground py-10">No forums available at the moment.</div>
-          ) :(
+            <div className="text-center text-muted-foreground py-10">No forums available at the moment.</div>
+          ) : (
             <motion.div
               className="space-y-4" // Increased spacing
               variants={listContainerVariants}
@@ -291,8 +301,8 @@ export default function CommunityPage() { // Renamed Community to CommunityPage
                   onClick={() => handleForumSelect(forum)}
                 >
                   <div className="flex items-center space-x-3 sm:space-x-4 overflow-hidden">
-                     <div className="flex-shrink-0 bg-primary/10 p-2.5 sm:p-3 rounded-full">
-                        <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                    <div className="flex-shrink-0 bg-primary/10 p-2.5 sm:p-3 rounded-full">
+                      <Users className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                     </div>
                     <div className="overflow-hidden">
                       <h3 className="font-semibold text-md sm:text-lg text-foreground truncate">
@@ -305,7 +315,7 @@ export default function CommunityPage() { // Renamed Community to CommunityPage
                   </div>
                   <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 ml-2">
                     <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
-                      {forum.postsCount} Post{forum.postsCount !== 1 ? 's' : ''}
+                      {forum.postsCount} Post{forum.postsCount !== 1 ? "s" : ""}
                     </span>
                     <ChevronRight className="w-5 h-5 text-muted-foreground" />
                   </div>
@@ -319,20 +329,20 @@ export default function CommunityPage() { // Renamed Community to CommunityPage
         <AnimatePresence>
           {showDiscussionSidebar && selectedForum && (
             <>
-            {/* Backdrop for mobile/tablet when sidebar is open */}
-            <motion.div
-              key="discussion-sidebar-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50 z-[90] md:hidden" // Only on smaller than md
-              onClick={handleCloseDiscussion}
-            />
-            <DiscussionSidebar
-              forum={selectedForum}
-              onClose={handleCloseDiscussion}
-            />
+              {/* Backdrop for mobile/tablet when sidebar is open */}
+              <motion.div
+                key="discussion-sidebar-overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 bg-black/50 z-[90] md:hidden" // Only on smaller than md
+                onClick={handleCloseDiscussion}
+              />
+              <DiscussionSidebar
+                forum={selectedForum}
+                onClose={handleCloseDiscussion}
+              />
             </>
           )}
         </AnimatePresence>

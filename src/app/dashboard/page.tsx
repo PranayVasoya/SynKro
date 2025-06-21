@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { useTheme } from "../theme-context";
+import { useTheme } from "@/app/theme-context";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef, useCallback } from "react";

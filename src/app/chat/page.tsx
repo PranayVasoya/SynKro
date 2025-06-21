@@ -4,10 +4,10 @@ import { useState, useEffect, useRef, FormEvent } from "react"; // Added FormEve
 import { useRouter } from "next/navigation";
 import { MessageCircle, ChevronRight, X, Send } from "lucide-react"; // Added Send and X
 import { motion, AnimatePresence } from "framer-motion";
-import axios, { AxiosError } from "axios"; // Import AxiosError
+import axios from "axios"; // Import AxiosError
 import { toast, Toaster } from "react-hot-toast"; // Import Toaster
 import { Button } from "@/components/ui/button"; // Import Button
-import Navbar from "@/components/Navbar"; // Assuming you want to use the global Navbar
+import type { Variants } from "framer-motion";
 
 // --- Interfaces (Assume these are in @/interfaces or @/types) ---
 interface UserData { // Simple UserData for sender context
@@ -31,10 +31,6 @@ interface Message {
   time: string; // ISO Date string preferably
 }
 
-interface ApiErrorResponse {
-  message?: string;
-  error?: string;
-}
 // --- End Interfaces ---
 
 
@@ -262,17 +258,25 @@ export default function ChatPage() { // Renamed Page to ChatPage
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
   };
-  const listItemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 150, damping: 20 }},
-  };
+
+  const listItemVariants: Variants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      type: "spring" as const, // ✅ Fix: explicit string literal
+      stiffness: 150,
+      damping: 20,
+    },
+  },
+};
 
 
   return (
     // Use consistent page background
     <div className="flex flex-col min-h-screen bg-muted dark:bg-background">
       <Toaster position="top-center" reverseOrder={false} />
-      <Navbar /> {/* Using the global Navbar */}
 
       <main className="flex-1 flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8"> {/* Changed justify-center to justify-start */}
         <motion.div
