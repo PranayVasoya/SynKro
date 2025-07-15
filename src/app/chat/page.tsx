@@ -8,6 +8,7 @@ import axios from "axios"; // Import AxiosError
 import { toast, Toaster } from "react-hot-toast"; // Import Toaster
 import { Button } from "@/components/ui/button"; // Import Button
 import type { Variants } from "framer-motion";
+// Remove Navbar import
 
 // --- Interfaces (Assume these are in @/interfaces or @/types) ---
 interface UserData { // Simple UserData for sender context
@@ -277,6 +278,8 @@ export default function ChatPage() { // Renamed Page to ChatPage
     // Use consistent page background
     <div className="flex flex-col min-h-screen bg-muted dark:bg-background">
       <Toaster position="top-center" reverseOrder={false} />
+      
+      {/* Navbar is handled by ClientLayout */}
 
       <main className="flex-1 flex flex-col items-center justify-start p-4 sm:p-6 lg:p-8"> {/* Changed justify-center to justify-start */}
         <motion.div
@@ -299,11 +302,25 @@ export default function ChatPage() { // Renamed Page to ChatPage
             <div className="text-center text-muted-foreground py-10">No chat rooms available yet.</div>
           ) : (
             <motion.div
-              className="space-y-3"
+              className="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar"
               variants={listContainerVariants}
               initial="hidden"
               animate="visible"
             >
+              <style jsx>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                  width: 6px;
+                  background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                  background-color: rgba(156, 163, 175, 0.5);
+                  border-radius: 10px;
+                }
+                .custom-scrollbar {
+                  scrollbar-width: thin;
+                  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+                }
+              `}</style>
               {chats.map((chat) => (
                 <motion.div
                   key={chat._id}

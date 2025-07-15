@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
@@ -17,7 +17,8 @@ interface UpdateRequestBody {
 export async function PUT(request: NextRequest) {
   try {
     await connectToDatabase();
-    const reqBody = await request.json() as UpdateRequestBody;
+
+    const reqBody: UpdateRequestBody = await request.json();
     console.log("Update Profile: Request body:", reqBody);
 
     const { username, prn, batch, mobile, github, linkedin, skills, profileComplete } = reqBody;

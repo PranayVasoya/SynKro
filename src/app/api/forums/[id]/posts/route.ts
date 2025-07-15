@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import Post from "@/models/postModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import mongoose from "mongoose";

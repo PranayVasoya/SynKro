@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import Notification from "@/models/notificationModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 

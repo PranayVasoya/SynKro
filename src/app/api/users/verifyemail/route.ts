@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import User from "@/models/userModel";
 import crypto from "crypto";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 
 connectToDatabase(); // Connect on module load
 

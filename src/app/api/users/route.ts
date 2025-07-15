@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
+
     const { searchParams } = new URL(request.url);
     const search = searchParams.get("search")?.trim();
 

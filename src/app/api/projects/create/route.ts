@@ -1,6 +1,6 @@
 // src/app/api/projects/create/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import Project from "@/models/projectModel";
 import Chatroom from "@/models/chatroomModel";
 import Notification from "@/models/notificationModel";

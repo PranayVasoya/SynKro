@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "@components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
@@ -151,10 +150,6 @@ export default function SignupPage() {
   return (
     <div className="flex flex-col items-center w-full min-h-screen bg-white dark:bg-customDarkGray">
       <Toaster position="top-center" reverseOrder={false} />
-
-      <div className="w-full bg-white dark:bg-customDarkGray shadow-md sticky top-0 z-50">
-        <Navbar />
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 w-full flex-1 items-center p-4 sm:p-6 gap-6 max-w-7xl mx-auto">
         <motion.div

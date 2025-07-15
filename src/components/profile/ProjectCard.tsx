@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/app/lib/utils";
 
 // Interfaces
-import type { Project, CommentData, LikeData } from "@/interfaces/project";
+import type { Project, CommentData } from "@/interfaces/project";
 import type { UserLookup } from "@/interfaces/user";
 
 // Icons
@@ -36,13 +36,7 @@ const ProjectCard = ({
   router: AppRouterInstance;
 }) => {
   const commentInputRef = useRef<HTMLInputElement | null>(null);
-  const isLiked =
-    (user?._id &&
-      project.likes?.some(
-        (like: LikeData) =>
-          (typeof like === "string" ? like : like._id) === user._id
-      )) ||
-    false;
+  const isLiked = user?._id && project.likes?.includes(user._id as never);
 
   const [commentPlaceholder, setCommentPlaceholder] = useState("Add a comment...");
   const [isHovered, setIsHovered] = useState(false); // Client-side state
@@ -174,8 +168,7 @@ const ProjectCard = ({
                 isLiked && user?._id ? "fill-current" : ""
               }`}
             />
-            {project.likes?.length || 0} Like
-            {project.likes?.length !== 1 ? "s" : ""}
+            {project.likes?.length || 0} Like{project.likes?.length !== 1 ? "s" : ""}
           </Button>
         </div>
         {/* --- End of Likes Section --- */}

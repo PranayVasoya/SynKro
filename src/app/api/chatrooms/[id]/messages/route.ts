@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import Chatroom from "@/models/chatroomModel";
 import Notification from "@/models/notificationModel";
 import User from "@/models/userModel";

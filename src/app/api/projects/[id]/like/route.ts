@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import Project from "@/models/projectModel";
 import User from "@/models/userModel";
 import Notification from "@/models/notificationModel";
@@ -52,10 +52,12 @@ export async function POST(request: NextRequest) {
 
     await project.save();
 
+    const updatedProject = await Project.findById(projectId).populate("createdBy", "username");
+
     return NextResponse.json({
       message: isLiked ? "Project unliked" : "Project liked",
       success: true,
-      data: { likes: project.likes.length },
+      data: updatedProject,
     });
   } catch (error: unknown) {
     console.error("Like Project: Error:", error);

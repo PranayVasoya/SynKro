@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
 export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
+
     const userId = await getDataFromToken(request);
     const user = await User.findById(userId).select(
       "-password -forgotPasswordToken -forgotPasswordTokenExpiry"

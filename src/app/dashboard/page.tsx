@@ -14,7 +14,7 @@ import ProjectCard from "@/components/dashboard/ProjectCard";
 
 // Interfaces
 import type { ApiErrorResponse } from "@/interfaces/api";
-import type { Project, LikeData } from "@/interfaces/project";
+import type { Project } from "@/interfaces/project";
 import type { NotificationData } from "@/interfaces/notification";
 import type { UserData } from "@/interfaces/user";
 
@@ -243,25 +243,24 @@ export default function Dashboard() {
   const handleLike = async (projectId: string) => {
     if (!user._id) return toast.error("Login required");
     try {
-      const res = await axios.post<{
-        message: string;
-        data: { likes: LikeData[] };
-      }>(`/api/projects/${projectId}/like`);
+      const res = await axios.post<{ message: string; data: Project }>(
+        `/api/projects/${projectId}/like`
+      );
 
-      const updatedLikes = res.data?.data?.likes;
+      const updatedProject = res.data?.data;
 
-      if (Array.isArray(updatedLikes)) {
+      if (updatedProject && updatedProject._id) {
         setProjects((prevProjects) =>
           prevProjects.map((p) =>
-            p._id === projectId ? { ...p, likes: updatedLikes } : p
+            p._id === projectId ? updatedProject : p
           )
         );
       } else {
         console.warn(
-          `Like API for project ${projectId} did not return a valid 'likes' array. Received:`,
-          updatedLikes
+          `Like API for project ${projectId} did not return a valid project object. Received:`,
+          updatedProject
         );
-        fetchProjects();
+        fetchProjects(); // Fallback to refetch all
       }
 
       toast.success(res.data.message || "Action successful");

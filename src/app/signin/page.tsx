@@ -2,11 +2,10 @@
 
 import axios from "axios";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // Components
-import Navbar from "@components/Navbar";
 import Image from "next/image";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
@@ -20,6 +19,14 @@ import { Button } from "@/components/ui/button";
 
 export default function SignInPage() {
   const router = useRouter();
+
+  // Prevent scrollbar on this page
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   const [emailPlaceholder, setEmailPlaceholder] = useState(
     "Enter your Email-ID"
@@ -101,11 +108,10 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen bg-background">
+    <div className="flex flex-col items-center w-full h-screen bg-background overflow-hidden">
       <Toaster position="top-center" reverseOrder={false} />
-      <Navbar />
 
-      <div className="bg-background grid grid-cols-1 md:grid-cols-2 w-full flex-1 items-center p-6 gap-6 max-w-7xl mx-auto">
+      <div className="bg-background grid grid-cols-1 md:grid-cols-2 w-full flex-1 items-center p-4 sm:p-6 gap-4 max-w-7xl mx-auto">
         {/* Illustration */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -116,22 +122,22 @@ export default function SignInPage() {
           <Image
             src="/sign_in.png"
             alt="Illustration for Sign In page"
-            width={450}
-            height={450}
+            width={400}
+            height={400}
             className="max-w-full h-auto object-contain"
             priority
           />
         </motion.div>
-        {/* --- End of Illsutration --- */}
+        {/* --- End of Illustration --- */}
 
         {/* Sign In Section */}
         <motion.div
-          className="flex flex-col items-center justify-center text-center gap-8 md:gap-10 h-full md:order-last"
+          className="flex flex-col items-center justify-center text-center gap-6 md:gap-8 h-full md:order-last"
           initial="hidden"
           animate="visible"
         >
           <motion.p
-            className="text-2xl md:text-3xl font-bold text-foreground"
+            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground px-2"
             variants={itemVariants}
           >
             Good to see you again. <br /> What will you create today?
@@ -139,7 +145,7 @@ export default function SignInPage() {
 
           <motion.form
             onSubmit={handleSignIn}
-            className="w-full max-w-sm flex flex-col items-center space-y-4 bg-card p-6 rounded-xl shadow-lg border border-border"
+            className="w-full max-w-sm flex flex-col items-center space-y-3 bg-card p-5 rounded-xl shadow-lg border border-border"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -230,7 +236,7 @@ export default function SignInPage() {
 
           <motion.div
             variants={itemVariants}
-            className="text-md text-muted-foreground"
+            className="text-sm md:text-md text-muted-foreground"
           >
             Don&apos;t have an account?{" "}
             <Link

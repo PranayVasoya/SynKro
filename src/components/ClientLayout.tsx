@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import dynamic from "next/dynamic";
 import { ReactNode, useEffect, useState } from "react";
@@ -25,5 +25,5 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
       {shouldRenderNavbar && <Navbar />}
       {children}
     </ThemeProvider>
-  );
+  );
 }
