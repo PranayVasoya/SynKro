@@ -1,5 +1,5 @@
+import connectToDatabase from "@/dbConfig/dbConfig";
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
 import Chatroom from "@/models/chatroomModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 import mongoose from "mongoose";

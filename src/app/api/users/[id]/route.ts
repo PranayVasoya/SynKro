@@ -6,12 +6,9 @@ import Project from "@/models/projectModel";
 // Connect to database
 connectToDatabase();
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const userId = params.id;
+    const userId = request.nextUrl.pathname.split("/").pop();
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },

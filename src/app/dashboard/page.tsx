@@ -818,7 +818,7 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.05 }}
           className="w-full text-center mb-8 md:mb-10 py-4"
         >
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
             Welcome back,{" "}
             {user.username ? (
               showTyped ? (

@@ -1,9 +1,9 @@
+import connectToDatabase from "@/dbConfig/dbConfig";
+import { getDataFromToken } from "@/helpers/getDataFromToken";
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
 import Project from "@/models/projectModel";
 import User from "@/models/userModel";
 import Notification from "@/models/notificationModel";
-import { getDataFromToken } from "@/helpers/getDataFromToken";
 
 export async function POST(request: NextRequest) {
   try {

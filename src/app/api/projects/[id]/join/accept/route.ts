@@ -1,10 +1,10 @@
+import connectToDatabase from "@/dbConfig/dbConfig";
+import { getDataFromToken } from "@/helpers/getDataFromToken";
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
-import Project from "@/models/projectModel";
 import JoinRequest from "@/models/joinRequestmodel";
 import Notification from "@/models/notificationModel";
+import Project from "@/models/projectModel";
 import User from "@/models/userModel";
-import { getDataFromToken } from "@/helpers/getDataFromToken";
 import mongoose from "mongoose";
 
 interface PopulatedUser {

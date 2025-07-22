@@ -1,6 +1,6 @@
 // app/api/skills/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/dbConfig/dbConfig";
+import connectToDatabase from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 
 export async function GET(request: NextRequest) {

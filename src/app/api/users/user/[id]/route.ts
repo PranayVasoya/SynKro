@@ -4,13 +4,10 @@ import User from "@/models/userModel";
 
  
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
     await connectToDatabase();
-    const userId = params.id;
+    const userId = request.nextUrl.pathname.split("/").pop();
     if (!userId) {
       return NextResponse.json(
         { error: "User ID is required" },
