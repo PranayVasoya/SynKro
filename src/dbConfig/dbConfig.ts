@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from 'mongoose';
+import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGO_URI!;
 
@@ -8,23 +8,13 @@ if (!MONGODB_URI) {
   );
 }
 
-interface MongooseCache {
-  conn: Mongoose | null;
-  promise: Promise<Mongoose> | null;
-}
-
-declare global {
-  // eslint-disable-next-line no-var
-  var mongoose: MongooseCache;
-}
-
 let cached = global.mongoose;
 
 if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function connectToDatabase(): Promise<Mongoose> {
+async function connectToDatabase() {
   if (cached.conn) {
     return cached.conn;
   }
