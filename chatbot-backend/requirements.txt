@@ -1,0 +1,10 @@
+# chatbot-backend/requirements.txt
+
+fastapi
+uvicorn[standard]
+python-dotenv
+groq 
+sentence-transformers
+faiss-cpu
+pymongo
+python-multipart

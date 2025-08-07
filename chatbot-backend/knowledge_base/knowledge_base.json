@@ -1,0 +1,722 @@
+[
+  {
+    "id": "SK-0001",
+    "category": "Onboarding",
+    "target_audience": "all",
+    "question": "What is SynKro?",
+    "answer": "SynKro is a collaborative academic platform designed to help students and faculty manage projects, share resources, and track progress seamlessly. It's your central hub for all project-related activities.",
+    "keywords": ["about", "what is", "synkro", "introduction", "platform"]
+  },
+  {
+    "id": "SK-0002",
+    "category": "Onboarding",
+    "target_audience": "all",
+    "question": "Tell me more about SynKro",
+    "answer": "SynKro is a collaborative academic platform designed to help students and faculty manage projects, share resources, and track progress seamlessly. It's your central hub for all project-related activities.",
+    "keywords": ["about", "what is", "synkro", "introduction", "platform"]
+  },
+  {
+    "id": "SK-0003",
+    "category": "Onboarding",
+    "target_audience": "all",
+    "question": "How do I sign up for SynKro?",
+    "answer": "You can sign up using your university email address. Click the 'Sign Up' button on the homepage and follow the on-screen instructions. A verification link will be sent to your email.",
+    "keywords": ["signup", "register", "create account", "onboarding"]
+  },
+  {
+    "id": "SK-0004",
+    "category": "Onboarding",
+    "target_audience": "all",
+    "question": "What's the registration process?",
+    "answer": "You can sign up using your university email address. Click the 'Sign Up' button on the homepage and follow the on-screen instructions. A verification link will be sent to your email.",
+    "keywords": ["signup", "register", "create account", "onboarding"]
+  },
+  {
+    "id": "SK-0005",
+    "category": "Onboarding",
+    "target_audience": "all",
+    "question": "Is SynKro free for students?",
+    "answer": "Yes, SynKro is provided free of charge to all students and faculty members affiliated with our partner institutions.",
+    "keywords": ["free", "cost", "price", "student", "subscription"]
+  },
+  {
+    "id": "SK-0006",
+    "category": "Onboarding",
+    "target_audience": "all",
+    "question": "Do I need to pay to use SynKro?",
+    "answer": "No, SynKro is provided free of charge to all students and faculty members affiliated with our partner institutions.",
+    "keywords": ["free", "cost", "price", "student", "subscription"]
+  },
+  {
+    "id": "SK-0007",
+    "category": "Onboarding",
+    "target_audience": "all",
+    "question": "How do I get started?",
+    "answer": "Welcome to SynKro! The best way to start is by completing your profile, and then either creating your first project or accepting an invitation to join an existing one. Check out the 'Get Started' guide on your dashboard.",
+    "keywords": ["get started", "first steps", "guide", "tutorial", "onboarding"]
+  },
+  {
+    "id": "SK-0008",
+    "category": "Onboarding",
+    "target_audience": "all",
+    "question": "Is there a tutorial?",
+    "answer": "Yes, upon your first login, you'll be offered an interactive tour. You can also access tutorials and guides anytime from the 'Help' menu.",
+    "keywords": ["tutorial", "guide", "help", "learn", "documentation"]
+  },
+  {
+    "id": "SK-0101",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "How do I reset my password?",
+    "answer": "To reset your password, click the 'Forgot Password' link on the login page. Enter your university email, and we'll send you instructions to create a new password.",
+    "keywords": ["password", "reset", "forgot", "change password", "account access"]
+  },
+  {
+    "id": "SK-0102",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "I forgot my password",
+    "answer": "To reset your password, click the 'Forgot Password' link on the login page. Enter your university email, and we'll send you instructions to create a new password.",
+    "keywords": ["password", "reset", "forgot", "change password", "account access"]
+  },
+  {
+    "id": "SK-0103",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "Can I change my password?",
+    "answer": "Yes, you can change your password at any time. Go to 'Account Settings' -> 'Security' and you will find the option to change your password.",
+    "keywords": ["password", "change", "update", "security", "account settings"]
+  },
+  {
+    "id": "SK-0104",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "How to update my profile picture?",
+    "answer": "Navigate to your 'Profile' page and click on your current avatar or the placeholder icon. You'll be prompted to upload a new image from your device.",
+    "keywords": ["profile picture", "avatar", "image", "photo", "update profile"]
+  },
+  {
+    "id": "SK-0105",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "How can I change my profile info?",
+    "answer": "You can edit your profile information, such as your name, major, or bio, by going to your 'Profile' page and clicking the 'Edit Profile' button.",
+    "keywords": ["edit profile", "update info", "bio", "name", "major"]
+  },
+  {
+    "id": "SK-0106",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "How do I manage my email notifications?",
+    "answer": "Go to 'Account Settings' -> 'Notifications'. From there, you can customize which email notifications you receive, such as for new tasks, mentions, or announcements.",
+    "keywords": ["notifications", "email", "manage", "settings", "alerts"]
+  },
+  {
+    "id": "SK-0107",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "I get too many emails from SynKro",
+    "answer": "You can customize your email preferences. Go to 'Account Settings' -> 'Notifications' to select the exact types of updates you want to be notified about via email.",
+    "keywords": ["notifications", "email", "stop emails", "unsubscribe", "spam"]
+  },
+  {
+    "id": "SK-0108",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "Can I link my Google account?",
+    "answer": "Yes, you can link your Google account for easier login. Go to 'Account Settings' -> 'Integrations' and follow the prompts to connect your Google account.",
+    "keywords": ["google account", "sso", "single sign-on", "link account", "integration"]
+  },
+  {
+    "id": "SK-0109",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "How do I change my display name?",
+    "answer": "Your display name can be changed from your 'Profile' page. Click 'Edit Profile' and update the name fields as needed.",
+    "keywords": ["display name", "username", "change name", "edit profile"]
+  },
+  {
+    "id": "SK-0110",
+    "category": "Account Management",
+    "target_audience": "all",
+    "question": "How to delete my account?",
+    "answer": "To delete your account, please go to 'Account Settings' -> 'Security'. You will find a 'Delete Account' option. Please be aware that this action is permanent and cannot be undone.",
+    "keywords": ["delete account", "remove account", "cancel", "close account"]
+  },
+  {
+    "id": "SK-0201",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "How do I create a new project?",
+    "answer": "To create a new project, navigate to your Dashboard and click the 'Create New Project' button. You will be guided through setting up the project name, description, and deadlines.",
+    "keywords": ["create project", "new project", "start project", "project setup"]
+  },
+  {
+    "id": "SK-0202",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "Where do I go to start a new project?",
+    "answer": "You can start a new project directly from your Dashboard. Look for the 'Create New Project' button, usually located in the top-right corner.",
+    "keywords": ["create project", "new project", "start project", "project setup"]
+  },
+  {
+    "id": "SK-0203",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "What's the process for setting up a project?",
+    "answer": "To set up a project, click 'Create New Project' on your Dashboard. You'll need to provide a title, a brief description, and you can optionally set a start and end date and invite members right away.",
+    "keywords": ["create project", "new project", "start project", "project setup"]
+  },
+  {
+    "id": "SK-0204",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "How do I find a project I'm a member of?",
+    "answer": "All projects you are a member of are listed on your main Dashboard. You can also use the search bar at the top of the page to search for a project by its name.",
+    "keywords": ["find project", "my projects", "search project", "project list"]
+  },
+  {
+    "id": "SK-0205",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "Can I edit the project details after creation?",
+    "answer": "Yes, if you are a project admin or the creator, you can edit project details. Go to the project's main page and find the 'Project Settings' or 'Edit Project' option.",
+    "keywords": ["edit project", "update project", "change details", "project settings"]
+  },
+  {
+    "id": "SK-0206",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "How to change a project's name?",
+    "answer": "To change a project's name, you need admin permissions for that project. Go to 'Project Settings' -> 'General' and you will find the option to edit the project title.",
+    "keywords": ["edit project", "rename project", "change name", "project title"]
+  },
+  {
+    "id": "SK-0207",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "How do I archive a completed project?",
+    "answer": "To archive a project, go to 'Project Settings' and look for the 'Archive Project' option. Archiving will remove it from your main dashboard but keep all data for future reference.",
+    "keywords": ["archive project", "complete project", "hide project", "finish project"]
+  },
+  {
+    "id": "SK-0208",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "Where can I find my archived projects?",
+    "answer": "You can view your archived projects by clicking on your profile icon and selecting 'View Archived Projects' from the dropdown menu.",
+    "keywords": ["find archived", "view old projects", "unarchive", "restore project"]
+  },
+  {
+    "id": "SK-0209",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "Can I restore an archived project?",
+    "answer": "Yes, you can restore an archived project. Find the project in your 'Archived Projects' list and click the 'Restore' or 'Unarchive' button.",
+    "keywords": ["restore project", "unarchive", "reactivate project", "archived"]
+  },
+  {
+    "id": "SK-0210",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "How do I delete a project permanently?",
+    "answer": "To permanently delete a project, you must first archive it. Then, from the 'Archived Projects' list, you will have the option to delete it forever. This action is irreversible and will delete all associated data.",
+    "keywords": ["delete project", "remove project", "permanent delete", "erase project"]
+  },
+  {
+    "id": "SK-0211",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "How do I set a deadline for a project?",
+    "answer": "Project deadlines can be set during creation or edited later in 'Project Settings'. This master deadline will be visible to all project members on the project dashboard.",
+    "keywords": ["project deadline", "due date", "end date", "set deadline"]
+  },
+  {
+    "id": "SK-0212",
+    "category": "Project Management",
+    "target_audience": "all",
+    "question": "What is a project dashboard?",
+    "answer": "The project dashboard is the main page for each project. It provides an overview of recent activity, upcoming deadlines, key files, and team members at a glance.",
+    "keywords": ["project dashboard", "overview", "main page", "project home"]
+  },
+  {
+    "id": "SK-0301",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "How can I add members to my project?",
+    "answer": "Inside your project, go to the 'Members' tab and click 'Invite Member'. You can search for users by their name or university email address. They will receive an invitation to join.",
+    "keywords": ["add member", "invite user", "team", "collaborator", "add person"]
+  },
+  {
+    "id": "SK-0302",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "How do I invite someone to my project?",
+    "answer": "Inside your project, go to the 'Members' tab and click 'Invite Member'. You can search for users by their name or university email address. They will receive an invitation to join.",
+    "keywords": ["add member", "invite user", "team", "collaborator", "add person"]
+  },
+  {
+    "id": "SK-0303",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "Can I invite people from outside my university?",
+    "answer": "Currently, SynKro is designed for collaboration within your institution. All members must have a valid university email address to join.",
+    "keywords": ["external collaborator", "guest", "invite outside", "non-university"]
+  },
+  {
+    "id": "SK-0304",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "What are the different roles in a project?",
+    "answer": "Projects typically have three roles: 'Admin' (can manage settings and members), 'Member' (can contribute to tasks and files), and 'Viewer' (can only view project content).",
+    "keywords": ["roles", "permissions", "member types", "admin", "viewer"]
+  },
+  {
+    "id": "SK-0305",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "How do I change a member's role?",
+    "answer": "As a project admin, go to the 'Members' tab, find the member you want to change, and use the dropdown menu next to their name to select a new role.",
+    "keywords": ["change role", "update permissions", "make admin", "promote member"]
+  },
+  {
+    "id": "SK-0306",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "How do I make someone a project admin?",
+    "answer": "To make a member an admin, go to the 'Members' tab, find the user, and change their role to 'Admin' using the role selector next to their name. You must be an admin yourself to do this.",
+    "keywords": ["make admin", "promote", "grant admin", "admin access"]
+  },
+  {
+    "id": "SK-0307",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "How to remove a member from a project?",
+    "answer": "As a project admin, you can remove a member by going to the 'Members' tab. Click the options menu (...) next to the member's name and select 'Remove from Project'.",
+    "keywords": ["remove member", "delete user", "kick member", "remove from project"]
+  },
+  {
+    "id": "SK-0308",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "How do I see all the members of a project?",
+    "answer": "You can see a full list of project members by clicking on the 'Members' tab within the project.",
+    "keywords": ["view members", "team list", "who is in the project", "see collaborators"]
+  },
+  {
+    "id": "SK-0309",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "How do I leave a project?",
+    "answer": "To leave a project you are a member of, go to the 'Members' tab. Find your own name in the list, click the options menu (...), and select 'Leave Project'.",
+    "keywords": ["leave project", "exit project", "remove myself", "quit project"]
+  },
+  {
+    "id": "SK-0310",
+    "category": "Team & Members",
+    "target_audience": "all",
+    "question": "What happens when I leave a project?",
+    "answer": "When you leave a project, your access is revoked. Any tasks assigned to you will become unassigned, but the files you uploaded and messages you sent will remain.",
+    "keywords": ["leave project", "consequences", "what happens", "exit"]
+  },
+  {
+    "id": "SK-0401",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "How do I create a new task?",
+    "answer": "In the 'Tasks' section of your project, click the 'Add Task' button. You can then provide a title, description, assign it to a team member, and set a due date.",
+    "keywords": ["new task", "create task", "add task", "to-do"]
+  },
+  {
+    "id": "SK-0402",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "Where can I add a task?",
+    "answer": "Tasks are managed within each project. Go to your project and click on the 'Tasks' or 'Task Board' tab to add a new task.",
+    "keywords": ["new task", "create task", "add task", "to-do"]
+  },
+  {
+    "id": "SK-0403",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "How do I assign a task to someone?",
+    "answer": "When creating or editing a task, you'll see an 'Assignee' field. Click it and select the project member you want to assign the task to.",
+    "keywords": ["assign task", "give task", "delegate", "assignee"]
+  },
+  {
+    "id": "SK-0404",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "Can I assign a task to multiple people?",
+    "answer": "Yes, depending on the project settings, you may be able to assign a single task to multiple members. Look for an 'Add Assignee' button in the task details.",
+    "keywords": ["multiple assignees", "assign to team", "group task"]
+  },
+  {
+    "id": "SK-0405",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "How do I set a due date for a task?",
+    "answer": "In the task creation or edit view, there is a 'Due Date' field. Click it to open a calendar and select the date the task should be completed by.",
+    "keywords": ["due date", "deadline", "task date", "set deadline"]
+  },
+  {
+    "id": "SK-0406",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "How do I mark a task as complete?",
+    "answer": "To mark a task as complete, simply click the checkbox next to the task's name in the task list or board. You can also change its status to 'Done' in the task details.",
+    "keywords": ["complete task", "finish task", "done", "mark as done", "check off"]
+  },
+  {
+    "id": "SK-0407",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "How do I view all my assigned tasks?",
+    "answer": "On your main dashboard, there is a 'My Tasks' widget that shows all tasks assigned to you across all your projects. You can also filter by 'Assigned to me' within any project's task board.",
+    "keywords": ["my tasks", "view my tasks", "assigned to me", "my to-dos"]
+  },
+  {
+    "id": "SK-0408",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "What are subtasks?",
+    "answer": "Subtasks are smaller, manageable steps within a larger parent task. They help break down complex work. You can add subtasks from within the parent task's detail view.",
+    "keywords": ["subtask", "child task", "nested task", "break down task"]
+  },
+  {
+    "id": "SK-0409",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "How do I add a subtask?",
+    "answer": "Open the detail view of the parent task. You will find an 'Add Subtask' button or field where you can list out the smaller steps.",
+    "keywords": ["add subtask", "create subtask", "sub-item"]
+  },
+  {
+    "id": "SK-0410",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "Can I reorder tasks?",
+    "answer": "Yes, in the 'Task Board' or 'List' view, you can typically drag and drop tasks to reorder them or move them between columns (e.g., from 'To Do' to 'In Progress').",
+    "keywords": ["reorder tasks", "prioritize", "move task", "drag and drop"]
+  },
+  {
+    "id": "SK-0411",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "How can I filter tasks?",
+    "answer": "The task view includes filter options at the top. You can filter tasks by assignee, due date, tags, or status to narrow down your view.",
+    "keywords": ["filter tasks", "search tasks", "find task", "sort tasks"]
+  },
+  {
+    "id": "SK-0412",
+    "category": "Task Management",
+    "target_audience": "all",
+    "question": "How do I attach a file to a task?",
+    "answer": "When you are creating or editing a task, look for a 'Attach File' or paperclip icon. This allows you to upload a file directly related to that specific task.",
+    "keywords": ["attach file", "add attachment", "task file", "upload to task"]
+  },
+  {
+    "id": "SK-0501",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "How do I upload a file to a project?",
+    "answer": "Navigate to the 'Files' tab within your project. You can either drag and drop your files into the window or use the 'Upload File' button.",
+    "keywords": ["upload", "file", "add document", "share file"]
+  },
+  {
+    "id": "SK-0502",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "Where do I put my project files?",
+    "answer": "All project-related files should be uploaded to the 'Files' section of that specific project. This keeps everything organized and accessible to the team.",
+    "keywords": ["upload", "file", "add document", "share file", "file storage"]
+  },
+  {
+    "id": "SK-0503",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "What is the maximum file size I can upload?",
+    "answer": "The maximum file size for a single upload is 100MB. For larger files, we recommend sharing a link from a cloud storage service like Google Drive or Dropbox.",
+    "keywords": ["file size", "upload limit", "max size", "large file"]
+  },
+  {
+    "id": "SK-0504",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "How do I organize files?",
+    "answer": "Within the 'Files' tab, you can create folders to organize your documents. Click 'Create Folder' to add a new folder and then drag files into it.",
+    "keywords": ["organize files", "folders", "create folder", "file structure"]
+  },
+  {
+    "id": "SK-0505",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "How to create a folder for files?",
+    "answer": "In the project's 'Files' section, look for a 'Create Folder' or 'New Folder' button. This will let you name a new folder to help organize your files.",
+    "keywords": ["organize files", "folders", "create folder", "file structure"]
+  },
+  {
+    "id": "SK-0506",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "How do I download a file?",
+    "answer": "To download a file, navigate to the 'Files' tab, find the file you need, and click the download icon next to it. You can also download multiple files as a zip archive.",
+    "keywords": ["download", "get file", "save file", "export"]
+  },
+  {
+    "id": "SK-0507",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "Does SynKro support file versioning?",
+    "answer": "Yes, when you upload a new version of a file with the same name, SynKro automatically keeps the previous versions. You can view or restore older versions from the file's detail page.",
+    "keywords": ["versioning", "file history", "version control", "revisions", "previous version"]
+  },
+  {
+    "id": "SK-0508",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "How to see previous versions of a file?",
+    "answer": "Click on the file to open its detail view. If multiple versions exist, you will see a 'Version History' tab where you can view and download older versions.",
+    "keywords": ["versioning", "file history", "version control", "revisions", "previous version"]
+  },
+  {
+    "id": "SK-0509",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "How do I delete a file?",
+    "answer": "To delete a file, go to the 'Files' tab, find the file, and click the 'Delete' or trash can icon. You may need admin or uploader permissions to delete certain files.",
+    "keywords": ["delete file", "remove file", "erase document"]
+  },
+  {
+    "id": "SK-0510",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "Can I preview files in the browser?",
+    "answer": "Yes, SynKro supports in-browser previews for common file types like PDF, images (JPG, PNG), and text documents. Just click on the file name to open the preview.",
+    "keywords": ["preview file", "view document", "open file", "in-browser"]
+  },
+  {
+    "id": "SK-0511",
+    "category": "File & Resource Management",
+    "target_audience": "all",
+    "question": "How to search for a file?",
+    "answer": "In the 'Files' tab of your project, there is a search bar at the top. You can use it to search for files by their name or content.",
+    "keywords": ["search file", "find file", "file search"]
+  },
+  {
+    "id": "SK-0601",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "How do I send a message to a team member?",
+    "answer": "You can use the main 'Chat' feature in the navigation bar to send a direct message to any user. You can also @mention them in a project's discussion forum.",
+    "keywords": ["chat", "message", "direct message", "dm", "contact"]
+  },
+  {
+    "id": "SK-0602",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "Is there a chat for each project?",
+    "answer": "Yes, every project has its own dedicated 'Discussion' or 'Forum' tab. This is the best place for project-specific conversations to keep them organized.",
+    "keywords": ["project chat", "discussion", "forum", "group chat", "team conversation"]
+  },
+  {
+    "id": "SK-0603",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "How do I use the discussion forum?",
+    "answer": "Navigate to the 'Discussion' tab in your project. You can start a new topic or reply to existing conversations. It supports text formatting and file attachments.",
+    "keywords": ["discussion", "forum", "post", "conversation", "reply"]
+  },
+  {
+    "id": "SK-0604",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "What is an @mention?",
+    "answer": "An @mention is a way to notify a specific user in a conversation. Type the '@' symbol followed by their name (e.g., @JaneDoe). They will receive a notification that you mentioned them.",
+    "keywords": ["mention", "tag", "@mention", "notify user"]
+  },
+  {
+    "id": "SK-0605",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "How do I get someone's attention in a discussion?",
+    "answer": "The best way to get a specific person's attention is to @mention them. Type '@' and then their name to send them a direct notification about your message.",
+    "keywords": ["mention", "tag", "@mention", "notify user", "get attention"]
+  },
+  {
+    "id": "SK-0606",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "What are announcements?",
+    "answer": "Announcements are special messages sent by project admins or faculty to all members of a project. They appear at the top of the project dashboard and often trigger an email notification.",
+    "keywords": ["announcement", "broadcast", "important message", "update"]
+  },
+  {
+    "id": "SK-0607",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "How do I post an announcement?",
+    "answer": "If you are a project admin, go to the project dashboard. You should see a section or button labeled 'Post Announcement' or 'Create Announcement'.",
+    "keywords": ["post announcement", "make announcement", "send update"]
+  },
+  {
+    "id": "SK-0608",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "Can I edit a message I sent?",
+    "answer": "Yes, you can edit your own messages in chat and discussions for a short period after sending them. Hover over your message and look for an 'Edit' icon or option.",
+    "keywords": ["edit message", "correct message", "change text", "typo"]
+  },
+  {
+    "id": "SK-0609",
+    "category": "Communication",
+    "target_audience": "all",
+    "question": "Can I delete a message?",
+    "answer": "Yes, you can typically delete your own messages. Hover over the message and look for a 'Delete' or trash can icon. Note that in some forums, deletion may not be permitted by the project admin.",
+    "keywords": ["delete message", "remove message", "erase chat"]
+  },
+  {
+    "id": "SK-0701",
+    "category": "Faculty Tools",
+    "target_audience": "faculty",
+    "question": "How can I view the progress of all student projects?",
+    "answer": "As a faculty member, your Dashboard includes a 'Faculty Overview' panel. From there, you can select a course or project group to view high-level statistics and progress reports.",
+    "keywords": ["faculty", "overview", "student progress", "dashboard", "view projects"]
+  },
+  {
+    "id": "SK-0702",
+    "category": "Faculty Tools",
+    "target_audience": "faculty",
+    "question": "Where is the faculty dashboard?",
+    "answer": "The faculty-specific tools are integrated into your main dashboard. Look for a 'Faculty Overview' or 'Instructor View' section, which provides access to course management and analytics.",
+    "keywords": ["faculty", "dashboard", "instructor view", "analytics", "reports"]
+  },
+  {
+    "id": "SK-0703",
+    "category": "Faculty Tools",
+    "target_audience": "faculty",
+    "question": "How do I create a project template for my class?",
+    "answer": "You can create a project and set it up with standard tasks, folders, and resources. Then, in 'Project Settings', you'll find an option to 'Save as Template'. Students can then use this template to start their projects.",
+    "keywords": ["project template", "class setup", "template", "reusable project", "faculty"]
+  },
+  {
+    "id": "SK-0704",
+    "category": "Faculty Tools",
+    "target_audience": "faculty",
+    "question": "How can I grade a project?",
+    "answer": "SynKro integrates with the university's Learning Management System (LMS). A 'Grade' button within the project on SynKro will link you back to the LMS gradebook for that specific assignment.",
+    "keywords": ["grade", "grading", "assessment", "mark", "faculty", "lms"]
+  },
+  {
+    "id": "SK-0705",
+    "category": "Faculty Tools",
+    "target_audience": "faculty",
+    "question": "Can I see a student's individual contribution?",
+    "answer": "Yes, the 'Project Analytics' tab provides insights into member activity, including task completions, file uploads, and discussion participation, helping you gauge individual contributions.",
+    "keywords": ["contribution", "analytics", "student activity", "individual work", "faculty"]
+  },
+  {
+    "id": "SK-0706",
+    "category": "Faculty Tools",
+    "target_audience": "faculty",
+    "question": "How do I track deadlines for all teams?",
+    "answer": "The 'Faculty Overview' on your dashboard provides a master calendar view of all key deadlines for the projects you oversee, color-coded by team or course.",
+    "keywords": ["track deadlines", "calendar", "due dates", "faculty", "overview"]
+  },
+  {
+    "id": "SK-0707",
+    "category": "Faculty Tools",
+    "target_audience": "faculty",
+    "question": "How can I send an announcement to all my students?",
+    "answer": "From your 'Faculty Overview', you can create a global announcement that will be sent to all students in a specific course or to all projects you supervise.",
+    "keywords": ["global announcement", "faculty", "send message", "course announcement"]
+  },
+  {
+    "id": "SK-0708",
+    "category": "Faculty Tools",
+    "target_audience": "faculty",
+    "question": "Can I bulk-create projects for student groups?",
+    "answer": "Yes, in the 'Faculty Tools' section, there is a 'Bulk Project Creation' feature. You can upload a CSV file with team names and member emails to automatically generate all the projects at once.",
+    "keywords": ["bulk create", "setup groups", "student teams", "faculty", "automation"]
+  },
+  {
+    "id": "SK-0801",
+    "category": "Technical Support",
+    "target_audience": "all",
+    "question": "The platform is running slow, what should I do?",
+    "answer": "If you experience slowness, please try clearing your browser cache and cookies first. If the issue persists, check our 'System Status' page for any ongoing incidents or contact support to report the problem.",
+    "keywords": ["slow", "lag", "performance", "speed", "troubleshooting"]
+  },
+  {
+    "id": "SK-0802",
+    "category": "Technical Support",
+    "target_audience": "all",
+    "question": "SynKro is not loading",
+    "answer": "If the platform isn't loading, first check your internet connection. Then, try a different browser or clear your current browser's cache. You can also visit our 'System Status' page to see if we are experiencing an outage.",
+    "keywords": ["not loading", "down", "outage", "blank screen", "error"]
+  },
+  {
+    "id": "SK-0803",
+    "category": "Technical Support",
+    "target_audience": "all",
+    "question": "How do I report a bug?",
+    "answer": "You can report a bug by clicking the 'Help' menu and selecting 'Report an Issue'. Please provide as much detail as possible, including what you were doing, what you expected to happen, and what actually happened.",
+    "keywords": ["bug report", "report issue", "glitch", "error", "something is broken"]
+  },
+  {
+    "id": "SK-0804",
+    "category": "Technical Support",
+    "target_audience": "all",
+    "question": "Which browsers are supported?",
+    "answer": "SynKro is optimized for the latest versions of Google Chrome, Mozilla Firefox, Safari, and Microsoft Edge. We do not recommend using Internet Explorer.",
+    "keywords": ["browser support", "supported browsers", "chrome", "firefox", "edge", "safari"]
+  },
+  {
+    "id": "SK-0805",
+    "category": "Technical Support",
+    "target_audience": "all",
+    "question": "I can't upload a file",
+    "answer": "If you're having trouble uploading a file, please check that it is not larger than the 100MB size limit and that it is a supported file type. Also, ensure you have a stable internet connection.",
+    "keywords": ["upload error", "file not uploading", "cant upload", "upload failed"]
+  },
+  {
+    "id": "SK-0806",
+    "category": "Technical Support",
+    "target_audience": "all",
+    "question": "How do I clear my browser cache?",
+    "answer": "The process for clearing your browser cache varies by browser. Generally, you can find the option in the 'Settings' or 'History' menu under 'Clear Browsing Data'. A quick web search for your specific browser will provide detailed instructions.",
+    "keywords": ["clear cache", "cache", "cookies", "browsing data", "troubleshooting"]
+  },
+  {
+    "id": "SK-0901",
+    "category": "Security & Privacy",
+    "target_audience": "all",
+    "question": "Is my data secure on SynKro?",
+    "answer": "Yes, security is our top priority. All data is encrypted in transit and at rest. We follow industry best practices to protect your information and perform regular security audits.",
+    "keywords": ["security", "data", "privacy", "secure", "encryption"]
+  },
+  {
+    "id": "SK-0902",
+    "category": "Security & Privacy",
+    "target_audience": "all",
+    "question": "Who can see my project data?",
+    "answer": "Your project data is only visible to the members of that project and authorized faculty supervisors. We do not share your data with third parties. For more details, please review our Privacy Policy.",
+    "keywords": ["privacy", "data access", "who can see", "confidentiality"]
+  },
+  {
+    "id": "SK-0903",
+    "category": "Security & Privacy",
+    "target_audience": "all",
+    "question": "Where can I find the privacy policy?",
+    "answer": "You can find a link to our full Privacy Policy in the footer of every page on the SynKro platform.",
+    "keywords": ["privacy policy", "data usage", "terms", "legal"]
+  },
+  {
+    "id": "SK-0904",
+    "category": "Security & Privacy",
+    "target_audience": "all",
+    "question": "How to enable two-factor authentication?",
+    "answer": "For enhanced security, you can enable Two-Factor Authentication (2FA) in your 'Account Settings' under the 'Security' tab. You will need an authenticator app on your phone to complete the setup.",
+    "keywords": ["2fa", "two-factor authentication", "mfa", "security", "authenticator"]
+  }
+]
