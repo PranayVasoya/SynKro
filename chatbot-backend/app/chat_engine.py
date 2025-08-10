@@ -2,9 +2,7 @@ import os
 import json
 import numpy as np
 import faiss
-
-# import google.generativeai as genai <-- REMOVE
-from groq import Groq  # <-- ADD
+from groq import Groq
 from pymongo import MongoClient
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
@@ -19,12 +17,11 @@ class ChatEngine:
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
         print("Model loaded.")
 
-        # Configure Groq API Client
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             raise ValueError("GROQ_API_KEY not found in environment variables.")
-        self.llm_client = Groq(api_key=api_key)  # <-- MODIFIED
-        self.llm_model = "llama3-8b-8192"  # We will use Llama 3 8B model
+        self.llm_client = Groq(api_key=api_key)
+        self.llm_model = "llama3-8b-8192"
 
         self.kb = self._load_knowledge_base(kb_path)
         self.index = self._build_faiss_index()
@@ -41,7 +38,6 @@ class ChatEngine:
         self.collection = self.db[collection_name]
         print("MongoDB connection successful.")
 
-    # ... (The _load_knowledge_base, _build_faiss_index, and _search_kb methods remain exactly the same) ...
     def _load_knowledge_base(self, kb_path):
         print(f"Loading knowledge base from {kb_path}...")
         try:
@@ -66,21 +62,34 @@ class ChatEngine:
         print("FAISS index built successfully.")
         return index
 
-    def _search_kb(self, query: str, threshold=0.75):
+    # [FIX & TUNING] - Threshold lowered and debug print added
+    def _search_kb(self, query: str, threshold=0.65):  # <-- THRESHOLD LOWERED
         if not self.index:
             return None, 0.0
+
         query_embedding = self.embedding_model.encode([query])
         distances, indices = self.index.search(
             np.array(query_embedding, dtype=np.float32), 1
         )
+
         best_match_index = indices[0][0]
         distance = distances[0][0]
+
         similarity = 1 / (1 + distance)
+
+        # This debug line is your most important tool for tuning
+        print(
+            f"DEBUG: Query: '{query}' | Best Match: '{self.kb[best_match_index]['question']}' | Similarity: {similarity:.4f}"
+        )
+
         if similarity >= threshold:
             return self.kb[best_match_index], similarity
         return None, similarity
 
     def _log_to_mongo(self, user_id, query, response, source, topic=None):
+        if user_id == "guest":
+            return
+
         log_entry = {
             "user_id": user_id,
             "query": query,
@@ -91,7 +100,6 @@ class ChatEngine:
         }
         self.collection.insert_one(log_entry)
 
-    # MODIFIED: This function now calls the Groq API
     def _is_creative_request(self, query: str) -> bool:
         print("Classifying intent for query using Groq...")
         try:
@@ -107,7 +115,7 @@ class ChatEngine:
                     },
                 ],
                 model=self.llm_model,
-                temperature=0,  # Low temperature for classification
+                temperature=0,
             )
             decision = chat_completion.choices[0].message.content.strip().upper()
             print(f"Intent classification result: {decision}")
@@ -116,8 +124,9 @@ class ChatEngine:
             print(f"Error during intent classification with Groq: {e}")
             return False
 
-    # MODIFIED: This function now calls the Groq API for generation
+    # [FIX] - Corrected logic flow for authentication and fallbacks
     def generate_response(self, query: str, user_id: str):
+        # 1. Search in local knowledge base first.
         kb_match, similarity = self._search_kb(query)
 
         if kb_match:
@@ -127,9 +136,20 @@ class ChatEngine:
             self._log_to_mongo(user_id, query, response_text, "KB", topic)
             return {"answer": response_text, "source": "Knowledge Base"}
 
+        # 2. If no KB match, classify the user's intent BEFORE checking if they are a guest.
         print("No suitable KB entry found. Checking for creative intent...")
-        if self._is_creative_request(query):
-            print("Creative intent detected. Calling Groq for a generative response.")
+        is_creative = self._is_creative_request(query)
+
+        # 3. Now, handle the logic based on intent.
+        if is_creative:
+            # The question is creative, NOW check if the user is allowed to use the LLM.
+            if user_id == "guest":
+                print("User is a guest. Creative LLM access is denied.")
+                guest_fallback_message = "This question requires advanced help. Please sign in or sign up to get a detailed answer from our AI assistant."
+                return {"answer": guest_fallback_message, "source": "Auth Wall"}
+
+            # If we reach here, the user is logged in and the request is creative.
+            print("Creative intent detected for logged-in user. Calling Groq...")
             try:
                 chat_completion = self.llm_client.chat.completions.create(
                     messages=[
@@ -145,7 +165,6 @@ class ChatEngine:
                     model=self.llm_model,
                 )
                 response_text = chat_completion.choices[0].message.content
-
                 self._log_to_mongo(
                     user_id,
                     query,
@@ -160,7 +179,9 @@ class ChatEngine:
                 error_message = "I'm having trouble brainstorming right now. Please try again in a moment."
                 self._log_to_mongo(user_id, query, error_message, "Error")
                 return {"answer": error_message, "source": "Error"}
+
         else:
+            # 4. The request was not creative, so it's out of scope for all users (guests and logged-in).
             print("Query is out of scope (not in KB and not a creative request).")
             fallback_message = "I can only answer questions about how to use the SynKro platform or help with brainstorming project ideas. Could you please rephrase your question?"
             self._log_to_mongo(

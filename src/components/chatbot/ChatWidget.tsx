@@ -27,10 +27,31 @@ export const ChatWidget = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // IMPORTANT: In a real app, get the user ID from your authentication system (e.g., useAuth hook, session).
-  const userId = 'local-dev-user-01'; 
+  // [AUTH & DEBUG FIX]
+  // This logic now correctly checks for user data and defaults to 'guest'.
+  const [userId, setUserId] = useState<string>('guest');
 
-  // Effect to scroll to the latest message
+  useEffect(() => {
+    // This effect runs on the client and checks for user data.
+    // YOU MUST ensure your login process saves user data to localStorage.
+    const userDataString = localStorage.getItem('user');
+    
+    if (userDataString) {
+      try {
+        const userData = JSON.parse(userDataString);
+        // IMPORTANT: Check if the user object has an 'id' or '_id' property.
+        // MongoDB often uses '_id'. Adjust this line if necessary.
+        if (userData && userData.id) {
+          setUserId(userData.id);
+        } else if (userData && userData._id) {
+          setUserId(userData._id);
+        }
+      } catch (error) {
+        console.error("Failed to parse user data from localStorage", error);
+      }
+    }
+  }, []);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -40,6 +61,9 @@ export const ChatWidget = () => {
     const userMessage: ChatMessageType = { id: Date.now().toString(), text, sender: 'user' };
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
+
+    // [DEBUGGING] - Check your browser console to see what ID is being sent.
+    console.log(`Sending message to bot. Query: "${text}", UserID: "${userId}"`);
 
     const response = await sendMessageToBot({ query: text, user_id: userId });
     
@@ -54,17 +78,16 @@ export const ChatWidget = () => {
 
   return (
     <div className="fixed bottom-5 right-5 z-50">
-      {/* Chat Window */}
       <div
         className={clsx(
-          "w-80 sm:w-96 h-[32rem] bg-white rounded-lg shadow-2xl flex flex-col transition-all duration-300 ease-in-out",
+          "w-80 sm:w-96 h-[32rem] bg-white rounded-lg shadow-2xl flex flex-col transition-all duration-300 ease-in-out dark:bg-gray-800",
           isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
         )}
       >
         <div className="bg-primary text-white p-4 rounded-t-lg flex justify-between items-center">
           <h3 className="font-bold text-lg">SynKro Assist</h3>
         </div>
-        <div className="flex-grow p-4 overflow-y-auto bg-white/10">
+        <div className="flex-grow p-4 overflow-y-auto bg-gray-50 dark:bg-gray-900">
           <div className="flex flex-col space-y-2">
             {messages.map((msg) => (
               <ChatMessage key={msg.id} message={msg} />
@@ -76,7 +99,6 @@ export const ChatWidget = () => {
         <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
       </div>
 
-      {/* Floating Action Button to toggle chat window */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="bg-primary text-white w-16 h-16 rounded-full shadow-lg flex items-center justify-center mt-4 float-right hover:bg-blue-700 active:bg-blue-800 transition-all duration-200"
