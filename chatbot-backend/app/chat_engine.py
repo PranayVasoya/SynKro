@@ -142,14 +142,8 @@ class ChatEngine:
 
         # 3. Now, handle the logic based on intent.
         if is_creative:
-            # The question is creative, NOW check if the user is allowed to use the LLM.
-            if user_id == "guest":
-                print("User is a guest. Creative LLM access is denied.")
-                guest_fallback_message = "This question requires advanced help. Please sign in or sign up to get a detailed answer from our AI assistant."
-                return {"answer": guest_fallback_message, "source": "Auth Wall"}
-
-            # If we reach here, the user is logged in and the request is creative.
-            print("Creative intent detected for logged-in user. Calling Groq...")
+            # The question is creative, allow all users (including guests) to use the LLM.
+            print("Creative intent detected. Calling Groq...")
             try:
                 chat_completion = self.llm_client.chat.completions.create(
                     messages=[
