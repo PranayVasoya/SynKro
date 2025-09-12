@@ -21,7 +21,7 @@ class ChatEngine:
         if not api_key:
             raise ValueError("GROQ_API_KEY not found in environment variables.")
         self.llm_client = Groq(api_key=api_key)
-        self.llm_model = "llama3-8b-8192"
+        self.llm_model = "llama-3.3-70b-versatile"
 
         self.kb = self._load_knowledge_base(kb_path)
         self.index = self._build_faiss_index()
