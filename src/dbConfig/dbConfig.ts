@@ -43,4 +43,5 @@ async function connectToDatabase(): Promise<Mongoose> {
 }
 
 export default connectToDatabase;
+export const connect = connectToDatabase;
 

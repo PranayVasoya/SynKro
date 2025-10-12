@@ -11,6 +11,7 @@ import { Typewriter } from "react-simple-typewriter";
 // Components
 import { Button } from "@/components/ui/button";
 import ProjectCard from "@/components/dashboard/ProjectCard";
+import ProjectsSidebar from "@/components/dashboard/ProjectsSidebar";
 
 // Interfaces
 import type { ApiErrorResponse } from "@/interfaces/api";
@@ -507,7 +508,7 @@ export default function Dashboard() {
     >
       <Toaster position="top-center" reverseOrder={false} />
       {/* Desktop Sidebar */}
-      <aside className="bg-card hidden md:flex flex-col w-64 p-4 space-y-6 border-r border-border h-screen sticky top-0 shadow-md z-[90]">
+      <aside className="bg-card hidden md:flex flex-col w-64 p-4 space-y-6 border-r border-border h-screen sticky top-0 shadow-md z-[90] overflow-y-auto">
         <motion.h1
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -517,6 +518,9 @@ export default function Dashboard() {
           SynKro
         </motion.h1>
         <MenuLinks animate={isFirstLoad} />
+        {user._id && (
+          <ProjectsSidebar projects={projects} userId={user._id} />
+        )}
       </aside>
       {/* Mobile Sidebar */}
       <AnimatePresence>
@@ -554,6 +558,9 @@ export default function Dashboard() {
                 />
               </div>
               <MenuLinks animate={isFirstLoad} />
+              {user._id && (
+                <ProjectsSidebar projects={projects} userId={user._id} />
+              )}
             </motion.aside>
           </>
         )}
