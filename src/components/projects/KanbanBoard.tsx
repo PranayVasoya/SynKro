@@ -119,10 +119,10 @@ export default function KanbanBoard({
       {columns.map((column) => {
         const columnTasks = getTasksByStatus(column);
         const columnColors = {
-          "To Do": "bg-purple-50 dark:bg-purple-950/20",
-          "In Progress": "bg-blue-50 dark:bg-blue-950/20",
-          "In Review": "bg-yellow-50 dark:bg-yellow-950/20",
-          Done: "bg-green-50 dark:bg-green-950/20",
+          "To Do": "bg-purple-50 dark:bg-purple-900/30",
+          "In Progress": "bg-blue-50 dark:bg-blue-900/30",
+          "In Review": "bg-yellow-50 dark:bg-yellow-900/30",
+          Done: "bg-green-50 dark:bg-green-900/30",
         };
 
         return (

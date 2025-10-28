@@ -39,7 +39,11 @@ export default function ProjectsSidebar({
   // Close popup when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+      // Check if the click is outside the popup and not on the "More Projects" button
+      const target = event.target as HTMLElement;
+      const isMoreProjectsButton = target.textContent?.includes('More Projects');
+      
+      if (popupRef.current && !popupRef.current.contains(target) && !isMoreProjectsButton) {
         setShowProjectsPopup(false);
       }
     };
@@ -105,7 +109,7 @@ export default function ProjectsSidebar({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 top-full mt-2 w-64 bg-popover border border-border rounded-lg shadow-lg z-50 overflow-hidden"
+            className="absolute left-0 top-full mt-2 w-full max-w-[250px] bg-popover border border-border rounded-lg shadow-lg z-50 overflow-hidden"
           >
             {/* Header */}
             <div className="p-3 border-b border-border flex items-center justify-between">

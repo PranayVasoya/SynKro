@@ -56,13 +56,36 @@ const ProjectCard = ({
     >
       {/* Clickable Area */}
       <div
-        onClick={() => router.push(`/projects/${project._id}`)}
+        onClick={() => {
+          // Check if user is owner or team member before navigating
+          const isOwner = project.createdBy?._id === user._id;
+          const isTeamMember = project.teamMembers?.some(
+            member => (typeof member === 'string' ? member : member._id) === user._id
+          );
+          
+          if (isOwner || isTeamMember) {
+            router.push(`/projects/${project._id}`);
+          } else {
+            toast.error("Only project owners and team members can access project tracking");
+          }
+        }}
         className="flex flex-col flex-grow mb-3 h-full cursor-pointer"
         role="link"
         tabIndex={0}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ")
-            router.push(`/projects/${project._id}`);
+          if (e.key === "Enter" || e.key === " ") {
+            // Check if user is owner or team member before navigating
+            const isOwner = project.createdBy?._id === user._id;
+            const isTeamMember = project.teamMembers?.some(
+              member => (typeof member === 'string' ? member : member._id) === user._id
+            );
+            
+            if (isOwner || isTeamMember) {
+              router.push(`/projects/${project._id}`);
+            } else {
+              toast.error("Only project owners and team members can access project tracking");
+            }
+          }
         }}
       >
         <h3 className="font-semibold text-card-foreground hover:underline w-fit">

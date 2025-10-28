@@ -162,7 +162,8 @@ function TaskRow({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={() => handleSave("type")}
             autoFocus
-            className="w-full p-1 bg-background border border-border rounded"
+            className="w-full p-1 bg-background border border-border rounded text-sm"
+            style={{ minWidth: "80px", maxWidth: "120px" }}
           >
             <option value="Task">Task</option>
             <option value="Story">Story</option>
@@ -211,7 +212,8 @@ function TaskRow({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={() => handleSave("status")}
             autoFocus
-            className="w-full p-1 bg-background border border-border rounded"
+            className="w-full p-1 bg-background border border-border rounded text-sm"
+            style={{ minWidth: "100px", maxWidth: "140px" }}
           >
             <option value="To Do">To Do</option>
             <option value="In Progress">In Progress</option>
@@ -227,7 +229,7 @@ function TaskRow({
             className="cursor-pointer"
           >
             <span
-              className={`px-2 py-1 rounded text-xs font-medium ${
+              className={`px-2 py-1 rounded text-xs font-medium inline-block ${
                 task.status === "To Do"
                   ? "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
                   : task.status === "In Progress"
@@ -236,6 +238,7 @@ function TaskRow({
                   ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
                   : "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
               }`}
+              style={{ maxWidth: "120px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
             >
               {task.status}
             </span>
@@ -254,7 +257,8 @@ function TaskRow({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={() => handleSave("priority")}
             autoFocus
-            className="w-full p-1 bg-background border border-border rounded"
+            className="w-full p-1 bg-background border border-border rounded text-sm"
+            style={{ minWidth: "80px", maxWidth: "120px" }}
           >
             <option value="Highest">Highest</option>
             <option value="High">High</option>
@@ -270,7 +274,7 @@ function TaskRow({
             }}
             className="cursor-pointer"
           >
-            <span className="text-sm">{task.priority}</span>
+            <span className="text-sm text-muted-foreground">{task.priority}</span>
           </div>
         )}
       </td>
@@ -284,18 +288,30 @@ function TaskRow({
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={() => handleSave("dueDate")}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSave("dueDate");
+              }
+            }}
             autoFocus
-            className="w-full p-1 bg-background border border-border rounded"
+            className="w-full p-1 bg-background border border-border rounded text-sm"
+            style={{ minWidth: "120px" }}
           />
         ) : (
           <div
             onClick={() => {
-              setEditValue(task.dueDate.split("T")[0]);
+              // Ensure we have a valid date string to split
+              const dateStr = task.dueDate || new Date().toISOString();
+              // Extract just the date part (YYYY-MM-DD)
+              setEditValue(dateStr.split("T")[0]);
               onStartEdit("dueDate");
             }}
-            className="cursor-pointer text-sm"
+            className="cursor-pointer text-sm text-muted-foreground hover:bg-muted/50 p-1 rounded transition-colors"
+            style={{ border: "1px dashed transparent", display: "inline-block" }}
+            onMouseOver={(e) => e.currentTarget.style.border = "1px dashed #ccc"}
+            onMouseOut={(e) => e.currentTarget.style.border = "1px dashed transparent"}
           >
-            {formatDate(task.dueDate)}
+            {task.dueDate ? formatDate(task.dueDate) : "➕ Set due date"}
           </div>
         )}
       </td>
