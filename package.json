@@ -19,12 +19,13 @@
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
     "framer-motion": "^12.18.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.483.0",
     "mongoose": "^8.13.2",
     "motion": "^12.18.1",
-    "neo4j-driver": "^5.28.1",
+    "neo4j-driver": "^5.28.2",
     "next": "^15.3.0",
     "next-themes": "^0.4.6",
     "nodemailer": "^6.10.1",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@types/dotenv": "^6.1.1",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.17",
@@ -48,6 +50,7 @@
     "eslint-config-next": "15.1.7",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import bcryptjs from "bcryptjs";
+import { neo4jService } from "@/services/neo4j.service";
+
 
 interface SignupRequestBody {
   username: string;
@@ -107,6 +109,16 @@ export async function POST(request: NextRequest) {
       prn: savedUser.prn,
       mobile: savedUser.mobile,
     });
+    try {
+      await neo4jService.syncUserFromMongoDB({
+        _id: savedUser._id.toString(),
+        username: savedUser.username,
+        skills: savedUser.skills || []
+      });
+    } catch (neo4jError) {
+      console.error("Neo4j sync error during signup:", neo4jError);
+      // Don't fail signup if Neo4j sync fails
+    }
 
     return NextResponse.json({
       message: "User registered successfully",

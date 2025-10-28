@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/dbConfig/dbConfig";
 import User from "@/models/userModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import { neo4jService } from "@/services/neo4j.service";
 
 interface UpdateRequestBody {
   username?: string;
@@ -111,6 +112,19 @@ export async function PUT(request: NextRequest) {
       mobile: updatedUser.mobile,
       skills: updatedUser.skills,
     });
+
+    // Sync user data to Neo4j
+    try {
+      await neo4jService.syncUserFromMongoDB({
+        _id: userId,
+        username: updatedUser.username,
+        skills: updatedUser.skills || []
+      });
+      console.log("Neo4j sync successful for user:", userId);
+    } catch (neo4jError) {
+      console.error("Neo4j sync error during profile update:", neo4jError);
+      // Don't fail the request if Neo4j sync fails
+    }
 
     return NextResponse.json({
       message: "Profile updated successfully",

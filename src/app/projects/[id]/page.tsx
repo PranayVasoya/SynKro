@@ -54,11 +54,18 @@ export default function ProjectTrackingPage({
         setProject(res.data.data);
       } catch (error) {
         console.error("Failed to fetch project:", error);
-        toast.error("Failed to load project");
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+          toast.error("Project not found");
+          router.push("/dashboard");
+        } else {
+          toast.error("Failed to load project");
+        }
       }
     };
-    fetchProject();
-  }, [projectId]);
+    if (projectId) {
+      fetchProject();
+    }
+  }, [projectId, router]);
 
   // Fetch tasks
   const fetchTasks = async () => {
@@ -72,7 +79,9 @@ export default function ProjectTrackingPage({
   };
 
   useEffect(() => {
-    fetchTasks();
+    if (projectId) {
+      fetchTasks();
+    }
   }, [projectId]);
 
   // Handle bulk delete

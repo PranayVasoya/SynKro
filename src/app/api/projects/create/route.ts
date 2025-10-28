@@ -7,6 +7,8 @@ import Notification from "@/models/notificationModel";
 import Post from "@/models/postModel";
 import User from "@/models/userModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
+import { neo4jService } from "@/services/neo4j.service";
+
 
 interface CreateProjectRequestBody {
   title: string;
@@ -80,6 +82,13 @@ export async function POST(request: NextRequest) {
     });
     await project.save();
     console.log("Create Project: Project created:", project._id);
+    try {
+      await neo4jService.syncProjectConnections({
+        teamMembers: [...new Set([userId, ...teamMembers])].map(id => id.toString())
+      });
+    } catch (neo4jError) {
+      console.error("Neo4j sync error during project creation:", neo4jError);
+    }
 
     // Create chatroom
     const chatroomTitle = `${title} Chatroom`;

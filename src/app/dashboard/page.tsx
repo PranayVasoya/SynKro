@@ -12,6 +12,7 @@ import { Typewriter } from "react-simple-typewriter";
 import { Button } from "@/components/ui/button";
 import ProjectCard from "@/components/dashboard/ProjectCard";
 import ProjectsSidebar from "@/components/dashboard/ProjectsSidebar";
+import RecommendationsPanel from "@/components/recommendations/RecommendationsPanel";
 
 // Interfaces
 import type { ApiErrorResponse } from "@/interfaces/api";
@@ -379,91 +380,91 @@ export default function Dashboard() {
 
   // --- Reusable Components ---
   const MenuLinks = ({ animate }: { animate: boolean }) => (
-  <motion.div
-    className="flex flex-col space-y-1 w-full"
-    variants={{
-      hidden: { opacity: 0 },
-      visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
-    }}
-    initial={animate ? "hidden" : false}
-    animate={animate ? "visible" : false}
-  >
-    {menuItemsDefinition.map((item, idx) => (
-      <div
-        key={idx}
-        className="relative"
-        ref={item.label === "Settings" ? settingsRef : null}
-      >
-        <motion.button
-          type="button"
-          variants={{
-            hidden: { opacity: 0, x: -20 },
-            visible: { opacity: 1, x: 0 },
-          }}
-          initial={animate ? "hidden" : false}
-          animate={animate ? "visible" : false}
-          className="flex items-center text-foreground cursor-pointer px-3 py-2 hover:bg-muted rounded-md transition-colors duration-200 w-full text-left"
-          onClick={(e) => {
-            item.action(e);
-          }}
-          whileHover={{ x: 3 }}
-          whileTap={{ scale: 0.98 }}
-          data-testid={`menu-${item.label.toLowerCase()}`}
+    <motion.div
+      className="flex flex-col space-y-1 w-full"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
+      }}
+      initial={animate ? "hidden" : false}
+      animate={animate ? "visible" : false}
+    >
+      {menuItemsDefinition.map((item, idx) => (
+        <div
+          key={idx}
+          className="relative"
+          ref={item.label === "Settings" ? settingsRef : null}
         >
-          {item.icon}{" "}
-          <span className="ml-3 font-medium text-sm">{item.label}</span>
-        </motion.button>
+          <motion.button
+            type="button"
+            variants={{
+              hidden: { opacity: 0, x: -20 },
+              visible: { opacity: 1, x: 0 },
+            }}
+            initial={animate ? "hidden" : false}
+            animate={animate ? "visible" : false}
+            className="flex items-center text-foreground cursor-pointer px-3 py-2 hover:bg-muted rounded-md transition-colors duration-200 w-full text-left"
+            onClick={(e) => {
+              item.action(e);
+            }}
+            whileHover={{ x: 3 }}
+            whileTap={{ scale: 0.98 }}
+            data-testid={`menu-${item.label.toLowerCase()}`}
+          >
+            {item.icon}{" "}
+            <span className="ml-3 font-medium text-sm">{item.label}</span>
+          </motion.button>
 
-        <AnimatePresence>
-          {item.label === "Settings" && showSettingsDropdown && (
-            <motion.div
-              initial={{ opacity: 0, y: -5, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -5, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="absolute left-0 top-full mt-1 w-48 bg-popover shadow-lg rounded-md border border-border z-[120] overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  toggleTheme();
-                  setShowSettingsDropdown(false);
-                }}
-                className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
-                data-testid="menu-theme-toggle"
+          <AnimatePresence>
+            {item.label === "Settings" && showSettingsDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -5, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="absolute left-0 top-full mt-1 w-48 bg-popover shadow-lg rounded-md border border-border z-[120] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
               >
-                {theme === "light" ? (
-                  <Moon className="w-4 h-4 mr-2" />
-                ) : (
-                  <Sun className="w-4 h-4 mr-2" />
-                )}{" "}
-                Toggle Theme
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  try {
-                    router.push("/faq");
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleTheme();
                     setShowSettingsDropdown(false);
-                    setShowSidebar(false);
-                  } catch (_err) {
-                    console.error("Nav to /faq failed", _err);
-                    toast.error("FAQ page not found.");
-                  }
-                }}
-                className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
-                data-testid="menu-faq"
-              >
-                <HelpCircle className="w-4 h-4 mr-2" /> FAQ
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    ))}
-  </motion.div>
-);
+                  }}
+                  className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
+                  data-testid="menu-theme-toggle"
+                >
+                  {theme === "light" ? (
+                    <Moon className="w-4 h-4 mr-2" />
+                  ) : (
+                    <Sun className="w-4 h-4 mr-2" />
+                  )}{" "}
+                  Toggle Theme
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      router.push("/faq");
+                      setShowSettingsDropdown(false);
+                      setShowSidebar(false);
+                    } catch (_err) {
+                      console.error("Nav to /faq failed", _err);
+                      toast.error("FAQ page not found.");
+                    }
+                  }}
+                  className="flex items-center w-full px-3 py-2 text-sm text-popover-foreground hover:bg-muted transition-colors"
+                  data-testid="menu-faq"
+                >
+                  <HelpCircle className="w-4 h-4 mr-2" /> FAQ
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      ))}
+    </motion.div>
+  );
 
   const MenuIcon = ({
     onClick,
@@ -739,8 +740,8 @@ export default function Dashboard() {
                             type="button"
                             key={notification._id}
                             className={`w-full text-left px-3 py-2.5 text-sm text-popover-foreground hover:bg-muted transition-colors block ${!notification.read
-                                ? "font-medium"
-                                : "opacity-70 bg-accent"
+                              ? "font-medium"
+                              : "opacity-70 bg-accent"
                               }`}
                             onClick={() => {
                               if (!notification.read)
@@ -825,6 +826,14 @@ export default function Dashboard() {
           transition={{ duration: 0.5, delay: 0.05 }}
           className="w-full text-center mb-8 md:mb-10 py-4"
         >
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="w-full mb-8"
+          >
+            <RecommendationsPanel />
+          </motion.div>
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight">
             Welcome back,{" "}
             {user.username ? (
