@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${poppins.className} bg-white dark:bg-customDarkGray`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${poppins.className} bg-white dark:bg-customDarkGray`} suppressHydrationWarning>
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

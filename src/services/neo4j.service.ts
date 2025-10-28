@@ -1,5 +1,5 @@
 import getDriver from '@/lib/neo4j';
-import { Session } from 'neo4j-driver';
+import neo4j, { Session } from 'neo4j-driver';
 
 export class Neo4jService {
   private async getSession(): Promise<Session> {
@@ -111,7 +111,7 @@ export class Neo4jService {
                mutualConnections,
                COLLECT(DISTINCT skill.name) AS skills
         `,
-        { userId, limit }
+        { userId, limit: neo4j.int(limit) }
       );
 
       return result.records.map(record => ({
@@ -145,7 +145,7 @@ export class Neo4jService {
                sharedSkillsCount,
                COLLECT(DISTINCT skill.name) AS skills
         `,
-        { userId, limit }
+        { userId, limit: neo4j.int(limit) }
       );
 
       return result.records.map(record => ({
