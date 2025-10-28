@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/dbConfig/dbConfig";
 import Project from "@/models/projectModel";
+import Chatroom from "@/models/chatroomModel";
 import { getDataFromToken } from "@/helpers/getDataFromToken";
 
 // GET a single project by ID
@@ -68,10 +69,14 @@ export async function DELETE(
       );
     }
 
+    // Delete the associated chatroom first
+    await Chatroom.deleteMany({ project: id });
+
+    // Delete the project
     await Project.findByIdAndDelete(id);
 
     return NextResponse.json({
-      message: "Project deleted successfully",
+      message: "Project and associated chatroom deleted successfully",
     });
   } catch (error: unknown) {
     console.error("Error deleting project:", error);
