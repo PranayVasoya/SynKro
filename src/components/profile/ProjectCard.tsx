@@ -15,7 +15,7 @@ import type { Project, CommentData } from "@/interfaces/project";
 import type { UserLookup } from "@/interfaces/user";
 
 // Icons
-import { Info, Heart, Send } from "lucide-react";
+import { Info, Heart, Send, Trash2 } from "lucide-react";
 
 // --- ProjectCard Component ---
 const ProjectCard = ({
@@ -23,6 +23,7 @@ const ProjectCard = ({
   user,
   handleLike,
   handleComment,
+  handleDelete,
   router,
 }: {
   project: Project;
@@ -33,6 +34,7 @@ const ProjectCard = ({
     text: string,
     inputRef: React.RefObject<HTMLInputElement | null>
   ) => void;
+  handleDelete?: (projectId: string) => void;
   router: AppRouterInstance;
 }) => {
   const commentInputRef = useRef<HTMLInputElement | null>(null);
@@ -40,6 +42,10 @@ const ProjectCard = ({
 
   const [commentPlaceholder, setCommentPlaceholder] = useState("Add a comment...");
   const [isHovered, setIsHovered] = useState(false); // Client-side state
+  const [isDeleteHovered, setIsDeleteHovered] = useState(false); // Delete icon hover state
+  
+  // Check if current user is the creator
+  const isCreator = user?._id && project.createdBy?._id === user._id;
 
   return (
     <motion.div
@@ -75,17 +81,37 @@ const ProjectCard = ({
             router.push(`/projects/${project._id}`);
         }}
       >
-        <motion.h3
-          initial={false} // Prevents SSR mismatch
-          className="font-semibold text-card-foreground hover:underline w-fit"
-          animate={{
-            fontWeight: isHovered ? 700 : 400,
-            textShadow: isHovered ? "0 0 2px rgba(255, 255, 255, 0.8)" : "0 0 0px rgba(0, 0, 0, 0)",
-          }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-        >
-          {project.title}
-        </motion.h3>
+        <div className="flex items-start justify-between">
+          <motion.h3
+            initial={false} // Prevents SSR mismatch
+            className="font-semibold text-card-foreground hover:underline w-fit"
+            animate={{
+              fontWeight: isHovered ? 700 : 400,
+              textShadow: isHovered ? "0 0 2px rgba(255, 255, 255, 0.8)" : "0 0 0px rgba(0, 0, 0, 0)",
+            }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            {project.title}
+          </motion.h3>
+          {isCreator && handleDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(project._id);
+              }}
+              onMouseEnter={() => setIsDeleteHovered(true)}
+              onMouseLeave={() => setIsDeleteHovered(false)}
+              className="flex-shrink-0 p-1 rounded transition-colors"
+              aria-label="Delete project"
+            >
+              <Trash2
+                className={`w-4 h-4 transition-colors ${
+                  isDeleteHovered ? "text-red-500" : "text-black dark:text-white"
+                }`}
+              />
+            </button>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
           {project.description}
         </p>

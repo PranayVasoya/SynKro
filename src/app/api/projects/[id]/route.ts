@@ -38,3 +38,46 @@ export async function GET(
     );
   }
 }
+
+// DELETE a project by ID
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await connectToDatabase();
+    
+    const userId = await getDataFromToken(request);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const project = await Project.findById(id);
+
+    if (!project) {
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    // Check if the user is the creator of the project
+    if (project.createdBy.toString() !== userId) {
+      return NextResponse.json(
+        { error: "You are not authorized to delete this project" },
+        { status: 403 }
+      );
+    }
+
+    await Project.findByIdAndDelete(id);
+
+    return NextResponse.json({
+      message: "Project deleted successfully",
+    });
+  } catch (error: unknown) {
+    console.error("Error deleting project:", error);
+    return NextResponse.json(
+      { error: "Failed to delete project" },
+      { status: 500 }
+    );
+  }
+}
